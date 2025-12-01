@@ -35,6 +35,7 @@ def parse_option():
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--hidden_dim", type=int, default=128)
+    parser.add_argument("--")
 
     opt = parser.parse_args()
     return opt
