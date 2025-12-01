@@ -1,0 +1,5 @@
+#python3 main_linear.py --epochs 30 --print_freq 10 --learning_rate 0.01 --lr_decay_epochs "5, 10, 20" --model "resnet18" --datasets 'imagenet100' --backbone_model_direct "/save/SupCon/imagenet100_models/imagenet100_resnet18_original_data__mixup_positive_random_intra_True_alpha_0.2_p_0.5_MoCo_trail_0_128_64_split_64" --backbone_model_name "ckpt_epoch_30.pth" --trail 0 --method "MoCo"
+
+#python3 main_linear.py --epochs 30 --print_freq 10 --learning_rate 0.01 --lr_decay_epochs "5, 10, 20" --model "resnet18" --datasets 'imagenet100' --backbone_model_direct "/save/SupCon/imagenet100_models/imagenet100_resnet18_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_3,4_MoCo_trail_0_128_256_old_augmented" --backbone_model_name "ckpt_epoch_30.pth" --trail 0 --method "MoCo"
+
+python3 main_linear.py --epochs 30 --print_freq 10 --learning_rate 0.01 --lr_decay_epochs "5, 10, 20" --model "resnet18" --datasets 'imagenet100' --backbone_model_direct "/save/SupCon/imagenet100_models/imagenet100_resnet18_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_3,4_MoCo_trail_0_128_256_twostage_old_augmented" --backbone_model_name "ckpt_epoch_40.pth" --trail 0 --method "MoCo"

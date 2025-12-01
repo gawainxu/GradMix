@@ -1,0 +1,3 @@
+#python3 main_supcon.py --epochs 200 --save_freq 40 --batch_size 256 --learning_rate 0.03 --lr_decay_epochs "120, 160" --lr_decay_rate 0.1 --model "resnet34" --datasets "tinyimgnet" --size 256 --trail 5 --temp 0.05 --method "MoCo" --K 8192 --momentum_moco 0.999 --method_gama 0.0 --method_lam 1.0 --randaug 0 --mixup_positive False
+
+python3 main_supcon.py --epochs 800 --save_freq 100 --batch_size 64 --learning_rate 0.03 --lr_decay_epochs "480, 640" --lr_decay_rate 0.1 --model "resnet50" --datasets "tinyimgnet" --size 256 --trail 5 --temp 0.05 --method "MoCo" --K 8192 --momentum_moco 0.999 --method_gama 0.0 --method_lam 1.0 --randaug 0 --mixup_positive True --grad_accumulationstep 4 --grad_layers "3"

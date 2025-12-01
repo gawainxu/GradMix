@@ -1,0 +1,3 @@
+python3 test_classifier.py --testing_known_features_path "/features/curruption_zoom_blur_4_cifar10_GradMix" --exemplar_features_path "/features/cifar10_resnet18_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_3,4_SimCLR_1.0_1.2_0.05_trail_5_128_256_twostage_augmix_old_augmented_200_train" --num_classes 10
+
+python3 test_classifier.py --testing_known_features_path "/features/curruption_zoom_blur_5_cifar10_GradMix" --exemplar_features_path "/features/cifar10_resnet18_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_3,4_SimCLR_1.0_1.2_0.05_trail_5_128_256_twostage_augmix_old_augmented_200_train" --num_classes 10

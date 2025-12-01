@@ -1,0 +1,15 @@
+import matplotlib.pyplot as plt
+
+x = torch.permute(x11, (1,2,0))
+x = x.cpu().numpy()
+x = (x-x.min()) / (x.max() - x.min())
+plt.imsave("x.png", x)
+
+import torch.nn as nn
+m = nn.UpsamplingBilinear2d(scale_factor=8)
+b  = torch.unsqueeze(activation, 0)
+b  = torch.unsqueeze(b, 0)
+b = m(b)
+b = b[0,0,:,:]
+b = b.cpu().numpy()
+plt.imsave("b.png", b)
