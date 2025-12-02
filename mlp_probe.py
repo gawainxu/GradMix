@@ -27,14 +27,14 @@ def parse_option():
     parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18"])
     parser.add_argument("--feat_dim", type=int, default=128)
     parser.add_argument("--backbone_model_dir", type=str,
-                        default="/home/zhi/projects/comprehensive_OSR/save/SupCon/cifar10_models")
-    parser.add_argument("--backbone_model_name", type=str, default="cifar10_resnet18_original_data__vanilia__SimCLR_0.0_1.0_0.05_trail_5_128_256")
-    parser.add_argument('--datasets', type=str, default='cifar10',
+                        default="/home/zhi/projects/comprehensive_OSR/save/SupCon/tinyimgnet_models")
+    parser.add_argument("--backbone_model_name", type=str, default="tinyimgnet_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_5_128_256_old_augmented")
+    parser.add_argument('--datasets', type=str, default='tinyimgnet',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
                                  "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft"], help='dataset')
     parser.add_argument("--trail", type=int, default=5, choices=[0, 1, 2, 3, 4, 5, 6],
                         help="index of repeating training")
-    parser.add_argument("--num_classes", type=int, default=10)
+    parser.add_argument("--num_classes", type=int, default=200)
     parser.add_argument("--randaug", type=int, default=0)
     parser.add_argument("--augmix", type=bool, default=False)
 
