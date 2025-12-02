@@ -1,0 +1,1 @@
+python3 main_linear.py --epochs 30 --learning_rate 0.001 --lr_decay_epochs "10" --model "resnet18" --datasets "imagenet100" --trail 0 --backbone_model_direct "/save/SupCon/imagenet100_models/imagenet100_resnet18_original_data__mixup_positive_alpha_10_beta_0.3_cutmix_no_3_SimCLR_0.0_1.0_0.05_trail_0_128_256/" --backbone_model_name "ckpt_epoch_70.pth"

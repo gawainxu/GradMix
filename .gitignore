@@ -1,0 +1,12 @@
+# Ignore build files
+/build/
+
+# Ignore Python cache
+__pycache__/
+
+# Ignore node_modules
+node_modules/
+save/
+
+# Ignore environment files
+.env
