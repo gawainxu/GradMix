@@ -1,1 +1,1 @@
-python3 mlp_probe.py
+python3 mlp_probe.py --backbone_model_dir "/save/SupCon/imagenet100_m_models" --backbone_model_name "imagenet100_m_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_0_128_256" --datasets "imagenet100_m" --trail 0 --num_classes 100 --epochs 20
