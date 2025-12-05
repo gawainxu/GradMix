@@ -10,7 +10,7 @@ import argparse
 import torch
 import torch.nn as nn
 
-from main_linear import set_loader, set_model, load_model
+from main_linear import load_model
 from util import adjust_learning_rate, warmup_learning_rate, accuracy
 from datautil import get_train_datasets, get_test_datasets
 from networks.resnet_big import SupConResNet
@@ -242,11 +242,10 @@ def validate(val_loader, model, classifier, criterion, opt):
 if __name__ == "__main__":
 
     opt = parse_option()
-    train_loader, test_loader = set_loader(opt)
-
     # build model and criterion
     model, classifier, criterion = set_model(opt)
     optimizer = set_optimizer(opt, classifier)
+    train_loader, test_loader = set_loader(opt)
 
     best_top1_test_acc = 0
     best_top5_test_acc = 0

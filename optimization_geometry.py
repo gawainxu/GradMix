@@ -270,4 +270,8 @@ if __name__ == "__main__":
     opt = parse_options()
     main(opt)
 
+    # following steps need to be done
+    # masked dataset
+    # gradient projection
+
 

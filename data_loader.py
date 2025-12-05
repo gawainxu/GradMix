@@ -22,7 +22,7 @@ import xml.etree.ElementTree as ET
 
 class iCIFAR10(CIFAR10):
     
-    def __init__(self, root, classes=range(10), train=True, transform=None,
+    def __init__(self, root, classes=range(10), train=True, opt=None, transform=None,
                  target_transform=None, download=False, label_dict = None, last_features_list=None, 
                  last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
         super(iCIFAR10, self).__init__(root,
@@ -134,6 +134,7 @@ class iCIFAR10(CIFAR10):
 class iCIFAR100(CIFAR100):
     def __init__(self, root,
                  classes=range(100),
+                 opt=None,
                  superClass = None,
                  train=True,
                  transform=None,
@@ -227,6 +228,7 @@ class mnist(MNIST):
     def __init__(self, root,
                  classes=range(10),
                  train = True,
+                 opt=None,
                  transform = None,
                  target_transform = None,
                  download = True,
@@ -307,7 +309,7 @@ class mnist1(data.Dataset):
       taining_file = 'training.pt'
       test_file = 'test.pt'
 
-      def __init__(self, root, classes=range(10), train=True, download=False,
+      def __init__(self, root, classes=range(10), opt=None, train=True, download=False,
                    transform=None, target_transform=None):
    
           self.root = os.path.expanduser(root)
@@ -422,7 +424,7 @@ class TinyImagenet(Dataset):
     """
     Defines Tiny Imagenet as for the others pytorch datasets.
     """
-    def __init__(self, root, classes=range(200), train=True, transform=None,
+    def __init__(self, root, classes=range(200), opt=None, train=True, transform=None,
                  target_transform=None, download=False, label_dict = None, last_features_list=None, 
                  last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
         self.not_aug_transform = transforms.Compose([transforms.ToTensor()])
@@ -541,11 +543,30 @@ class cifar10_c(Dataset):
         return img, label
 
 
-def cifar100_c(root, corruption_name, severity, transform=None):
-    pass
+class cifar100_c(Dataset):
+
+    def __init__(self, root, corruption_name, severity, transform=None):
+        root = root + "/CIFAR-100-C/"
+        data_name = corruption_name + "_" + str(severity)
+        with open(root + data_name, "rb") as f:
+            self.data, self.label = pickle.load(f)
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, index):
+        img = self.data[index]
+        label = self.label[index]
+        if self.transform is not None:
+            img = Image.fromarray(img)
+            img = self.transform(img)
+
+        return img, label
 
 
-def ImageNet100(root, classes=range(100), train=True, transform=None,
+
+def ImageNet100(root, classes=range(100), train=True, opt=None, transform=None,
                 target_transform=None, download=False, label_dict = None, last_features_list=None, 
                 last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
     
@@ -564,7 +585,7 @@ def ImageNet100(root, classes=range(100), train=True, transform=None,
 
 class ImageNet100_M(Dataset):
     
-    def __init__(self, root, train, classes=range(10), download=True, transform = None, target_transform = None, label_dict = None, 
+    def __init__(self, root, train, opt = None, classes=range(10), download=True, transform = None, target_transform = None, label_dict = None,
                  last_features_list=None, last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
        if train:
           self.data_path = root + "/imagenet100_train"
@@ -575,7 +596,8 @@ class ImageNet100_M(Dataset):
                transforms.RandomGrayscale(p=0.2),
                transforms.ToTensor(),
                transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), ])
-          self.transform = TwoCropTransform(self.transform)
+          if "training_supcon" in opt.action:
+              self.transform = TwoCropTransform(self.transform)
        else:
           self.data_path = root + "/imagenet100_test"
           self.annotations_path = root + "/imagenet_annotations_vali"
@@ -584,7 +606,8 @@ class ImageNet100_M(Dataset):
                transforms.RandomGrayscale(p=0.2),
                transforms.ToTensor(),
                transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), ])
-          self.transform = TwoCropTransform(self.transform)
+          if "testing_known" in opt.action or "testing_unknown" in opt.action:
+              self.transform = TwoCropTransform(self.transform)
 
        self.class_dir_list = sorted(os.listdir(self.data_path))
        self.class_map = {serie_num: index for index, serie_num in enumerate(self.class_dir_list)}
@@ -689,7 +712,7 @@ class ImageNet100_M(Dataset):
 
 class customSVHN(SVHN):
 
-    def __init__(self, root, train, classes=range(10), download=True, transform = None, target_transform = None, label_dict = None, 
+    def __init__(self, root, train, opt=None, classes=range(10), download=True, transform = None, target_transform = None, label_dict = None,
                  last_features_list=None, last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
         super(customSVHN, self).__init__(root=root, split=train, transform = transform, target_transform = target_transform, download=download)
     
@@ -787,7 +810,7 @@ class customSVHN(SVHN):
 
 class CUB(Dataset):
 
-    def __init__(self, root, classes=range(1, 201), download=False,
+    def __init__(self, root, classes=range(1, 201), opt=None, download=False,
                  train=True, transform=None, target_transform=None,
                  label_dict=None, last_features_list=None, last_features=None, 
                  last_feature_labels=None, last_model=None, last_feature_labels_list=None,
@@ -918,7 +941,7 @@ class Aircraft(VisionDataset):
     splits = ('train', 'val', 'trainval', 'test')
     img_folder = os.path.join('Aircraft', 'data', 'images')
 
-    def __init__(self, root, train=True, classes=range(100), download=False,  transform=None,
+    def __init__(self, root, train=True, opt=None, classes=range(100), download=False,  transform=None,
                  target_transform=None, label_dict = None, last_features_list=None, last_feature_labels_list=None,
                  last_model=None, subsample_transform=None, class_type='variant'):
 
@@ -1000,7 +1023,7 @@ class Aircraft(VisionDataset):
 
 
 
-def Cars(root, train=True, limit=0, transform=None, metas=None):
+def Cars(root, train=True, opt=None, limit=0, transform=None, metas=None):
     """
         Cars Dataset
         TODO check the classes!!!!!
