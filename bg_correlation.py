@@ -140,8 +140,6 @@ def compute_pixel_entropy(img, mask, idx=0):
     #hist = hist[hist > 0]  # remove zeros to avoid log(0)
 
 
-
-
 def flatten_image_with_mask(img, mask, idx=0):
     
     img = img.cpu()

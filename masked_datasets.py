@@ -6,6 +6,8 @@ Created on Tue May 20 10:03:47 2025
 @author: zhi
 """
 
+import os
+import cv2
 from voc_base import VOCFull
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
@@ -111,7 +113,96 @@ class my_VOC_subsects(Dataset):
         img_mask = np.multiply(img_np, processed_mask)
         
         return img_mask
-    
+
+
+class ImageNet100_masked(Dataset):
+
+    def __init__(self, root, train, opt = None, classes=range(10), merge=True):
+
+        self.data_train_path = os.path.join(root, "imagenet100_train")
+        self.data_test_path = os.path.join(root, "imagenet100_test")
+        self.mask_train_path = os.path.join(root, "ImageNetS919/train-semi-segmentation")
+        self.mask_test_path = os.path.join(root, "ImageNetS919/validation-segmentation")
+
+        self.train_data = []
+        self.train_masks = []
+        self.test_data = []
+        self.test_masks = []
+        self.train_labels = []
+        self.test_labels = []
+
+        self.class_dir_list = sorted(os.listdir(self.data_train_path))
+        self.class_map = {serie_num: index for index, serie_num in enumerate(self.class_dir_list)}
+
+        self.transform = transforms.Compose([transforms.ToTensor(),
+             transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),])
+        self.newsize = 224
+
+        for cd in self.class_dir_list:
+            class_data_dir = os.path.join(self.data_train_path, cd)
+            class_mask_dir = os.path.join(self.mask_train_path, cd)
+            label = self.class_map[cd]
+            class_file_list = os.listdir(class_data_dir)
+            class_mask_list = os.listdir(class_mask_dir)
+            for file_name in class_file_list:
+                if file_name in class_mask_list:
+                    im = Image.open(class_data_dir + "/" + file_name)
+                    im = im.convert("RGB")
+                    mask = Image.open(class_mask_dir + "/" + file_name)
+                    self.width, self.height = im.size
+                    if self.width <= self.newsize or self.height <= self.newsize:
+                        im = im.resize((self.newsize, self.newsize))
+                        mask = mask.resize(self.newsize, self.newsize)
+                    else:
+                        im = im.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
+                                      (self.width - self.newsize) // 2 + self.newsize,
+                                      (self.height - self.newsize) // 2 + self.newsize))
+                        mask = mask.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
+                                      (self.width - self.newsize) // 2 + self.newsize,
+                                      (self.height - self.newsize) // 2 + self.newsize))
+                    self.train_data.append(im)
+                    self.train_masks.append(mask)
+                    self.train_labels.append(label)
+
+            class_data_dir = os.path.join(self.data_test_path, cd)
+            class_mask_dir = os.path.join(self.mask_test_path, cd)
+            label = self.class_map[cd]
+            class_file_list = os.listdir(class_data_dir)
+            class_mask_list = os.listdir(class_mask_dir)
+            for file_name in class_file_list:
+                if file_name in class_mask_list:
+                    im = Image.open(class_data_dir + "/" + file_name)
+                    im = im.convert("RGB")
+                    mask = Image.open(class_mask_dir + "/" + file_name)
+                    if self.width <= self.newsize or self.height <= self.newsize:
+                        im = im.resize((self.newsize, self.newsize))
+                        mask = mask.resize(self.newsize, self.newsize)
+                    else:
+                        im = im.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
+                                      (self.width - self.newsize) // 2 + self.newsize,
+                                      (self.height - self.newsize) // 2 + self.newsize))
+                        mask = mask.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
+                                      (self.width - self.newsize) // 2 + self.newsize,
+                                      (self.height - self.newsize) // 2 + self.newsize))
+                    self.test_data.append(im)
+                    self.test_masks.append(mask)
+                    self.test_labels.append(label)
+
+            if merge:
+                self.train_data = self.train_data + self.test_data
+                self.train_masks = self.train_masks + self.test_masks
+                self.train_labels = self.train_labels + self.test_labels
+
+    def __getitem__(self, idx):
+
+        img = self.train_data[idx]
+        img = self.transform(img)
+
+        return img, self.train_masks[idx], self.train_labels[idx]
+
+    def __len__(self):
+
+        return
 
 
 if __name__ == "__main__":
