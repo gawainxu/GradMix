@@ -6,10 +6,11 @@ import torch.nn as nn
 
 from main_linear import load_model
 from networks.resnet_big import SupConResNet
-from networks.resnet_preact import SupConpPreactResNet
-from networks.simCNN import simCNN_contrastive
 from losses import SupConLoss
-from datautil import get_train_datasets, get_test_datasets
+from masked_datasets import ImageNet100_masked
+
+from gradcam import backward_hook, forward_hook
+from gradcam import process_heatmap, process_featuremap
 
 
 def parse_option():
@@ -43,14 +44,7 @@ def parse_option():
 def set_model(opt):
 
     in_channels = 3
-
-    if opt.model == "resnet18" or opt.model == "resnet34" or opt.model == "resnet50":
-        model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
-    elif opt.model == "preactresnet18" or opt.model == "preactresnet34":
-        model = SupConpPreactResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
-    else:
-        model = simCNN_contrastive(opt, feature_dim=opt.feat_dim, in_channels=in_channels)
-
+    model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
     model = load_model(model, opt.backbone_model_path)
     criterion1 = SupConLoss(temperature=opt.temp)
     criterion2 = SupConLoss(temperature=opt.temp)
@@ -61,28 +55,33 @@ def set_model(opt):
 def set_loader(opt):
     # construct data loader
 
-    train_dataset = get_train_datasets(opt)
-    test_dataset = get_test_datasets(opt)
-
-    train_sampler = None
-    if opt.datasets != "imagenet100":
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True,
-                                                   num_workers=opt.num_workers, pin_memory=True, sampler=train_sampler,
-                                                   drop_last=True,
-                                                   persistent_workers=True)
-        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1,
-                                                  shuffle=False,
-                                                  num_workers=opt.num_workers, pin_memory=True, sampler=train_sampler,
-                                                  drop_last=True,
-                                                  persistent_workers=True)
-    else:
-        train_loader = train_dataset
-        test_loader = test_dataset
-
-    return train_loader, test_loader
-
+    datasets = ImageNet100_masked(root=opt.data_root)
+    data_sampler = None
+    data_loader = torch.utils.data.DataLoader(datasets, batch_size=opt.batch_size, shuffle=True,
+                                              num_workers=opt.num_workers, pin_memory=True, sampler=data_sampler,
+                                              drop_last=True, persistent_workers=True)
+    return data_loader
 
 
 if __name__ == "__main__":
 
     opt = argparse()
+    model, criterion1, criterion2 = set_model(opt)
+    data_loader = set_loader(opt)
+
+
+
+
+
+""" 
+1. EPG for attribution maps
+   - load model
+   - load data (two views, annotation_mask)
+   - compute attribution map
+   - EPG computing 
+2. gradient projection
+   - load model
+   - load data (two views, annotation_mask)
+   - backprojection
+   - compute gradient projection
+"""

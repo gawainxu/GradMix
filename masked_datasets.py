@@ -117,7 +117,8 @@ class my_VOC_subsects(Dataset):
 
 class ImageNet100_masked(Dataset):
 
-    def __init__(self, root, train, opt = None, classes=range(10), merge=True):
+    # todo align with the class oders in imagenet-s
+    def __init__(self, root, merge=True):
 
         self.data_train_path = os.path.join(root, "imagenet100_train")
         self.data_test_path = os.path.join(root, "imagenet100_test")
@@ -132,6 +133,7 @@ class ImageNet100_masked(Dataset):
         self.test_labels = []
 
         self.class_dir_list = sorted(os.listdir(self.data_train_path))
+        self.mask_dir_list = sorted(os.listdir(self.mask_train_path))
         self.class_map = {serie_num: index for index, serie_num in enumerate(self.class_dir_list)}
 
         self.transform = transforms.Compose([transforms.ToTensor(),
@@ -139,20 +141,23 @@ class ImageNet100_masked(Dataset):
         self.newsize = 224
 
         for cd in self.class_dir_list:
+            if cd not in self.mask_dir_list:
+                continue
             class_data_dir = os.path.join(self.data_train_path, cd)
             class_mask_dir = os.path.join(self.mask_train_path, cd)
             label = self.class_map[cd]
             class_file_list = os.listdir(class_data_dir)
             class_mask_list = os.listdir(class_mask_dir)
+            class_mask_list = [n.split(".")[0] for n in class_mask_list]
             for file_name in class_file_list:
-                if file_name in class_mask_list:
+                if file_name.split(".")[0] in class_mask_list:
                     im = Image.open(class_data_dir + "/" + file_name)
                     im = im.convert("RGB")
-                    mask = Image.open(class_mask_dir + "/" + file_name)
+                    mask = Image.open(class_mask_dir + "/" + file_name.split(".")[0] + ".png")
                     self.width, self.height = im.size
                     if self.width <= self.newsize or self.height <= self.newsize:
                         im = im.resize((self.newsize, self.newsize))
-                        mask = mask.resize(self.newsize, self.newsize)
+                        mask = mask.resize((self.newsize, self.newsize))
                     else:
                         im = im.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
                                       (self.width - self.newsize) // 2 + self.newsize,
@@ -161,6 +166,9 @@ class ImageNet100_masked(Dataset):
                                       (self.width - self.newsize) // 2 + self.newsize,
                                       (self.height - self.newsize) // 2 + self.newsize))
                     self.train_data.append(im)
+                    mask = np.asarray(mask)[:,:, 0]
+                    assert np.sum(mask)>=0
+                    mask = (mask > 0).astype(int)
                     self.train_masks.append(mask)
                     self.train_labels.append(label)
 
@@ -169,14 +177,15 @@ class ImageNet100_masked(Dataset):
             label = self.class_map[cd]
             class_file_list = os.listdir(class_data_dir)
             class_mask_list = os.listdir(class_mask_dir)
+            class_mask_list = [n.split(".")[0] for n in class_mask_list]
             for file_name in class_file_list:
-                if file_name in class_mask_list:
+                if file_name.split(".")[0] in class_mask_list:
                     im = Image.open(class_data_dir + "/" + file_name)
                     im = im.convert("RGB")
-                    mask = Image.open(class_mask_dir + "/" + file_name)
+                    mask = Image.open(class_mask_dir + "/" + file_name.split(".")[0] + ".png")
                     if self.width <= self.newsize or self.height <= self.newsize:
                         im = im.resize((self.newsize, self.newsize))
-                        mask = mask.resize(self.newsize, self.newsize)
+                        mask = mask.resize((self.newsize, self.newsize))
                     else:
                         im = im.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
                                       (self.width - self.newsize) // 2 + self.newsize,
@@ -185,29 +194,43 @@ class ImageNet100_masked(Dataset):
                                       (self.width - self.newsize) // 2 + self.newsize,
                                       (self.height - self.newsize) // 2 + self.newsize))
                     self.test_data.append(im)
+                    mask = np.asarray(mask)[:,:, 0]
+                    assert np.sum(mask) >= 0
+                    mask = (mask > 0).astype(int)
                     self.test_masks.append(mask)
                     self.test_labels.append(label)
 
-            if merge:
-                self.train_data = self.train_data + self.test_data
-                self.train_masks = self.train_masks + self.test_masks
-                self.train_labels = self.train_labels + self.test_labels
+        if merge:
+            self.train_data = self.train_data + self.test_data
+            self.train_masks = self.train_masks + self.test_masks
+            self.train_labels = self.train_labels + self.test_labels
 
     def __getitem__(self, idx):
 
         img = self.train_data[idx]
-        img = self.transform(img)
+        #img = self.transform(img)
 
-        return img, self.train_masks[idx], self.train_labels[idx]
+        return img, self.train_labels[idx], self.train_masks[idx]
 
     def __len__(self):
 
-        return
+        return len(self.train_data)
 
 
 if __name__ == "__main__":
-    
+
+    import matplotlib.pyplot as plt
     root = "/home/zhi/projects/datasets"
-    my_subsects = my_VOC_subsects(root)
-    img, l, m = my_subsects[45]
+    my_subsects = ImageNet100_masked(root)
+
+    for i in range(len(my_subsects)):
+        img, l, m = my_subsects[i]
+        img = np.asarray(img)
+        m = np.repeat(m[:, :, np.newaxis], 3, axis=2).astype(np.uint8)
+        imgm = np.multiply(img, m)
+        #imgm = Image.fromarray(imgm, 'RGB')
+        #imgm.show()
+        cv2.imwrite("/home/zhi/projects/temp/" + str(i) + ".png",  cv2.cvtColor(imgm, cv2.COLOR_RGB2BGR))
+        cv2.imwrite("/home/zhi/projects/temp/" + str(i) + "_ori.png",  cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
+
         
