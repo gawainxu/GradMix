@@ -167,6 +167,7 @@ def EPG_cam(cammap, mask):
     p = np.sum(mask)
     n = mask.shape[0] * mask.shape[1] - p
     fn = np.sum(np.multiply(cammap, 1-mask))
+    print("p, n, tp, fn", p, n, tp, fn)
 
     recall = tp * 1. / (tp + fn)
     acc = tp * 1. / p
