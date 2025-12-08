@@ -35,15 +35,12 @@ def parse_option():
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["imagenet100_m", 'cifar10', "tinyimgnet", "imagenet100"],
                         help='dataset')
+    parser.add_argument("--data_root", type=str, default="/home/zhi/projects/datasets")
     parser.add_argument("--num_classes", type=int, default=6)
     parser.add_argument("--trail", type=int, default=0)
-    parser.add_argument("--linear", type=bool, default=False)
 
     # for "single" and "sim"
     parser.add_argument("--class_idx", type=int, default=0)
-    # for "supcon"
-    parser.add_argument("--class_idxs", type=list, default=[15, 16])
-    parser.add_argument("--data_ids", type=list, default=[[123, 231, 56, 23, 30, 84], [65, 67, 23, 87, 90, 100]])
     parser.add_argument("--img_size", type=int, default=32)
     parser.add_argument("--feature_id", type=int, default=5)
     parser.add_argument("--bsz", type=int, default=256)
@@ -52,22 +49,19 @@ def parse_option():
     parser.add_argument('--temp', type=float, default=0.05, help='temperature for loss')
     parser.add_argument("--feat_dim", type=int, default=128)
     parser.add_argument("--model_path", type=str,
-                        default="/save/SupCon/cifar10_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_0_128_256_old_augmented/last.pth")
-    parser.add_argument('--temp', type=float, default=0.05, help='temperature for loss function')
-    parser.add_argument("--mode", type=str, default="ssl", choices=["single", "supcon", "sim", "ssl"],
-                        help="Mode of the loss function that used to compute the loss")
-    parser.add_argument("--use_cuda", type=bool, default=False)
+                        default="/save/SupCon/imagenet100_m_models/imagenet100_m_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_0_128_256/last.pth")
+    parser.add_argument("--mode", type=str, default="supcon")
 
     opt = parser.parse_args()
     opt.main_dir = os.getcwd()
 
-    opt.output_path = opt.main_dir + "/" + opt.model_path.split("/")[-2] + "_" + opt.mode + "_cam/"
+    opt.output_path = opt.main_dir + "/cam/"
     if not os.path.exists(opt.output_path):
         os.makedirs(opt.output_path)
 
     opt.model_path = opt.main_dir + opt.model_path
 
-    opt.feature_path = "./featuremaps/" + str(opt.class_id)
+    opt.feature_path = "./featuremaps/" + str(opt.class_idx)
     if not os.path.exists(opt.feature_path):
         os.makedirs(opt.feature_path)
 
@@ -86,7 +80,7 @@ def load_model(opt, model):
 
     state_dict = new_state_dict
     model.load_state_dict(state_dict)
-    model.to(opt.device)
+    model.cpu()
     model.eval()
 
     return model
@@ -179,13 +173,7 @@ if __name__ == "__main__":
     model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=3)
     criterion1 = SupConLoss(temperature=opt.temp)
     criterion2 = SupConLoss(temperature=opt.temp)
-    if opt.linear is True:
-        linear = LinearClassifier(name=opt.model, num_classes=opt.num_classes)
-        model, linear = load_model(model, linear, opt.model_path)
-        linear = linear.cpu()
-    else:
-        linear = None
-        model = load_model(model, linear, opt.model_path)
+    model = load_model(opt, model)
 
     model.eval()
     model = model.cpu()
@@ -193,7 +181,7 @@ if __name__ == "__main__":
 
     datasets = ImageNet100_masked(root=opt.data_root)
     data_loader = torch.utils.data.DataLoader(datasets, batch_size=opt.bsz, shuffle=True,
-                                              num_workers=opt.num_workers, pin_memory=True, sampler=None,
+                                              num_workers=4, pin_memory=True, sampler=None,
                                               drop_last=True, persistent_workers=True)
 
     # register hook
@@ -206,17 +194,7 @@ if __name__ == "__main__":
         print(idx)
         images1 = images[0]
         images2 = images[1]
-        images_ori = images[2]
         images = torch.cat([images1, images2], dim=0)
-
-        if torch.cuda.is_available() and opt.use_cuda:
-            images = images.cuda(non_blocking=True)
-            images1 = images1.cuda(non_blocking=True)
-            images2 = images2.cuda(non_blocking=True)
-            labels = labels.cuda(non_blocking=True)
-            model = model.cuda()
-            criterion1 = criterion1.cuda()
-            criterion2 = criterion2.cuda()
 
         features = model(images)
         features1, features2 = torch.split(features, [opt.bsz, opt.bsz], dim=0)
@@ -234,7 +212,7 @@ if __name__ == "__main__":
         heatmap = F.relu(cam)
         for i in range(opt.bsz):
             save_path = opt.output_path + str(idx * opt.bsz + i) + ".png"
-            cammap = process_heatmap(cam[i], images_ori[i], save_path, opt)
+            cammap = process_heatmap(cam[i], images1[i], save_path, opt)
             score = EPG_cam(cammap, masks[i])
             scores.append(score)
 

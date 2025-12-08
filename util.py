@@ -11,12 +11,14 @@ from sklearn.metrics import roc_curve, auc
 
 class TwoCropTransform:
     """Create two crops of the same image"""
-    def __init__(self, transform, transform2 = None, repeat=1, origin=False):
+    def __init__(self, transform, transform2=None, repeat=1, origin=False):
         self.transform = transform
         self.repeat = repeat
         self.origin = origin
         if transform2 is None:
             self.transform2 = transform
+        else:
+            self.transform2 = transform2
 
     def __call__(self, x):
 

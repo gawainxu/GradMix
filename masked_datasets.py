@@ -164,9 +164,9 @@ class ImageNet100_masked(Dataset):
                     im = Image.open(class_data_dir + "/" + file_name)
                     im = im.convert("RGB")
                     mask = Image.open(class_mask_dir + "/" + file_name.split(".")[0] + ".png")
-                    mask = np.asarray(mask)[:, :, 0]
-                    mask = (mask > 0).astype(int)
-                    masked_im = self.masking_img(im, mask)
+                    mask_np = np.asarray(mask)[:, :, 0]
+                    mask_np = (mask_np > 0).astype(int)
+                    masked_im = self.masking_img(im, mask_np)
                     self.width, self.height = im.size
                     if self.width <= self.newsize or self.height <= self.newsize:
                         im = im.resize((self.newsize, self.newsize))
@@ -177,11 +177,13 @@ class ImageNet100_masked(Dataset):
                                       (self.width - self.newsize) // 2 + self.newsize,
                                       (self.height - self.newsize) // 2 + self.newsize))
                         mask = mask.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
-                                         (self.width - self.newsize) // 2 + self.newsize,
-                                         (self.height - self.newsize) // 2 + self.newsize))
+                                      (self.width - self.newsize) // 2 + self.newsize,
+                                      (self.height - self.newsize) // 2 + self.newsize))
                         masked_im = masked_im.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
                                                    (self.width - self.newsize) // 2 + self.newsize,
                                                    (self.height - self.newsize) // 2 + self.newsize))
+                    mask = np.asarray(mask)[:, :, 0]
+                    mask = (mask > 0).astype(int)
                     self.train_data.append(im)
                     self.train_masks.append(mask)
                     self.train_labels.append(label)
@@ -198,9 +200,9 @@ class ImageNet100_masked(Dataset):
                     im = Image.open(class_data_dir + "/" + file_name)
                     im = im.convert("RGB")
                     mask = Image.open(class_mask_dir + "/" + file_name.split(".")[0] + ".png")
-                    mask = np.asarray(mask)[:, :, 0]
-                    mask = (mask > 0).astype(int)
-                    masked_im = self.masking_img(im, mask)
+                    mask_np = np.asarray(mask)[:, :, 0]
+                    mask_np = (mask_np > 0).astype(int)
+                    masked_im = self.masking_img(im, mask_np)
                     if self.width <= self.newsize or self.height <= self.newsize:
                         im = im.resize((self.newsize, self.newsize))
                         mask = mask.resize((self.newsize, self.newsize))
@@ -215,6 +217,8 @@ class ImageNet100_masked(Dataset):
                         masked_im = masked_im.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
                                                     (self.width - self.newsize) // 2 + self.newsize,
                                                     (self.height - self.newsize) // 2 + self.newsize))
+                    mask = np.asarray(mask)[:, :, 0]
+                    mask = (mask > 0).astype(int)
                     self.test_data.append(im)
                     self.test_masks.append(mask)
                     self.test_labels.append(label)
