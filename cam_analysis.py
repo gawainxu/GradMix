@@ -163,9 +163,15 @@ def EPG_cam(cammap, mask):
     # normalize the cammap
     cammap = (cammap - cammap.min()) / (cammap.max() - cammap.min())
     cammap = np.asarray(cammap)[:, :, 0]
-    score = np.sum(np.multiply(cammap, mask)) / np.sum(mask)
+    tp = np.sum(np.multiply(cammap, mask))
+    p = np.sum(mask)
+    n = mask.shape[0] * mask.shape[1] - p
+    fn = np.sum(np.multiply(cammap, 1-mask))
 
-    return score
+    recall = tp * 1. / (tp + fn)
+    acc = tp * 1. / p
+
+    return recall, acc
 
 
 if __name__ == "__main__":
