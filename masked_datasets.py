@@ -11,6 +11,7 @@ import cv2
 from voc_base import VOCFull
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
+import torch
 from PIL import ImageFilter, Image
 import numpy as np
 import scipy
@@ -260,15 +261,20 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     root = "/home/zhi/projects/datasets"
     my_subsects = ImageNet100_masked(root)
+    data_loader = torch.utils.data.DataLoader(my_subsects, batch_size=1, shuffle=True,
+                                              num_workers=4, pin_memory=True, sampler=None,
+                                              drop_last=True, persistent_workers=True)
 
-    for i in range(len(my_subsects)):
-        img, l, m = my_subsects[i]
-        img = np.asarray(img)
-        m = np.repeat(m[:, :, np.newaxis], 3, axis=2).astype(np.uint8)
-        imgm = np.multiply(img, m)
-        #imgm = Image.fromarray(imgm, 'RGB')
-        #imgm.show()
-        cv2.imwrite("/home/zhi/projects/temp/" + str(i) + ".png",  cv2.cvtColor(imgm, cv2.COLOR_RGB2BGR))
-        cv2.imwrite("/home/zhi/projects/temp/" + str(i) + "_ori.png",  cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
+    for idx, (images, imgm, labels, masks) in enumerate(data_loader):
+        if idx > 1:
+            break
+        i,im,l,m = my_subsects[idx]
+        print(type(l), l)
+        print(type(m), m.shape)
+        print("===============")
+        print(type(labels), labels.shape)
+        print(type(masks), masks.shape)
+        #cv2.imwrite("/home/zhi/projects/temp/" + str(idx) + ".png",  cv2.cvtColor(images, cv2.COLOR_RGB2BGR))
+        #cv2.imwrite("/home/zhi/projects/temp/" + str(idx) + "_ori.png",  cv2.cvtColor(imgm, cv2.COLOR_RGB2BGR))
 
         

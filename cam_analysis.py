@@ -7,6 +7,7 @@ Created on Fri Feb  2 23:05:06 2024
 """
 
 import os
+from pathlib import Path
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
@@ -35,13 +36,13 @@ def parse_option():
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["imagenet100_m", 'cifar10', "tinyimgnet", "imagenet100"],
                         help='dataset')
-    parser.add_argument("--data_root", type=str, default="/home/zhi/projects/datasets")
+    parser.add_argument("--data_root", type=str, default="datasets")
     parser.add_argument("--num_classes", type=int, default=6)
     parser.add_argument("--trail", type=int, default=0)
 
     # for "single" and "sim"
     parser.add_argument("--class_idx", type=int, default=0)
-    parser.add_argument("--img_size", type=int, default=32)
+    parser.add_argument("--img_size", type=int, default=224)
     parser.add_argument("--feature_id", type=int, default=5)
     parser.add_argument("--bsz", type=int, default=256)
 
@@ -54,6 +55,8 @@ def parse_option():
 
     opt = parser.parse_args()
     opt.main_dir = os.getcwd()
+    opt.parent_dir = Path(opt.main_dir).parent.absolute()
+    opt.data_root = os.path.join(opt.parent_dir, opt.data_root)
 
     opt.output_path = opt.main_dir + "/cam/"
     if not os.path.exists(opt.output_path):
@@ -131,7 +134,7 @@ def process_heatmap(heatmap, img, save_path, opt):
 
     # Plot the heatmap on the same axes,
     # but with alpha < 1 (this defines the transparency of the heatmap)
-    ax.imshow(overlay, alpha=0.2, interpolation='nearest')
+    #ax.imshow(overlay, alpha=0.2, interpolation='nearest')
 
     # Show the plot
     # plt.show()
@@ -195,6 +198,7 @@ if __name__ == "__main__":
         images1 = images[0]
         images2 = images[1]
         images = torch.cat([images1, images2], dim=0)
+        masks = masks.numpy()
 
         features = model(images)
         features1, features2 = torch.split(features, [opt.bsz, opt.bsz], dim=0)
