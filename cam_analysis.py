@@ -197,7 +197,8 @@ if __name__ == "__main__":
     backward_hook = model.encoder.layer4[-1].register_full_backward_hook(backward_hook)  # 4
     forward_hook = model.encoder.layer4[-1].register_forward_hook(forward_hook)  # 4
 
-    scores = []
+    recalls = []
+    accs = []
 
     for idx, (images, _, labels, masks) in enumerate(data_loader):
         print(idx)
@@ -223,12 +224,14 @@ if __name__ == "__main__":
         for i in range(opt.bsz):
             save_path = opt.output_path + str(idx * opt.bsz + i) + ".png"
             cammap = process_heatmap(cam[i], images1[i], save_path, opt)
-            score = EPG_cam(cammap, masks[i])
-            scores.append(score)
+            recall, acc = EPG_cam(cammap, masks[i])
+            recalls.append(recall)
+            accs.append(acc)
 
     backward_hook.remove()
     forward_hook.remove()
-    print("EPG score is", sum(scores) / len(scores))
+    print("EPG recall is", sum(recalls) / len(recalls))
+    print("EPG recall is", sum(accs) / len(accs))
 
 
 
