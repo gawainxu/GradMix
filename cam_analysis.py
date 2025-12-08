@@ -170,7 +170,7 @@ def EPG_cam(cammap, mask):
     print("p, n, tp, fn", p, n, tp, fn)
 
     recall = tp * 1. / (tp + fn)
-    acc = tp * 1. / p
+    acc = tp * 1. / (p + 1e-8)
 
     return recall, acc
 
@@ -226,13 +226,15 @@ if __name__ == "__main__":
             save_path = opt.output_path + str(idx * opt.bsz + i) + ".png"
             cammap = process_heatmap(cam[i], images1[i], save_path, opt)
             recall, acc = EPG_cam(cammap, masks[i])
-            recalls.append(recall)
-            accs.append(acc)
+            if recall > 0:
+                recalls.append(recall)
+            if acc > 0:
+                accs.append(acc)
 
     backward_hook.remove()
     forward_hook.remove()
     print("EPG recall is", sum(recalls) / len(recalls))
-    print("EPG recall is", sum(accs) / len(accs))
+    print("EPG acc is", sum(accs) / len(accs))
 
 
 
