@@ -11,24 +11,26 @@ from sklearn.metrics import roc_curve, auc
 
 class TwoCropTransform:
     """Create two crops of the same image"""
-    def __init__(self, transform, repeat=1, origin=False):
+    def __init__(self, transform, transform2 = None, repeat=1, origin=False):
         self.transform = transform
         self.repeat = repeat
         self.origin = origin
+        if transform2 is None:
+            self.transform2 = transform
 
     def __call__(self, x):
 
         if self.repeat == 1:
             if self.origin:
                 origin_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop(224)])
-                return [self.transform(x), self.transform(x), origin_transform(x)]
-            return [self.transform(x), self.transform(x)]
+                return [self.transform(x), self.transform2(x), origin_transform(x)]
+            return [self.transform(x), self.transform2(x)]
         else:
             transformed_x1 = []
             transformed_x2 = []
             for _ in range(self.repeat):
                 transformed_x1.append(torch.unsqueeze(self.transform(x), dim=0))
-                transformed_x2.append(torch.unsqueeze(self.transform(x), dim=0))
+                transformed_x2.append(torch.unsqueeze(self.transform2(x), dim=0))
 
             transformed_x1 = torch.cat(transformed_x1, dim=0)
             transformed_x2 = torch.cat(transformed_x2, dim=0)
