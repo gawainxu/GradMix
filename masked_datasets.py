@@ -14,7 +14,7 @@ from torch.utils.data import Dataset
 from PIL import ImageFilter, Image
 import numpy as np
 import scipy
-
+from util import TwoCropTransform
 
 class my_VOC(VOCFull):
     
@@ -126,8 +126,10 @@ class ImageNet100_masked(Dataset):
         self.mask_test_path = os.path.join(root, "ImageNetS919/validation-segmentation")
 
         self.train_data = []
+        self.train_data_masked = []
         self.train_masks = []
         self.test_data = []
+        self.test_data_masked = []
         self.test_masks = []
         self.train_labels = []
         self.test_labels = []
@@ -136,8 +138,12 @@ class ImageNet100_masked(Dataset):
         self.mask_dir_list = sorted(os.listdir(self.mask_train_path))
         self.class_map = {serie_num: index for index, serie_num in enumerate(self.class_dir_list)}
 
-        self.transform = transforms.Compose([transforms.ToTensor(),
-             transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),])
+        self.transform = transforms.Compose([transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
+                                             transforms.RandomHorizontalFlip(),
+                                             transforms.RandomGrayscale(p=0.2),
+                                             transforms.ToTensor(),
+                                             transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),])
+        self.transform = TwoCropTransform(self.transform)
         self.newsize = 224
 
         for cd in self.class_dir_list:
@@ -154,23 +160,28 @@ class ImageNet100_masked(Dataset):
                     im = Image.open(class_data_dir + "/" + file_name)
                     im = im.convert("RGB")
                     mask = Image.open(class_mask_dir + "/" + file_name.split(".")[0] + ".png")
+                    mask = np.asarray(mask)[:, :, 0]
+                    mask = (mask > 0).astype(int)
+                    masked_im = self.masking_img(im, mask)
                     self.width, self.height = im.size
                     if self.width <= self.newsize or self.height <= self.newsize:
                         im = im.resize((self.newsize, self.newsize))
                         mask = mask.resize((self.newsize, self.newsize))
+                        masked_im = masked_im.resize((self.newsize, self.newsize))
                     else:
                         im = im.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
                                       (self.width - self.newsize) // 2 + self.newsize,
                                       (self.height - self.newsize) // 2 + self.newsize))
                         mask = mask.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
-                                      (self.width - self.newsize) // 2 + self.newsize,
-                                      (self.height - self.newsize) // 2 + self.newsize))
+                                         (self.width - self.newsize) // 2 + self.newsize,
+                                         (self.height - self.newsize) // 2 + self.newsize))
+                        masked_im = masked_im.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
+                                                   (self.width - self.newsize) // 2 + self.newsize,
+                                                   (self.height - self.newsize) // 2 + self.newsize))
                     self.train_data.append(im)
-                    mask = np.asarray(mask)[:,:, 0]
-                    assert np.sum(mask)>=0
-                    mask = (mask > 0).astype(int)
                     self.train_masks.append(mask)
                     self.train_labels.append(label)
+                    self.train_data_masked.append(masked_im)
 
             class_data_dir = os.path.join(self.data_test_path, cd)
             class_mask_dir = os.path.join(self.mask_test_path, cd)
@@ -183,9 +194,13 @@ class ImageNet100_masked(Dataset):
                     im = Image.open(class_data_dir + "/" + file_name)
                     im = im.convert("RGB")
                     mask = Image.open(class_mask_dir + "/" + file_name.split(".")[0] + ".png")
+                    mask = np.asarray(mask)[:, :, 0]
+                    mask = (mask > 0).astype(int)
+                    masked_im = self.masking_img(im, mask)
                     if self.width <= self.newsize or self.height <= self.newsize:
                         im = im.resize((self.newsize, self.newsize))
                         mask = mask.resize((self.newsize, self.newsize))
+                        masked_im = masked_im.resize((self.newsize, self.newsize))
                     else:
                         im = im.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
                                       (self.width - self.newsize) // 2 + self.newsize,
@@ -193,28 +208,43 @@ class ImageNet100_masked(Dataset):
                         mask = mask.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
                                       (self.width - self.newsize) // 2 + self.newsize,
                                       (self.height - self.newsize) // 2 + self.newsize))
+                        masked_im = masked_im.crop(((self.width - self.newsize) // 2, (self.height - self.newsize) // 2,
+                                                    (self.width - self.newsize) // 2 + self.newsize,
+                                                    (self.height - self.newsize) // 2 + self.newsize))
                     self.test_data.append(im)
-                    mask = np.asarray(mask)[:,:, 0]
-                    assert np.sum(mask) >= 0
-                    mask = (mask > 0).astype(int)
                     self.test_masks.append(mask)
                     self.test_labels.append(label)
+                    self.test_data_masked.append(masked_im)
 
         if merge:
             self.train_data = self.train_data + self.test_data
             self.train_masks = self.train_masks + self.test_masks
             self.train_labels = self.train_labels + self.test_labels
+            self.train_data_masked = self.train_data_masked + self.test_data_masked
 
     def __getitem__(self, idx):
 
         img = self.train_data[idx]
-        #img = self.transform(img)
+        img = self.transform(img)
+        img_masked = self.train_data_masked[idx]
+        img_masked = self.transform(img_masked)
 
-        return img, self.train_labels[idx], self.train_masks[idx]
+        return img, img_masked, self.train_labels[idx], self.train_masks[idx]
 
     def __len__(self):
 
         return len(self.train_data)
+
+
+    def masking_img(self, img, mask):
+
+        img_np = np.asarray(img)
+        mask = np.repeat(mask[:, :, np.newaxis], 3, axis=2).astype(np.uint8)
+        img_np = np.multiply(img_np, mask)
+        img_np = Image.fromarray(img_np, 'RGB')
+
+        return img_np
+
 
 
 if __name__ == "__main__":

@@ -308,3 +308,10 @@ if __name__ == "__main__":
 
 
 
+"""
+1. EPG for attribution maps
+   - load model
+   - load data (two views, annotation_mask)
+   - compute attribution map
+   - EPG computing 
+"""
