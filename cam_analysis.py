@@ -103,7 +103,7 @@ def forward_hook(module, args, output):
     print(f"Gradient Size: {activations.size()}")
 
 
-def process_heatmap(heatmap, img, save_path, opt):
+def process_heatmap(heatmap, img, img_ori, save_path, opt):
     plt.close('all')
 
     # normalize the heatmap
@@ -120,7 +120,7 @@ def process_heatmap(heatmap, img, save_path, opt):
     ax.axis('off')  # removes the axis markers
 
     # First plot the original image
-    ax.imshow(to_pil_image(img, mode='RGB'))
+    ax.imshow(to_pil_image(img_ori, mode='RGB'))
 
     # Resize the heatmap to the same size as the input image and defines
     # a resample algorithm for increasing image resolution
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     recalls = []
     accs = []
 
-    for idx, (images, _, labels, masks) in enumerate(data_loader):
+    for idx, (images, _, images_ori, labels, masks) in enumerate(data_loader):
         print(idx)
         images1 = images[0]
         images2 = images[1]
@@ -225,7 +225,7 @@ if __name__ == "__main__":
         heatmap = F.relu(cam)
         for i in range(opt.bsz):
             save_path = opt.output_path + str(idx * opt.bsz + i) + ".png"
-            cammap = process_heatmap(cam[i], images1[i], save_path, opt)
+            cammap = process_heatmap(cam[i], images1[i], images_ori[i], save_path, opt)
             recall, acc = EPG_cam(cammap, masks[i])
             if recall > 0:
                 recalls.append(recall)
