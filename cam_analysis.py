@@ -134,7 +134,7 @@ def process_heatmap(heatmap, img, img_ori, save_path, opt):
 
     # Plot the heatmap on the same axes,
     # but with alpha < 1 (this defines the transparency of the heatmap)
-    #ax.imshow(overlay, alpha=0.2, interpolation='nearest')
+    ax.imshow(overlay, alpha=0.2, interpolation='nearest')
 
     # Show the plot
     # plt.show()
