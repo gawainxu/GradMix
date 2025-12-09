@@ -233,12 +233,14 @@ class ImageNet100_masked(Dataset):
 
     def __getitem__(self, idx):
 
+        transform_for_ori = transforms.Compose([transforms.ToTensor()])
         img = self.train_data[idx]
+        img_ori = transform_for_ori(img)
         img = self.transform(img)
         img_masked = self.train_data_masked[idx]
         img_masked = self.transform(img_masked)
 
-        return img, img_masked, self.train_labels[idx], self.train_masks[idx]
+        return img, img_masked, img_ori, self.train_labels[idx], self.train_masks[idx]
 
     def __len__(self):
 
