@@ -6,6 +6,7 @@ import argparse
 import time
 import math
 import pickle
+import numpy as np
 
 import torch
 import torch.backends.cudnn as cudnn
@@ -445,6 +446,8 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
 
                 loss_ssl_grad.append([x.detach().cpu() for x in g_ssl])
                 loss_sl_grad.append([x.detach().cpu() for x in g_sl])
+                print("g_sup", np.sum(np.abs(loss_sl_grad[-1])))
+                print("g_ssl", np.sum(np.abs(loss_ssl_grad[-1])))
                 #loss_ssl_hessian.append([x.detach().cpu() for x in hessian_ssl])
                 #loss_sl_hessian.append([x.detach().cpu() for x in hessian_sl])
 
