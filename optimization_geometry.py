@@ -54,7 +54,7 @@ def parse_options():
 
     opt.main_dir = os.getcwd()
     opt.model_main_dir = os.path.join(opt.main_dir, "/save/SupCon/")
-    opt.model_path = os.path.join(opt.model_main_dir, opt.model_path)
+    opt.model_path = os.path.join(opt.model_main_dir, opt.models_path)
 
     return opt
 
