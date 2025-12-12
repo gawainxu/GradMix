@@ -26,7 +26,7 @@ from util import TwoCropTransform
 def parse_options():
     parser = argparse.ArgumentParser('argument for evaluation')
 
-    parser.add_argument("--models_path", type=str, default="/home/zhi/projects/comprehensive_OSR_copy/save/SupCon/cifar100_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_0_128_256/")
+    parser.add_argument("--models_path", type=str, default="/cifar100_models/cifar100_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_0_128_256/")
     parser.add_argument('--model', type=str, default='resnet18',
                         choices=["resnet18", "resnet34", "resnet50", "preactresnet18", "preactresnet34", "simCNN",
                                  "MLP"])
@@ -51,6 +51,10 @@ def parse_options():
         opt.device = "cuda"
     else:
         opt.device = "cpu"
+
+    opt.main_dir = os.getcwd()
+    opt.model_main_dir = os.path.join(opt.main_dir, "/save/SupCon/")
+    opt.model_path = os.path.join(opt.model_main_dir, opt.model_path)
 
     return opt
 
