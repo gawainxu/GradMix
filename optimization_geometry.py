@@ -230,10 +230,9 @@ def main(opt):
             g_ssl = torch.autograd.grad(loss_ssl, model.head[2].weight,
                                         retain_graph=True)[0]
 
-            g_sup.requires_grad_(True)
-            g_ssl.requires_grad_(True)
-
-            h_sup, h_ssl = hessian_single_layer(model, images, labels, bsz, criterion1, criterion2)
+            #g_sup.requires_grad_(True)
+            #g_ssl.requires_grad_(True)
+            #h_sup, h_ssl = hessian_single_layer(model, images, labels, bsz, criterion1, criterion2)
             """
             flattened_grads = torch.cat(([grad.flatten() for grad in g_sup]))
             hessian = torch.zeros(flattened_grads.shape[0], flattened_grads.shape[0])
@@ -245,8 +244,12 @@ def main(opt):
 
             losses_sup_epoch.append(loss_sup.detach().cpu().numpy())
             losses_ssl_epoch.append(loss_ssl.detach().cpu().numpy())
-            g_sup_epoch.append(g_sup.detach().cpu().numpy())
-            g_ssl_epoch.append(g_ssl.detach().cpu().numpy())
+            g_sup = g_sup.detach().cpu().numpy()
+            g_ssl = g_ssl.detach().cpu().numpy()
+            g_sup_epoch.append(g_sup)
+            g_ssl_epoch.append(g_ssl)
+            print("g_sup", np.sum(np.abs(g_sup)))
+            print("g_ssl", np.sum(np.abs(g_ssl)))
             #h_sup_epoch.append(h_sup.detach().cpu().numpy())
             #h_ssl_epoch.append(h_ssl.detach().cpu().numpy())
 
