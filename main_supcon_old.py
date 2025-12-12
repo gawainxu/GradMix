@@ -141,7 +141,7 @@ def parse_option():
     parser.add_argument("--randaug", type=int, default=0)
     parser.add_argument("--apool", type=bool, default=False)
     parser.add_argument("--use_cuda", type=bool, default=True)
-    parser.add_argument("--record_grad", type=bool, default=False)
+    parser.add_argument("--record_grad", type=bool, default=True)
 
     opt = parser.parse_args()
 
@@ -437,7 +437,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
             loss = opt.method_gama * loss_sup + opt.method_lam * loss_ssl
             losses_ssl.update(loss_ssl.detach().cpu().item())
             losses_sup.update(loss_sup.detach().cpu().item())
-            ious_epoch.append(ious)
+            #ious_epoch.append(ious)
 
             if opt.record_grad:
                 # Here the model parameters can be other intermdiate parameters
@@ -446,8 +446,8 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
 
                 loss_ssl_grad.append([x.detach().cpu() for x in g_ssl])
                 loss_sl_grad.append([x.detach().cpu() for x in g_sl])
-                print("g_sup", np.sum(np.abs(loss_sl_grad[-1])))
-                print("g_ssl", np.sum(np.abs(loss_ssl_grad[-1])))
+                print("g_sup", torch.sum(torch.abs(loss_sl_grad[-1][0])), torch.sum(torch.abs(loss_sl_grad[-1][1])))
+                print("g_ssl", torch.sum(torch.abs(loss_ssl_grad[-1][0])), torch.sum(torch.abs(loss_ssl_grad[-1][1])))
                 #loss_ssl_hessian.append([x.detach().cpu() for x in hessian_ssl])
                 #loss_sl_hessian.append([x.detach().cpu() for x in hessian_sl])
 
