@@ -33,7 +33,7 @@ activations = None
 
 def parse_option():
     parser = argparse.ArgumentParser('argument for grad cam')
-    parser.add_argument('--datasets', type=str, default='cifar10',
+    parser.add_argument('--datasets', type=str, default='imagenet100_m',
                         choices=["imagenet100_m", 'cifar10', "tinyimgnet", "imagenet100"],
                         help='dataset')
     parser.add_argument("--data_root", type=str, default="datasets")
