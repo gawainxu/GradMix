@@ -110,7 +110,7 @@ def process_heatmap(heatmap, img, img_ori, save_path, opt):
     heatmap /= torch.max(heatmap)
 
     heatmap = heatmap.detach().cpu()
-    img = img.detach().cpu()
+    #img = img.detach().cpu()
 
     # draw the heatmap
     #plt.matshow(heatmap)
@@ -192,7 +192,7 @@ if __name__ == "__main__":
 
     datasets = ImageNet100_masked(root=opt.data_root)
     data_loader = torch.utils.data.DataLoader(datasets, batch_size=opt.bsz, shuffle=True,
-                                              num_workers=4, pin_memory=True, sampler=None,
+                                              num_workers=1, pin_memory=True, sampler=None,
                                               drop_last=True, persistent_workers=True)
 
     # register hook
