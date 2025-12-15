@@ -268,13 +268,14 @@ if __name__ == "__main__":
         
         #energy = np.sum(cam * mask ) / np.sum(cam)
         energy = threshold_energy(cam, mask, threshold=opt.threshold)
+        print("energy is", energy)
         energy_list.append(energy)
         
         #bg_entropy = compute_pixel_entropy(img_ori, mask, idx=idx)
         #bg_entropy_list.append(bg_entropy)
     
-    with open(opt.output_path, "wb") as f:
-        pickle.dump((bg_entropy_list, energy_list), f)
+    #with open(opt.output_path, "wb") as f:
+    #    pickle.dump((bg_entropy_list, energy_list), f)
         
         
         
