@@ -107,7 +107,7 @@ def process_heatmap(heatmap, img, img_ori, save_path, opt):
     plt.close('all')
 
     # normalize the heatmap
-    heatmap /= torch.max(heatmap)
+    #heatmap /= torch.max(heatmap)
 
     heatmap = heatmap.detach().cpu()
     #img = img.detach().cpu()
@@ -126,10 +126,17 @@ def process_heatmap(heatmap, img, img_ori, save_path, opt):
     # a resample algorithm for increasing image resolution
     # we need heatmap.detach() because it can't be converted to numpy array while
     # requiring gradients
-    heatmap_np = heatmap.detach().numpy()
-    heatmap_np = (heatmap_np > 0).astype(int)
-    print("positive ratio", np.sum(heatmap_np) * 1.0 / heatmap_np.shape[0] / heatmap_np.shape[1])
     overlay = to_pil_image(heatmap.detach(), mode='F').resize((opt.img_size, opt.img_size), resample=PIL.Image.BICUBIC)
+
+    overlay_np = np.array(overlay)
+    print(overlay_np.shape)
+    overlay_np = (overlay_np - overlay_np.min()) / (overlay_np.max() - overlay_np.min())
+    overlay_np0 = (overlay_np > 0).astype(int)
+    print("positive ratio heatmap", np.sum(overlay_np0) * 1.0 / overlay_np0.shape[0] / overlay_np0.shape[1])
+    overlay_np1 = (overlay_np > 0.3).astype(int)
+    print("positive ratio heatmap", np.sum(overlay_np1) * 1.0 / overlay_np1.shape[0] / overlay_np1.shape[1])
+    overlay_np2 = (overlay_np > 0).astype(int)
+    print("positive ratio heatmap", np.sum(overlay_np2) * 1.0 / overlay_np2.shape[0] / overlay_np2.shape[1])
 
     # Apply any colormap you want
     cmap = colormaps['jet']
