@@ -6,6 +6,8 @@ Created on Fri Jul 11 18:00:26 2025
 @author: zhi
 """
 
+import os
+import Path
 import argparse
 import pickle
 import numpy as np
@@ -37,13 +39,13 @@ def parse_option():
     parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18", "resnet34"])
     parser.add_argument("--feat_dim", type=int, default=128)
     parser.add_argument("--bsz", type=int, default=1)
-    parser.add_argument("--data_root", type=str, default="../datasets")
+    parser.add_argument("--data_root", type=str, default="datasets")
     parser.add_argument("--img_size", type=int, default=224)
     parser.add_argument("--num_classes", type=int, default=100)
     parser.add_argument("--backbone_model_direct", type=str,
-                        default="./save/SupCon/imagenet100_m_models/imagenet100_m_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_0_128_256/last.pth")
-    parser.add_argument("--backbone_model_name", type=str, default="ckpt_epoch_50.pth")   
-    parser.add_argument("--linear_model_name", type=str, default="ckpt_epoch_50_linear.pth")
+                        default="/save/SupCon/imagenet100_m_models/imagenet100_m_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_0_128_256")
+    parser.add_argument("--backbone_model_name", type=str, default="last.pth")
+    parser.add_argument("--linear_model_name", type=str, default="last_linear.pth")
     parser.add_argument("--output_path", type=str, default="./features/energy_entropy")
     
     parser.add_argument("--threshold", type=float, default=0.01)
@@ -52,8 +54,12 @@ def parse_option():
 
     opt = parser.parse_args()
 
-    opt.backbone_model_path = opt.backbone_model_direct + opt.backbone_model_name
-    opt.linear_model_path = opt.backbone_model_direct + opt.linear_model_name
+    opt.backbone_model_path = os.path.join(opt.backbone_model_direct, opt.backbone_model_name)
+    opt.linear_model_path = os.path.join(opt.backbone_model_direct, opt.linear_model_name)
+
+    opt.main_dir = os.getcwd()
+    opt.parent_dir = Path(opt.main_dir).parent.absolute()
+    opt.data_root = os.path.join(opt.parent_dir, opt.data_root)
     
     opt.output_path = opt.output_path + "_" + opt.method + "_" + str(opt.threshold) + "_" + str(opt.if_train)
 
