@@ -216,6 +216,7 @@ if __name__ == "__main__":
         print(idx)
         images1 = images[0]
         images2 = images[1]
+        print(images1.shape, images2.shape)
         images = torch.cat([images1, images2], dim=0)
         masks = masks.numpy()
 
