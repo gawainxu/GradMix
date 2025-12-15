@@ -68,7 +68,7 @@ def parse_option():
     
     parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "resnet50", "simCNN", "MLP"])
     parser.add_argument('--datasets', type=str, default='imagenet100',
-                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', 'imagenet100', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft"], help='dataset')
+                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', 'imagenet100', 'imagenet100_m', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft"], help='dataset')
     parser.add_argument("--backbone_model_direct", type=str, default="/save/SupCon/imagenet100_models/imagenet100_resnet18_original_data__vanilia__SimCLR_0.0_1.0_0.05_trail_0_128_256")      
     parser.add_argument("--backbone_model_name", type=str, default="ckpt_epoch_100.pth")                                             
     parser.add_argument("--trail", type=int, default=0)
