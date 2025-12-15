@@ -40,7 +40,8 @@ def parse_option():
     parser.add_argument("--data_root", type=str, default="../datasets")
     parser.add_argument("--img_size", type=int, default=224)
     parser.add_argument("--num_classes", type=int, default=100)
-    parser.add_argument("--backbone_model_direct", type=str, default="./save/SupCon/imagenet100_models/imagenet100_m_resnet18_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_2,3,4_SimCLR_1.0_1.0_0.05_trail_0_128_230_old_augmented/")      
+    parser.add_argument("--backbone_model_direct", type=str,
+                        default="./save/SupCon/imagenet100_m_models/imagenet100_m_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_0_128_256/last.pth")
     parser.add_argument("--backbone_model_name", type=str, default="ckpt_epoch_50.pth")   
     parser.add_argument("--linear_model_name", type=str, default="ckpt_epoch_50_linear.pth")
     parser.add_argument("--output_path", type=str, default="./features/energy_entropy")
@@ -165,7 +166,6 @@ def flatten_image_with_mask(img, mask, idx=0):
     img = img.reshape([3, -1])
     print("mask", np.sum(mask))
     
-    
     for i, p_mask in enumerate(mask.flatten()):
         if p_mask == 0:
             flatten_img.append(img[:, i])
@@ -173,7 +173,7 @@ def flatten_image_with_mask(img, mask, idx=0):
     return flatten_img
 
 
-def threshold_energy(cam, mask, threshold=0.01):
+def threshold_energy(cam, mask, threshold=0):
     
     cam_norm = (cam-cam.min()) / (cam.max() - cam.min())
     cam_norm = np.where(cam_norm>threshold, 1, 0)
@@ -186,7 +186,7 @@ def threshold_energy(cam, mask, threshold=0.01):
     
     energy = area_in / area_obj #area_out #(area_obj + area_out)
     
-    return (area_in, area_out, area_obj)
+    return energy
 
 
 def backward_hook(module, grad_input, grad_output):
@@ -228,7 +228,7 @@ if __name__ == "__main__":
     energy_list = []
     bg_entropy_list = []
     
-    for idx, (img, label, mask, img_ori) in enumerate(data_loader):
+    for idx, (img, img_masked, img_ori, label, mask) in enumerate(data_loader):
         
         img = img.cuda()
         label = label.cuda()
@@ -270,8 +270,8 @@ if __name__ == "__main__":
         energy = threshold_energy(cam, mask, threshold=opt.threshold)
         energy_list.append(energy)
         
-        bg_entropy = compute_pixel_entropy(img_ori, mask, idx=idx)
-        bg_entropy_list.append(bg_entropy)
+        #bg_entropy = compute_pixel_entropy(img_ori, mask, idx=idx)
+        #bg_entropy_list.append(bg_entropy)
     
     with open(opt.output_path, "wb") as f:
         pickle.dump((bg_entropy_list, energy_list), f)

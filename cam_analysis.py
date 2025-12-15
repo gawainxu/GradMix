@@ -127,7 +127,7 @@ def process_heatmap(heatmap, img, img_ori, save_path, opt):
     # we need heatmap.detach() because it can't be converted to numpy array while
     # requiring gradients
     heatmap_np = heatmap.detach().numpy()
-    heatmap_np = np.where(heatmap_np>0)
+    heatmap_np = (heatmap_np > 0).astype(int)
     print("positive ratio", np.sum(heatmap_np) * 1.0 / heatmap_np.shape[0] / heatmap_np.shape[1])
     overlay = to_pil_image(heatmap.detach(), mode='F').resize((opt.img_size, opt.img_size), resample=PIL.Image.BICUBIC)
 
