@@ -219,6 +219,7 @@ if __name__ == "__main__":
         print(images1.shape, images2.shape)
         images = torch.cat([images1, images2], dim=0)
         masks = masks.numpy()
+        print(images.shape, masks.shape)
 
         features = model(images)
         features1, features2 = torch.split(features, [opt.bsz, opt.bsz], dim=0)
