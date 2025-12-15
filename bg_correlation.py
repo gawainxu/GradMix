@@ -207,7 +207,7 @@ if __name__ == "__main__":
     opt = parse_option()
     
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.485,0.456,0.406),(0.229,0.224,0.225))])
-    datasets = ImageNet100_masked(train=opt.if_train, root=opt.data_root, transform=transform, if_mask=False)
+    datasets = ImageNet100_masked(root=opt.data_root)
     print("len dataset", len(datasets))
     data_loader = DataLoader(datasets, batch_size=opt.bsz, shuffle=False, num_workers=1, pin_memory=True)
     

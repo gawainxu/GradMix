@@ -238,9 +238,11 @@ class ImageNet100_masked(Dataset):
     def __getitem__(self, idx):
 
         transform_for_ori = transforms.Compose([transforms.ToTensor()])
+        transform_for_img = transforms.Compose([transforms.ToTensor(),
+                                                transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
         img = self.train_data[idx]
         img_ori = transform_for_ori(img)
-        img = self.transform(img)
+        img = transform_for_img(img)
         img_masked = self.train_data_masked[idx]
         img_masked = self.transform(img_masked)
 
