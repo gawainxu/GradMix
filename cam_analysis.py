@@ -133,9 +133,9 @@ def process_heatmap(heatmap, img, img_ori, save_path, opt):
     overlay_np = (overlay_np - overlay_np.min()) / (overlay_np.max() - overlay_np.min())
     overlay_np0 = (overlay_np > 0).astype(int)
     print("positive ratio heatmap", np.sum(overlay_np0) * 1.0 / overlay_np0.shape[0] / overlay_np0.shape[1])
-    overlay_np1 = (overlay_np > 0.3).astype(int)
+    overlay_np1 = (overlay_np > 0.1).astype(int)
     print("positive ratio heatmap", np.sum(overlay_np1) * 1.0 / overlay_np1.shape[0] / overlay_np1.shape[1])
-    overlay_np2 = (overlay_np > 0).astype(int)
+    overlay_np2 = (overlay_np > 0.5).astype(int)
     print("positive ratio heatmap", np.sum(overlay_np2) * 1.0 / overlay_np2.shape[0] / overlay_np2.shape[1])
 
     # Apply any colormap you want
@@ -216,10 +216,8 @@ if __name__ == "__main__":
         print(idx)
         images1 = images[0]
         images2 = images[1]
-        print(images1.shape, images2.shape)
         images = torch.cat([images1, images2], dim=0)
         masks = masks.numpy()
-        print(images.shape, masks.shape)
 
         features = model(images)
         features1, features2 = torch.split(features, [opt.bsz, opt.bsz], dim=0)
