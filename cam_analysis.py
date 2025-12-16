@@ -135,8 +135,14 @@ def process_heatmap(heatmap, img, img_ori, save_path, opt):
     print("positive ratio heatmap", np.sum(overlay_np0) * 1.0 / overlay_np0.shape[0] / overlay_np0.shape[1])
     overlay_np1 = (overlay_np > 0.1).astype(int)
     print("positive ratio heatmap", np.sum(overlay_np1) * 1.0 / overlay_np1.shape[0] / overlay_np1.shape[1])
-    overlay_np2 = (overlay_np > 0.5).astype(int)
+    overlay_np2 = (overlay_np > 0.2).astype(int)
     print("positive ratio heatmap", np.sum(overlay_np2) * 1.0 / overlay_np2.shape[0] / overlay_np2.shape[1])
+    overlay_np3 = (overlay_np > 0.3).astype(int)
+    print("positive ratio heatmap", np.sum(overlay_np3) * 1.0 / overlay_np3.shape[0] / overlay_np3.shape[1])
+    overlay_np4 = (overlay_np > 0.4).astype(int)
+    print("positive ratio heatmap", np.sum(overlay_np4) * 1.0 / overlay_np4.shape[0] / overlay_np4.shape[1])
+    overlay_np5 = (overlay_np > 0.5).astype(int)
+    print("positive ratio heatmap", np.sum(overlay_np5) * 1.0 / overlay_np5.shape[0] / overlay_np5.shape[1])
 
     # Apply any colormap you want
     cmap = colormaps['jet']
@@ -149,7 +155,7 @@ def process_heatmap(heatmap, img, img_ori, save_path, opt):
     # Show the plot
     # plt.show()
     fig.savefig(save_path)
-    return overlay
+    return overlay_np0, overlay_np1, overlay_np2, overlay_np3, overlay_np4, overlay_np5
 
 
 def process_featuremap(feature_maps, img, opt):
@@ -168,16 +174,39 @@ def process_featuremap(feature_maps, img, opt):
         plt.savefig(opt.feature_path + "/" + str(n) + ".png")
 
 
-def EPG_cam(cammap, mask):
+def EPG_cam(cammaps, mask):
 
     # normalize the cammap
-    cammap = (cammap - cammap.min()) / (cammap.max() - cammap.min())
-    cammap = np.asarray(cammap)[:, :, 0]
-    cammap = (cammap > 0).astype(int)
+    #cammap = (cammap - cammap.min()) / (cammap.max() - cammap.min())
+    #cammap = np.asarray(cammap)[:, :, 0]
+    #cammap = (cammap > 0).astype(int)
+    overlay_np0, overlay_np1, overlay_np2, overlay_np3, overlay_np4, overlay_np5 = cammaps
+    recall0, acc0 = metrics(overlay_np0, mask)
+    print("recall0", "acc0", recall0, acc0)
+
+    recall1, acc1 = metrics(overlay_np1, mask)
+    print("recall1", "acc1", recall1, acc1)
+
+    recall2, acc2 = metrics(overlay_np2, mask)
+    print("recall2", "acc2", recall2, acc2)
+
+    recall3, acc3 = metrics(overlay_np3, mask)
+    print("recall3", "acc3", recall3, acc3)
+
+    recall4, acc4 = metrics(overlay_np4, mask)
+    print("recall4", "acc4", recall4, acc4)
+
+    recall5, acc5 = metrics(overlay_np5, mask)
+    print("recall5", "acc5", recall5, acc5)
+
+    return recall0, recall1, recall2, recall3, recall4, recall5, acc0, acc1, acc2, acc3, acc4, acc5
+
+
+def metrics(cammap, mask):
     tp = np.sum(np.multiply(cammap, mask))
     p = np.sum(mask)
     n = mask.shape[0] * mask.shape[1] - p
-    fn = np.sum(np.multiply(cammap, 1-mask))
+    fn = np.sum(np.multiply(cammap, 1 - mask))
     print("p, n, tp, fn", p, n, tp, fn)
 
     recall = tp * 1. / (tp + fn)
@@ -209,8 +238,8 @@ if __name__ == "__main__":
     backward_hook = model.encoder.layer4[-1].register_full_backward_hook(backward_hook)  # 4
     forward_hook = model.encoder.layer4[-1].register_forward_hook(forward_hook)  # 4
 
-    recalls = []
-    accs = []
+    recalls0, recalls1, recalls2, recalls3, recalls4, recalls5 = [], [], [], [], [], []
+    accs0, accs1, accs2, accs3, accs4, accs5 = [], [], [], [], [], []
 
     for idx, (images, _, images_ori, labels, masks) in enumerate(data_loader):
         print(idx)
@@ -235,17 +264,40 @@ if __name__ == "__main__":
         heatmap = F.relu(cam)
         for i in range(opt.bsz):
             save_path = opt.output_path + str(idx * opt.bsz + i) + ".png"
-            cammap = process_heatmap(cam[i], images1[i], images_ori[i], save_path, opt)
-            recall, acc = EPG_cam(cammap, masks[i])
-            if recall > 0:
-                recalls.append(recall)
-            if acc > 0:
-                accs.append(acc)
+            cammaps = process_heatmap(cam[i], images1[i], images_ori[i], save_path, opt)
+            recall0, recall1, recall2, recall3, recall4, recall5, acc0, acc1, acc2, acc3, acc4, acc5 = EPG_cam(cammaps, masks[i])
+            recalls0.append(recall0)
+            accs0.append(acc0)
+            recalls1.append(recall1)
+            accs1.append(acc1)
+            recalls2.append(recall2)
+            accs2.append(acc2)
+            recalls3.append(recall3)
+            accs3.append(acc3)
+            recalls4.append(recall4)
+            accs4.append(acc4)
+            recalls5.append(recall5)
+            accs5.append(acc5)
 
     backward_hook.remove()
     forward_hook.remove()
-    print("EPG recall is", sum(recalls) / len(recalls))
-    print("EPG acc is", sum(accs) / len(accs))
+    print("EPG recall0 is", sum(recalls0) / len(recalls0))
+    print("EPG acc0 is", sum(accs0) / len(accs0))
+
+    print("EPG recall1 is", sum(recalls1) / len(recalls1))
+    print("EPG acc1 is", sum(accs1) / len(accs1))
+
+    print("EPG recall2 is", sum(recalls2) / len(recalls2))
+    print("EPG acc2 is", sum(accs2) / len(accs2))
+
+    print("EPG recall3 is", sum(recalls3) / len(recalls3))
+    print("EPG acc3 is", sum(accs3) / len(accs3))
+
+    print("EPG recall4 is", sum(recalls4) / len(recalls4))
+    print("EPG acc4 is", sum(accs4) / len(accs4))
+
+    print("EPG recall5 is", sum(recalls5) / len(recalls5))
+    print("EPG acc5 is", sum(accs5) / len(accs5))
 
 
 
