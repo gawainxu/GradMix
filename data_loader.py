@@ -101,7 +101,7 @@ class iCIFAR10(CIFAR10):
         if self.label_dict is not None:
             target = self.label_dict[str(target)]
 
-        return img, target
+        return img, target, torch.tensor([0,0,0,0])
 
     def __len__(self):
         if self.train:
@@ -499,7 +499,7 @@ class TinyImagenet(Dataset):
         if hasattr(self, 'logits'):
             return img, target, original_img, self.logits[index]
 
-        return img, target
+        return img, target, torch.tensor([0,0,0,0])
     
     def get_image_class(self, label):
 
