@@ -739,6 +739,7 @@ def main():
                 opt.save_folder, 'ckpt_epoch_{epoch}.pth'.format(epoch=epoch))
             save_model(model, linear, optimizer, opt, epoch, save_file)
 
+        """
         with open(os.path.join(opt.save_folder, "iou_" + str(epoch)), "wb") as f:
             pickle.dump(ious_epoch, f)
         #with open(os.path.join(opt.save_folder, "iou_vali_" + str(epoch)), "wb") as f:
@@ -749,6 +750,7 @@ def main():
         #    pickle.dump(hessian, f)
         with open(os.path.join(opt.save_folder, "loss_" + str(epoch)), "wb") as f:
             pickle.dump(loss, f)
+        """
 
     # save the last model
     save_file = os.path.join(
