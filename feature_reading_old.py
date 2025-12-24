@@ -186,7 +186,7 @@ def normalFeatureReading(data_loader, model, linear_model, opt):
     outputs_linear = []
     labels = []
 
-    for i, (img, label) in enumerate(data_loader):
+    for i, (img, label, _) in enumerate(data_loader):
         
         print(i)
         if i > opt.break_idx:
