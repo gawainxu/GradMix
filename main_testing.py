@@ -378,6 +378,7 @@ def distance_classifier(testing_features, testing_labels, sorted_training_featur
 
 def feature_classifier(opt):
 
+    print(opt.exemplar_features_path)
     with open(opt.exemplar_features_path, "rb") as f:
         features_exemplar_head, features_exemplar_backbone, _, labels_examplar = pickle.load(f) 
         features_exemplar_head = np.squeeze(np.array(features_exemplar_head))    
