@@ -108,7 +108,7 @@ def parse_option():
         opt.linear_model_path = opt.main_dir + opt.linear_model_path
 
     opt.n_cls = len(osr_splits_inliers[opt.datasets][opt.trail])
-    opt.n_outs = 0 #len(osr_splits_outliers[opt.datasets][opt.trail])
+    opt.n_outs = len(osr_splits_outliers[opt.datasets][opt.trail])
 
     opt.break_idx = breaks[opt.datasets][opt.if_train]
     if platform.system() == 'Windows':
