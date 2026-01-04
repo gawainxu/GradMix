@@ -52,12 +52,12 @@ def parse_option():
     parser.add_argument("--end", type=bool, default=False, help="if it is end to end training")
     parser.add_argument("--ensembles", type=int, default=1)
     parser.add_argument("--linear_model_path", type=str, default="/save/SupCon/cifar10_models/cifar10_resnet18_original_data__vanilia__SimCLR_0.01_trail_0/last_linear.pth")
-    parser.add_argument("--num_classes", type=int, default=6)
+    parser.add_argument("--num_classes", type=int, default=20)
     parser.add_argument("--feat_dim", type=int, default=128)
     
-    parser.add_argument("--exemplar_features_path", type=str, default="/features/cifar10_resnet18_original_data__vanilia__SimCLR_1.0_3.2_trail_0_128_256_500_train")
-    parser.add_argument("--testing_known_features_path", type=str, default="/features/cifar10_resnet18_original_data__vanilia__SimCLR_1.0_3.2_trail_0_128_256_500_test_known")
-    parser.add_argument("--testing_unknown_features_path", type=str, default="/features/cifar10_resnet18_original_data__vanilia__SimCLR_1.0_3.2_trail_0_128_256_500_test_unknown")
+    parser.add_argument("--exemplar_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_4_128_256_600_train")
+    parser.add_argument("--testing_known_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_4_128_256_600_test_known")
+    parser.add_argument("--testing_unknown_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_4_128_256_600_test_unknown")
 
     parser.add_argument("--exemplar_features_path1", type=str, default=None)
     parser.add_argument("--testing_known_features_path1", type=str, default=None)
@@ -515,8 +515,8 @@ def feature_classifier(opt):
     #print("LoF AUROC is: ", auroc)
 
     # OSCR
-    #oscr = OSCR(np.array(prediction_logits_known_dis_out), np.array(prediction_logits_unknown_dis_out), predictions_known, labels_testing_known)
-    #print("OSCR is: ", oscr)
+    oscr = OSCR(np.array(prediction_logits_known_dis_out), np.array(prediction_logits_unknown_dis_out), predictions_known, labels_testing_known)
+    print("OSCR is: ", oscr)
 
     #print("Acc Known: ", acc_known)
 

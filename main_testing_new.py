@@ -325,14 +325,14 @@ def feature_classifier(opt):
             features_exemplar_backbone1, _, _, labels_examplar1 = pickle.load(f)         #
             #_, features_exemplar_backbone, _, labels_examplar = pickle.load(f)         #
             features_exemplar_backbone1 = np.squeeze(np.array(features_exemplar_backbone1))
-        features_exemplar_backbone_step2 = np.concatenate((features_exemplar_backbone, features_exemplar_backbone1), axis=1)
+        features_exemplar_backbone_step1 = np.concatenate((features_exemplar_backbone, features_exemplar_backbone1), axis=1)
     
     if opt.exemplar_features_path2 is not None:
         with open(opt.exemplar_features_path2, "rb") as f:       # !!!!!!!!
             features_exemplar_backbone2, _, _, labels_examplar2 = pickle.load(f)         #
             #_, features_exemplar_backbone, _, labels_examplar = pickle.load(f)         #
             features_exemplar_backbone2 = np.squeeze(np.array(features_exemplar_backbone2))
-        features_exemplar_backbone_step3 = np.concatenate((features_exemplar_backbone, features_exemplar_backbone2), axis=1)
+        features_exemplar_backbone_step2 = np.concatenate((features_exemplar_backbone1, features_exemplar_backbone2), axis=1)
 
     sorted_features_examplar_backbone_step1 = sortFeatures(features_exemplar_backbone, labels_examplar, opt)
     sorted_features_examplar_backbone_step2 = sortFeatures(features_exemplar_backbone_step2, labels_examplar, opt)

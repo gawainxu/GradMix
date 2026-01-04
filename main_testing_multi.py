@@ -47,11 +47,11 @@ def parse_option():
     parser.add_argument("--model_path2", type=str, default=None)
     parser.add_argument("--ensembles", type=int, default=1)
     parser.add_argument("--linear_model_path", type=str, default=None)
-    parser.add_argument("--num_classes", type=int, default=10)
+    parser.add_argument("--num_classes", type=int, default=6)
     
-    parser.add_argument("--exemplar_features_path", type=str, default="/features/")
-    parser.add_argument("--testing_known_features_path", type=str, default="/features/")
-    parser.add_argument("--testing_unknown_features_path", type=str, default="/features/")
+    parser.add_argument("--exemplar_features_path", type=str, default="/features1/cifar10_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_1_128_256_600_train")
+    parser.add_argument("--testing_known_features_path", type=str, default="/features1/cifar10_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_1_128_256_600_test_known")
+    parser.add_argument("--testing_unknown_features_path", type=str, default="/features1/cifar10_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_1_128_256_600_test_unknown")
 
     parser.add_argument("--exemplar_features_path1", type=str, default=None)
     parser.add_argument("--testing_known_features_path1", type=str, default=None)
@@ -303,7 +303,7 @@ def layer_ratios(acc_known_dis, acc_known_dis1):
 def feature_classifier(opt):
 
     with open(opt.exemplar_features_path, "rb") as f:
-        features_exemplar_backbone, _, _, labels_examplar = pickle.load(f)         #
+        features_exemplar_backbone, _, _, labels_examplar = pickle.load(f)         # first is the head
         #_, features_exemplar_backbone, _, labels_examplar = pickle.load(f)         #
         features_exemplar_backbone = np.squeeze(np.array(features_exemplar_backbone))
         sorted_features_examplar_backbone = sortFeatures(features_exemplar_backbone, labels_examplar, opt)
@@ -414,10 +414,10 @@ def feature_classifier(opt):
     auroc = AUROC(labels_binary, probs_binary, opt)
     print("AUROC is: ", auroc)
 
-    layer_ratio0, layer_ratio1 = layer_ratios(acc_known_dis, acc_known_dis1)
+    layer_ratio0, layer_ratio1 = layer_ratios(acc_known_dis, acc_known_dis)
 
-    prediction_logits_known_dis_in = np.array([layer_ratio0 * i + layer_ratio1 * j for i, j in zip(prediction_logits_known_dis_in, prediction_logits_known_dis_in1)])
-    prediction_logits_unknown_dis_in =  np.array([layer_ratio0 * i + layer_ratio1 * j  for i, j in zip(prediction_logits_unknown_dis_in, prediction_logits_unknown_dis_in1)])
+    prediction_logits_known_dis_in = np.array([layer_ratio0 * i + layer_ratio1 * j for i, j in zip(prediction_logits_known_dis_in, prediction_logits_known_dis_in)])
+    prediction_logits_unknown_dis_in =  np.array([layer_ratio0 * i + layer_ratio1 * j  for i, j in zip(prediction_logits_unknown_dis_in, prediction_logits_unknown_dis_in)])
     probs_binary_dis = np.concatenate((prediction_logits_known_dis_in, prediction_logits_unknown_dis_in), axis=0) 
     #print("probs_binary", probs_binary_dis)
 
