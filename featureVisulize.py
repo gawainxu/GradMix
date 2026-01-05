@@ -31,14 +31,14 @@ from util import  feature_stats
 def parse_option():
 
     parser = argparse.ArgumentParser('argument for visulization')
-    parser.add_argument("--inlier_features_path", type=str, default="/features/cifar10_resnet18_original_data__mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_no_SimCLR_1.0_1.2_0.05_trail_4_128_256_twostage_4_train")
-    parser.add_argument("--outlier_features_path", type=str, default="/features/cifar10_resnet18_original_data__mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_no_SimCLR_1.0_1.2_0.05_trail_4_128_256_twostage_4_test_unknown")  
+    parser.add_argument("--inlier_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_4_128_256_600_train")
+    parser.add_argument("--outlier_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_4_128_256_600_test_unknown")
     parser.add_argument("--inlier_features_path1", type=str, default=None)
     parser.add_argument("--outlier_features_path1", type=str, default=None) 
     parser.add_argument("--inlier_features_path2", type=str, default=None)
     parser.add_argument("--outlier_features_path2", type=str, default=None)
-    parser.add_argument("--num_classes", type=int, default=6)
-    parser.add_argument("--save_path", type=str, default="/plots/cifar10_resnet18_original_data__mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_no_SimCLR_1.0_1.2_0.05_trail_4_128_256_twostage_4_test_unknown_tsne.pdf")
+    parser.add_argument("--num_classes", type=int, default=20)
+    parser.add_argument("--save_path", type=str, default="/plots/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_4_128_256_600_train_tsne.pdf")
     parser.add_argument("--reduced_len", type=int, default=30)
     parser.add_argument("--ensemble_features", type=bool, default=False)
     parser.add_argument("--downsample_ratio", type=int, default=None)
