@@ -337,7 +337,7 @@ def distances(stats, test_features, mode="mahalanobis"):
                 #dis =  np.matmul(features_normalized, np.linalg.inv(var))
                 #dis = np.matmul(dis, np.swapaxes(features_normalized, 0, 1))
                 #dis = dis[0][0]
-                if np.linalg.matrix_rank(var) == var.shape[0]:
+                if np.linalg.matrix_rank(var) < var.shape[0]:
                     dis = mahalanobis(features, mu, np.linalg.pinv(var))
                 else:
                     dis = mahalanobis(features, mu, np.linalg.inv(var))
