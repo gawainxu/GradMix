@@ -343,20 +343,29 @@ class SupConResNet_end(nn.Module):
         dim_in = dim_in * wide_k
         self.encoder = model_fun(in_channels=in_channels, k=wide_k)
         if head == 'linear':
-            self.head = nn.Linear(dim_in, feat_dim)
+            self.head1 = nn.Linear(dim_in, feat_dim)
+            self.head2 = nn.Linear(dim_in, feat_dim)
+            self.head3 = nn.Linear(dim_in, feat_dim)
         elif head == 'mlp':
-            self.head = nn.Sequential(
+            self.head1 = nn.Sequential(
                 nn.Linear(dim_in, dim_in),
                 nn.ReLU(inplace=True),
-                nn.Linear(dim_in, feat_dim)
-            )
+                nn.Linear(dim_in, feat_dim))
+            self.head2 = nn.Sequential(
+                nn.Linear(dim_in, dim_in),
+                nn.ReLU(inplace=True),
+                nn.Linear(dim_in, feat_dim))
+            self.head3 = nn.Sequential(
+                nn.Linear(dim_in, dim_in),
+                nn.ReLU(inplace=True),
+                nn.Linear(dim_in, feat_dim))
         else:
             raise NotImplementedError(
                 'head not supported: {}'.format(head))
 
     def forward(self, x):
         feat = self.encoder(x)
-        feat1 = F.normalize(self.head(feat), dim=1)
-        feat2 = F.normalize(self.head(feat), dim=1)
-        feat3 = F.normalize(self.head(feat), dim=1)
+        feat1 = F.normalize(self.head1(feat), dim=1)
+        feat2 = F.normalize(self.head2(feat), dim=1)
+        feat3 = F.normalize(self.head3(feat), dim=1)
         return feat1, feat2, feat3

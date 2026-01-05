@@ -60,8 +60,8 @@ def parse_option():
 
     # model dataset
     parser.add_argument('--model', type=str, default='resnet18',
-                        choices=["resnet18", "resnet34", "resnet50", "preactresnet18", "preactresnet34", "simCNN",
-                                 "MLP"])
+                        choices=["resnet18", "resnet34", "resnet50", "preactresnet18", "preactresnet34"])
+    parser.add_argument("--feat_dim", type=int, default=128)
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
                                  "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft"], help='dataset')
@@ -74,7 +74,7 @@ def parse_option():
     # method
     parser.add_argument('--method', type=str, default='SimCLR',
                         choices=['SupCon', 'SimCLR', "SimCLR_CE", "MoCo"], help='choose method')
-    parser.add_argument("--ensemble_method", type=str, default="end")
+    parser.add_argument("--ensemble_mode", type=str, default="end")
     parser.add_argument("--trail", type=int, default=0, choices=[0, 1, 2, 3, 4, 5, 6],
                         help="index of repeating training")
     parser.add_argument("--action", type=str, default="training_supcon",
@@ -85,9 +85,9 @@ def parse_option():
     parser.add_argument('--temp2', type=float, default=0.05, help='temperature for loss2')
     parser.add_argument('--temp3', type=float, default=0.05, help='temperature for loss3')
 
-    parser.add_argument('--alph1', type=float, default=1, help='coefficient for loss1')
-    parser.add_argument('--alph2', type=float, default=1, help='coefficient for loss2')
-    parser.add_argument('--alph3', type=float, default=1, help='coefficient for loss3')
+    parser.add_argument('--alpha1', type=float, default=1, help='coefficient for loss1')
+    parser.add_argument('--alpha2', type=float, default=1, help='coefficient for loss2')
+    parser.add_argument('--alpha3', type=float, default=1, help='coefficient for loss3')
 
     # other setting
     parser.add_argument('--cosine', type=bool, default=False,
@@ -305,8 +305,6 @@ def train(train_loader, model, criterion1, criterion2, criterion3, optimizer, ep
         optimizer.zero_grad()
         loss.backward(retain_graph=False)
         # plot_grad_flow(model.named_parameters(), idx, epoch)
-        if opt.clip is not None:
-            torch.nn.utils.clip_grad_norm_(model.parameters(), opt.clip)
         optimizer.step()
 
         # measure elapsed time
@@ -393,6 +391,9 @@ def main():
     optimizer = set_optimizer(opt, model)
 
     losses = []
+    losses1 = []
+    losses2 = []
+    losses3 = []
     losses_vali = []
 
     # training routine
@@ -407,8 +408,10 @@ def main():
         print('epoch {}, total time {:.2f}'.format(epoch, time2 - time1))
 
         losses.append(loss)
+        losses1.append(loss1)
+        losses2.append(loss2)
+        losses3.append(loss3)
         # losses_vali.append(loss_vali)
-        # all_ious_vali.append(ious_epoch_vali)
 
         if epoch % opt.save_freq == 0:
             save_file = os.path.join(
@@ -420,7 +423,7 @@ def main():
         opt.save_folder, 'last.pth')
     save_model(model, optimizer, opt, opt.epochs, save_file)
     with open(os.path.join(opt.save_folder, "loss_" + str(opt.trail)), "wb") as f:
-        pickle.dump((losses, losses_vali), f)
+        pickle.dump((losses, losses1, losses2, losses3), f)
 
 
 if __name__ == '__main__':
