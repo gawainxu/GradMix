@@ -88,7 +88,7 @@ def parse_option():
     parser.add_argument("--LoF_K", type=int, default=5)
     parser.add_argument("--LoF_contamination", type=float, default=0.01)
 
-    parser.add_argument("--auroc_save_path", type=str, default="/plots/auroc")
+    parser.add_argument("--auroc_save_path", type=str, default="/plots/cifar10_resnet18_temp_0.005_id_4_lr_0.001_bz_256_auroc.pdf")
 
     parser.add_argument("--with_outliers", type=bool, default=False)
     parser.add_argument("--downsample", type=bool, default=False)
