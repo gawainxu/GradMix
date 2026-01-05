@@ -431,7 +431,7 @@ def feature_classifier(opt):
             features_testing_known_head2 = np.squeeze(np.array(features_testing_known_head2))
             features_testing_known_backbone2 = np.squeeze(np.array(features_testing_known_backbone2))
             labels_testing_known2 = np.squeeze(np.array(labels_testing_known2))
-        features_testing_known_head2 = np.concatenate((features_testing_known_head, features_testing_known_head2), axis=1)
+        features_testing_known_head = np.concatenate((features_testing_known_head, features_testing_known_head2), axis=1)
         features_testing_known_backbone = np.concatenate((features_testing_known_backbone, features_testing_known_backbone2), axis=1)
 
     if opt.ensemble_features is True:
