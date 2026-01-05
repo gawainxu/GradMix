@@ -134,7 +134,7 @@ def parse_option():
         opt.lr_decay_epochs.append(int(it))
 
     opt.model_name = opt.datasets + "_" + opt.model
-    opt.model_name += "_SupCon_"
+    opt.model_name += "_ensemble_"
 
     opt.model_name += 'trail_{}'.format(opt.trail) + "_" + str(opt.feat_dim) + "_" + str(opt.batch_size) + "_" + str(opt.ensemble_mode)
     opt.model_name += "_" + str(opt.temp1)
