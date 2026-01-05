@@ -15,14 +15,8 @@ from torchvision import datasets
 from util import TwoCropTransform, AverageMeter
 from util import adjust_learning_rate
 from util import set_optimizer, save_model
-from datautil import vanilla_mixup, salient_cutmix, vanilla_cutmix
 from datautil import num_inlier_classes_mapping
-from networks.resnet_big import SupConResNet, LinearClassifier
-from networks.resnet_big import MoCoResNet
-from networks.maskcon import MaskCon
-from networks.simCNN import simCNN_contrastive
-from networks.resnet_preact import SupConpPreactResNet
-from networks.mlp import SupConMLP
+from networks.resnet_multi import SupConResNet_end, SupConResNet_inter
 from losses import SupConLoss
 from datautil import get_train_datasets, get_test_datasets
 
@@ -204,14 +198,10 @@ def set_model(opt):
     else:
         in_channels = 3
 
-    if opt.model in ["preactresnet18", "preactresnet34"]:
-        model = SupConpPreactResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
-    if opt.model in ["resnet18", "resnet34", "resnet50"]:
-        model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
-    elif opt.model == "MLP":
-        model = SupConMLP(feat_dim=opt.feat_dim)
+    if opt.ensemble_mode == "end":
+        model = SupConResNet_end(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
     else:
-        model = simCNN_contrastive(opt, feature_dim=opt.feat_dim, in_channels=in_channels)
+        model = SupConResNet_inter(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
 
     criterion1 = SupConLoss(temperature=opt.temp1)
     criterion2 = SupConLoss(temperature=opt.temp2)
@@ -241,8 +231,6 @@ def set_model(opt):
 
 
 def load_model(opt, model=None):
-    if model is None:
-        model = SupConResNet(name=opt.model)
 
     ckpt = torch.load(opt.last_model_path, map_location='cpu')
     state_dict = ckpt['model']
@@ -260,7 +248,7 @@ def load_model(opt, model=None):
     return model
 
 
-def train(train_loader, model, linear, criterion1, criterion2, criterion3, optimizer, epoch, opt):
+def train(train_loader, model, criterion1, criterion2, criterion3, optimizer, epoch, opt):
     """one epoch training"""
     model.train()
 
@@ -291,14 +279,20 @@ def train(train_loader, model, linear, criterion1, criterion2, criterion3, optim
         # warm-up learning rate
         # warmup_learning_rate(opt, epoch, idx, len(train_loader), optimizer)
 
-        features = model(images)
-        features1, features2 = torch.split(features, [bsz, bsz], dim=0)
-        features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
+        features1, features2, features3 = model(images)
+        features11, features12 = torch.split(features1, [bsz, bsz], dim=0)
+        features1 = torch.cat([features11.unsqueeze(1), features12.unsqueeze(1)], dim=1)
+
+        features21, features22 = torch.split(features2, [bsz, bsz], dim=0)
+        features2 = torch.cat([features21.unsqueeze(1), features22.unsqueeze(1)], dim=1)
+
+        features31, features32 = torch.split(features3, [bsz, bsz], dim=0)
+        features3 = torch.cat([features31.unsqueeze(1), features32.unsqueeze(1)], dim=1)
 
         if opt.ensemble_mode == "end":
-            loss1 = criterion1(features, labels)
-            loss2 = criterion2(features, labels)
-            loss3 = criterion3(features, labels)
+            loss1 = criterion1(features1, labels)
+            loss2 = criterion2(features2, labels)
+            loss3 = criterion3(features3, labels)
             loss = opt.alpha1 * loss1 + opt.alpha2 * loss2 + opt.alpha3 * loss3
 
         # update metric
@@ -393,14 +387,12 @@ def main():
     print("test_loader, ", test_loader.__len__())
 
     # build model and criterion
-    model, linear, criterion1, criterion2 = set_model(opt)
+    model, criterion1, criterion2, criterion3 = set_model(opt)
 
     # build optimizer
     optimizer = set_optimizer(opt, model)
 
     losses = []
-    all_ious = []
-    all_ious_vali = []
     losses_vali = []
 
     # training routine
@@ -409,31 +401,26 @@ def main():
 
         # train for one epoch
         time1 = time.time()
-        loss, ious_epoch, grads = train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
+        loss, loss1, loss2, loss3 = train(train_loader, model, criterion1, criterion2, criterion3, optimizer, epoch, opt)
         # loss_vali, ious_epoch_vali = validate(test_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
         time2 = time.time()
         print('epoch {}, total time {:.2f}'.format(epoch, time2 - time1))
 
         losses.append(loss)
-        all_ious.append(ious_epoch)
         # losses_vali.append(loss_vali)
         # all_ious_vali.append(ious_epoch_vali)
 
         if epoch % opt.save_freq == 0:
             save_file = os.path.join(
                 opt.save_folder, 'ckpt_epoch_{epoch}.pth'.format(epoch=epoch))
-            save_model(model, linear, optimizer, opt, epoch, save_file)
+            save_model(model, optimizer, opt, epoch, save_file)
 
     # save the last model
     save_file = os.path.join(
         opt.save_folder, 'last.pth')
-    save_model(model, linear, optimizer, opt, opt.epochs, save_file)
+    save_model(model, optimizer, opt, opt.epochs, save_file)
     with open(os.path.join(opt.save_folder, "loss_" + str(opt.trail)), "wb") as f:
         pickle.dump((losses, losses_vali), f)
-    with open(os.path.join(opt.save_folder, "iou_all"), "wb") as f:
-        pickle.dump(all_ious, f)
-    with open(os.path.join(opt.save_folder, "iou_all_vali"), "wb") as f:
-        pickle.dump(all_ious_vali, f)
 
 
 if __name__ == '__main__':
