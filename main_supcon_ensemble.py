@@ -421,7 +421,7 @@ def main():
     # save the last model
     save_file = os.path.join(
         opt.save_folder, 'last.pth')
-    save_model(model, optimizer, opt, opt.epochs, save_file)
+    save_model(model, None, optimizer, opt, opt.epochs, save_file)
     with open(os.path.join(opt.save_folder, "loss_" + str(opt.trail)), "wb") as f:
         pickle.dump((losses, losses1, losses2, losses3), f)
 
