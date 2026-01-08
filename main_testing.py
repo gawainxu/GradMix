@@ -529,9 +529,6 @@ def feature_classifier(opt):
 if __name__ == "__main__":
     
     opt = parse_option()
-
-    #models, linear_model = set_model(opt)
-    #print("Model loaded!!")
     
     auroc = feature_classifier(opt)                        # oscr, acc_known
     
