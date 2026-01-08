@@ -44,19 +44,19 @@ def parse_option():
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "tinyimgnet", 'mnist', "svhn"],
                         help='dataset')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
-    parser.add_argument('--model', type=str, default="resnet34",
+    parser.add_argument('--model', type=str, default="resnet18",
                         choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "simCNN"])
     parser.add_argument("--model_path", type=str,
-                        default="/save/SupCon/cifar10_models/cifar10_resnet18_original_data__vanilia__SimCLR_0.01_trail_0/ckpt_epoch_400.pth")
-    parser.add_argument("--num_classes", type=int, default=20)
+                        default="/save/SupCon/cifar10_models/cifar10_resnet18_ensemble_trail_1_128_256_end_0.5_0.05_0.01_1.0_1.0_1.0/last.pth")
+    parser.add_argument("--num_classes", type=int, default=6)
     parser.add_argument("--feat_dim", type=int, default=128)
 
-    parser.add_argument("--exemplar_features_path_ensemble", type=str, default=None)
-    parser.add_argument("--testing_known_features_path_ensemble", type=str, default=None)
-    parser.add_argument("--testing_unknown_features_path_ensemble", type=str, default=None)
+    parser.add_argument("--exemplar_features_path", type=str, default="/features1/cifar10_resnet18_ensemble_trail_1_128_256_end_0.5_0.05_0.01_1.0_1.0_1.0_600_train")
+    parser.add_argument("--testing_known_features_path", type=str, default="/features1/cifar10_resnet18_ensemble_trail_1_128_256_end_0.5_0.05_0.01_1.0_1.0_1.0_600_test_known")
+    parser.add_argument("--testing_unknown_features_path", type=str, default="/features1/cifar10_resnet18_ensemble_trail_1_128_256_end_0.5_0.05_0.01_1.0_1.0_1.0_600_test_unknown")
     parser.add_argument("--ensemble_mode", type=str, default="end")
 
-    parser.add_argument("--trail", type=int, default=0)
+    parser.add_argument("--trail", type=int, default=1)
     parser.add_argument("--split_train_val", type=bool, default=True)
     parser.add_argument("--action", type=str, default="testing_known",
                         choices=["training_supcon", "trainging_linear", "testing_known", "testing_unknown",
@@ -98,12 +98,12 @@ def parse_option():
     opt.prediction_save_path = opt.main_dir + "/" + opt.prediction_save_path
 
 
-    if opt.exemplar_features_path_ensemble is not None:
-        opt.exemplar_features_path_ensemble = opt.main_dir + opt.exemplar_features_path_ensemble
-    if opt.testing_known_features_path_ensemble is not None:
-        opt.testing_known_features_path_ensemble = opt.main_dir + opt.testing_known_features_path_ensemble
-    if opt.testing_unknown_features_path_ensemble is not None:
-        opt.testing_unknown_features_path_ensemble = opt.main_dir + opt.testing_unknown_features_path_ensemble
+    if opt.exemplar_features_path is not None:
+        opt.exemplar_features_path = opt.main_dir + opt.exemplar_features_path
+    if opt.testing_known_features_path is not None:
+        opt.testing_known_features_path = opt.main_dir + opt.testing_known_features_path
+    if opt.testing_unknown_features_path is not None:
+        opt.testing_unknown_features_path = opt.main_dir + opt.testing_unknown_features_path
 
     return opt
 
@@ -144,12 +144,14 @@ def set_model(opt):
     else:
         model = SupConResNet_inter(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
 
+    model = load_model(opt, model)
+
     return model
 
 
 def load_model(opt, model=None):
 
-    ckpt = torch.load(opt.last_model_path, map_location='cpu')
+    ckpt = torch.load(opt.model_path, map_location='cpu')
     state_dict = ckpt['model']
 
     new_state_dict = {}
@@ -159,7 +161,6 @@ def load_model(opt, model=None):
 
     state_dict = new_state_dict
     model.load_state_dict(state_dict)
-    model.cuda()
     model.eval()
 
     return model
@@ -300,16 +301,42 @@ def feature_classifier(opt):
     print(opt.exemplar_features_path)
     with open(opt.exemplar_features_path, "rb") as f:
         features_exemplar_head1, features_exemplar_head2, features_exemplar_head3, features_exemplar_backbone, labels_examplar = pickle.load(f)
-        features_exemplar_head = np.concatenate((features_exemplar_head1, features_exemplar_head2, features_exemplar_head3), axis=1)
         labels_examplar = np.squeeze(np.array(labels_examplar))
-    sorted_features_examplar_head = sortFeatures(features_exemplar_head, labels_examplar, opt)
 
     if opt.testing_known_features_path is not None:
         with open(opt.testing_known_features_path, "rb") as f:
             features_testing_known_head1, features_testing_known_head2, features_testing_known_head3, features_testing_known_backbone, labels_testing_known = pickle.load(f)
-            features_testing_known_head = np.concatenate((features_testing_known_head1, features_testing_known_head2, features_testing_known_head3), axis=1)
             labels_testing_known = np.squeeze(np.array(labels_testing_known))
 
+    with open(opt.testing_unknown_features_path, "rb") as f:
+        features_testing_unknown_head1, features_testing_unknown_head2, features_testing_unknown_head3, features_testing_unknown_backbone, labels_testing_unknown = pickle.load(
+            f)
+        labels_testing_unknown = np.squeeze(np.array(labels_testing_unknown))
+
+    labels_binary_known = [1 if i < 100 else 0 for i in labels_testing_known]
+    labels_binary_unknown = [1 if i < 100 else 0 for i in labels_testing_unknown]
+    labels_binary = np.array(labels_binary_known + labels_binary_unknown)
+
+    model = set_model(opt)
+    features_testing_known_backbone = torch.tensor(features_testing_known_backbone.astype(np.float32))
+    features_testing_known_head1 = model.head1(features_testing_known_backbone)
+    features_testing_known_head2 = model.head2(features_testing_known_backbone)
+    features_testing_known_head3 = model.head3(features_testing_known_backbone)
+    features_testing_known_head = torch.cat((features_testing_known_head1, features_testing_known_head2, features_testing_known_head3), dim=1)
+
+    features_testing_unknown_backbone = torch.tensor(features_testing_unknown_backbone.astype(np.float32))
+    features_testing_unknown_head1 = model.head1(features_testing_unknown_backbone)
+    features_testing_unknown_head2 = model.head2(features_testing_unknown_backbone)
+    features_testing_unknown_head3 = model.head3(features_testing_unknown_backbone)
+    features_testing_unknown_head = torch.cat((features_testing_unknown_head1, features_testing_unknown_head2, features_testing_unknown_head3), dim=1)
+
+    norm_score_known = np.linalg.norm(features_testing_known_head.detach().numpy(), axis=1)
+    norm_score_unknown = np.linalg.norm(features_testing_unknown_head.detach().numpy(), axis=1)
+    norm_score_binary = np.concatenate((norm_score_known, norm_score_unknown), axis=0)
+    auroc = AUROC(labels_binary, norm_score_binary, opt)
+    print("AUROC norm is: ", auroc)
+
+    """
     features_testing_known_head, labels_testing_known = down_sampling(features_testing_known_head, labels_testing_known,
                                                                       opt.downsampling_ratio_known)
     prediction_logits_known, predictions_known, acc_known = KNN_classifier(features_testing_known_head,
@@ -319,10 +346,7 @@ def feature_classifier(opt):
     prediction_logits_known_dis_in, prediction_logits_known_dis_out, predictions_known_dis, acc_known_dis = distance_classifier(
         features_testing_known_head, labels_testing_known, sorted_features_examplar_head)
 
-    with open(opt.testing_unknown_features_path, "rb") as f:
-        features_testing_unknown_head1, features_testing_unknown_head2, features_testing_unknown_head3, features_testing_unknown_backbone, labels_testing_unknown = pickle.load(f)
-        features_testing_unknown_head =  np.concatenate((features_testing_unknown_head1, features_testing_unknown_head2, features_testing_unknown_head3), axis=1)
-        labels_testing_unknown = np.squeeze(np.array(labels_testing_unknown))
+   
 
     features_testing_unknown_head, labels_testing_unknown = down_sampling(features_testing_unknown_head,
                                                                           labels_testing_unknown,
@@ -363,7 +387,7 @@ def feature_classifier(opt):
     oscr = OSCR(np.array(prediction_logits_known_dis_out), np.array(prediction_logits_unknown_dis_out),
                 predictions_known, labels_testing_known)
     print("OSCR is: ", oscr)
-
+    """
 
     return auroc
 
