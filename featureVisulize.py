@@ -31,14 +31,14 @@ from util import  feature_stats
 def parse_option():
 
     parser = argparse.ArgumentParser('argument for visulization')
-    parser.add_argument("--inlier_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_4_128_256_600_train")
-    parser.add_argument("--outlier_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_4_128_256_600_test_unknown")
+    parser.add_argument("--inlier_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_4_128_256_600_train")
+    parser.add_argument("--outlier_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_test_unknown")
     parser.add_argument("--inlier_features_path1", type=str, default=None)
     parser.add_argument("--outlier_features_path1", type=str, default=None) 
     parser.add_argument("--inlier_features_path2", type=str, default=None)
     parser.add_argument("--outlier_features_path2", type=str, default=None)
     parser.add_argument("--num_classes", type=int, default=20)
-    parser.add_argument("--save_path", type=str, default="/plots/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_4_128_256_600_train_tsne.pdf")
+    parser.add_argument("--save_path", type=str, default="/plots/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_4_128_256_600_test_unknown_tsne.pdf")
     parser.add_argument("--reduced_len", type=int, default=30)
     parser.add_argument("--ensemble_features", type=bool, default=False)
     parser.add_argument("--downsample_ratio", type=int, default=None)
@@ -193,8 +193,8 @@ if __name__ == "__main__":
 
         if opt.ensemble_features is True:
             features_outliers_head = np.concatenate((features_outliers_backbone, features_outliers_head), axis=1)           
-        features_outliers_head = np.repeat(features_outliers_head, 2, axis=0)
-        labels_outliers = np.repeat(labels_outliers, 2, axis=0)
+        features_outliers_head = np.repeat(features_outliers_head, 1, axis=0)
+        labels_outliers = np.repeat(labels_outliers, 1, axis=0)
         features_test = np.concatenate((features_inliers_head, features_outliers_head), axis=0)
         labels_test = np.concatenate((labels_inliers, labels_outliers), axis=0)
         
@@ -220,7 +220,10 @@ if __name__ == "__main__":
     features_SNE = np.concatenate((features_SNE, features), 0)
     print("features_SNE", features_SNE.shape)
 
-    
+    #i = np.where(labels_test==1000)[0]
+    #features_SNE = features_SNE[i]
+    #labels_test = labels_test[i]
+
     f = {"feature_1": features_SNE[:, 0], 
          "feature_2": features_SNE[:, 1],
          "label": labels_test}

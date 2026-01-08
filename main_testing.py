@@ -45,27 +45,27 @@ def parse_option():
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "tinyimgnet", 'mnist', "svhn"], help='dataset')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
-    parser.add_argument('--model', type=str, default="resnet34",  choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "simCNN"])
-    parser.add_argument("--model_path", type=str, default="/save/SupCon/cifar10_models/cifar10_resnet18_original_data__vanilia__SimCLR_0.01_trail_0/ckpt_epoch_400.pth")
-    parser.add_argument("--model_path1", type=str, default=None)
-    parser.add_argument("--model_path2", type=str, default=None)
+    parser.add_argument('--model', type=str, default="resnet18",  choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "simCNN"])
+    parser.add_argument("--model_path", type=str, default="/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256/last.pth")
+    parser.add_argument("--model_path1", type=str, default="/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256/last.pth")
+    parser.add_argument("--model_path2", type=str, default="/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256/last.pth")
     parser.add_argument("--end", type=bool, default=False, help="if it is end to end training")
     parser.add_argument("--ensembles", type=int, default=1)
-    parser.add_argument("--linear_model_path", type=str, default="/save/SupCon/cifar10_models/cifar10_resnet18_original_data__vanilia__SimCLR_0.01_trail_0/last_linear.pth")
+    parser.add_argument("--linear_model_path", type=str, default=None)
     parser.add_argument("--num_classes", type=int, default=20)
     parser.add_argument("--feat_dim", type=int, default=128)
     
-    parser.add_argument("--exemplar_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_4_128_256_600_train")
-    parser.add_argument("--testing_known_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_4_128_256_600_test_known")
-    parser.add_argument("--testing_unknown_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_4_128_256_600_test_unknown")
+    parser.add_argument("--exemplar_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_train")
+    parser.add_argument("--testing_known_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_test_known")
+    parser.add_argument("--testing_unknown_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_test_unknown")
 
-    parser.add_argument("--exemplar_features_path1", type=str, default=None)
-    parser.add_argument("--testing_known_features_path1", type=str, default=None)
-    parser.add_argument("--testing_unknown_features_path1", type=str, default=None)
+    parser.add_argument("--exemplar_features_path1", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_train")
+    parser.add_argument("--testing_known_features_path1", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_test_known")
+    parser.add_argument("--testing_unknown_features_path1", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_test_unknown")
 
-    parser.add_argument("--exemplar_features_path2", type=str, default=None)
-    parser.add_argument("--testing_known_features_path2", type=str, default=None)
-    parser.add_argument("--testing_unknown_features_path2", type=str, default=None)
+    parser.add_argument("--exemplar_features_path2", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_train")
+    parser.add_argument("--testing_known_features_path2", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_test_known")
+    parser.add_argument("--testing_unknown_features_path2", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_test_unknown")
 
     parser.add_argument("--trail", type=int, default=0)
     parser.add_argument("--split_train_val", type=bool, default=True)
@@ -138,23 +138,11 @@ def parse_option():
 def load_model(model, linear_model=None, path=None):
     ckpt = torch.load(path, map_location='cpu')
     state_dict = ckpt['model']
-
-    new_state_dict = {}
-    for k, v in state_dict.items():
-        k = k.replace("module.", "")
-        new_state_dict[k] = v
-    state_dict = new_state_dict
     model.load_state_dict(state_dict)
 
     if linear_model is not None:
         state_dict_linear = ckpt['linear']
-        new_state_dict = {}
-        for k, v in state_dict_linear.items():
-            k = k.replace("module.", "")
-            new_state_dict[k] = v
-        state_dict = new_state_dict
         linear_model.load_state_dict(state_dict)
-
         return model, linear_model
     
     return model
@@ -174,14 +162,8 @@ def set_model(opt):
     else:
         model = simCNN_contrastive(opt)
 
-    if opt.end == True:
-        linear_model = LinearClassifier(name=opt.model, num_classes=opt.num_classes)
-        model, linear_model = load_model(model, linear_model, opt.model_path)
-        linear_model.eval()
-        linear_model = linear_model.cpu()
-    else:
-        model = load_model(model, opt.model_path)
-        linear_model = None
+    model = load_model(model, path=opt.model_path)
+    linear_model = None
     
     model.eval()
     model = model.cpu()
@@ -190,12 +172,12 @@ def set_model(opt):
 
     if opt.model_path1 is not None:
         model1 = copy.deepcopy(model)
-        model1 = load_model(model1, opt.model_path1)
+        model1 = load_model(model1, path=opt.model_path1)
         models.append(model1)
 
     if opt.model_path2 is not None:
         model2 = copy.deepcopy(model)
-        model2 = load_model(model2, opt.model_path2)
+        model2 = load_model(model2, path=opt.model_path2)
         models.append(model2)
 
     if opt.linear_model_path is not None:
@@ -392,16 +374,16 @@ def feature_classifier(opt):
             features_exemplar_head1, features_exemplar_backbone1, _, labels_examplar1 = pickle.load(f)         
             features_exemplar_head1 = np.squeeze(np.array(features_exemplar_head1))
             features_exemplar_backbone1 = np.squeeze(np.array(features_exemplar_backbone1))
-        features_exemplar_head = np.concatenate((features_exemplar_head, features_exemplar_head1), axis=1)
-        features_exemplar_backbone = np.concatenate((features_exemplar_backbone, features_exemplar_backbone1), axis=1)
+        #features_exemplar_head = np.concatenate((features_exemplar_head, features_exemplar_head1), axis=1)
+        #features_exemplar_backbone = np.concatenate((features_exemplar_backbone, features_exemplar_backbone1), axis=1)
     
     if opt.exemplar_features_path2 is not None:
         with open(opt.exemplar_features_path2, "rb") as f:       
             features_exemplar_head2, features_exemplar_backbone2, _, labels_examplar2 = pickle.load(f)         
             features_exemplar_head2 = np.squeeze(np.array(features_exemplar_head2))
             features_exemplar_backbone2 = np.squeeze(np.array(features_exemplar_backbone2))
-        features_exemplar_head = np.concatenate((features_exemplar_head, features_exemplar_head2), axis=1)
-        features_exemplar_backbone = np.concatenate((features_exemplar_backbone, features_exemplar_backbone2), axis=1)
+        #features_exemplar_head = np.concatenate((features_exemplar_head, features_exemplar_head2), axis=1)
+        #features_exemplar_backbone = np.concatenate((features_exemplar_backbone, features_exemplar_backbone2), axis=1)
 
 
     if opt.ensemble_features is True:
@@ -422,8 +404,8 @@ def feature_classifier(opt):
             features_testing_known_head1 = np.squeeze(np.array(features_testing_known_head1))       
             features_testing_known_backbone1 = np.squeeze(np.array(features_testing_known_backbone1))
             labels_testing_known1 = np.squeeze(np.array(labels_testing_known1))
-        features_testing_known_head = np.concatenate((features_testing_known_head, features_testing_known_head1), axis=1)
-        features_testing_known_backbone = np.concatenate((features_testing_known_backbone, features_testing_known_backbone1), axis=1)
+        #features_testing_known_head = np.concatenate((features_testing_known_head, features_testing_known_head1), axis=1)
+        #features_testing_known_backbone = np.concatenate((features_testing_known_backbone, features_testing_known_backbone1), axis=1)
 
     if opt.testing_known_features_path2 is not None:
         with open(opt.testing_known_features_path2, "rb") as f:             
@@ -431,17 +413,14 @@ def feature_classifier(opt):
             features_testing_known_head2 = np.squeeze(np.array(features_testing_known_head2))
             features_testing_known_backbone2 = np.squeeze(np.array(features_testing_known_backbone2))
             labels_testing_known2 = np.squeeze(np.array(labels_testing_known2))
-        features_testing_known_head = np.concatenate((features_testing_known_head, features_testing_known_head2), axis=1)
-        features_testing_known_backbone = np.concatenate((features_testing_known_backbone, features_testing_known_backbone2), axis=1)
+        #features_testing_known_head = np.concatenate((features_testing_known_head, features_testing_known_head2), axis=1)
+        #features_testing_known_backbone = np.concatenate((features_testing_known_backbone, features_testing_known_backbone2), axis=1)
 
     if opt.ensemble_features is True:
         features_testing_known_head = np.concatenate((features_testing_known_backbone, features_testing_known_head), axis=1)
-    features_testing_known_head, labels_testing_known = down_sampling(features_testing_known_head, labels_testing_known, opt.downsampling_ratio_known)
-    #features_testing_known_backbone, labels_testing_known = down_sampling(features_testing_known_backbone, labels_testing_known, opt.downsampling_ratio_known)
-    prediction_logits_known, predictions_known, acc_known = KNN_classifier(features_testing_known_head, labels_testing_known, sorted_features_examplar_head)   #
-    #prediction_logits_known, predictions_known, acc_known = KNN_classifier(features_testing_known_backbone, labels_testing_known, sorted_features_examplar_backbone)
-
-    prediction_logits_known_dis_in, prediction_logits_known_dis_out, predictions_known_dis, acc_known_dis = distance_classifier(features_testing_known_head, labels_testing_known, sorted_features_examplar_head)
+    #features_testing_known_head, labels_testing_known = down_sampling(features_testing_known_head, labels_testing_known, opt.downsampling_ratio_known)
+    #prediction_logits_known, predictions_known, acc_known = KNN_classifier(features_testing_known_head, labels_testing_known, sorted_features_examplar_head)
+    #prediction_logits_known_dis_in, prediction_logits_known_dis_out, predictions_known_dis, acc_known_dis = distance_classifier(features_testing_known_head, labels_testing_known, sorted_features_examplar_head)
 
 
     with open(opt.testing_unknown_features_path, "rb") as f:
@@ -457,8 +436,8 @@ def feature_classifier(opt):
             features_testing_unknown_head1 = np.squeeze(np.array(features_testing_unknown_head1))
             features_testing_unknown_backbone1 = np.squeeze(np.array(features_testing_unknown_backbone1))
             labels_testing_unknown1 = np.squeeze(np.array(labels_testing_unknown1))
-        features_testing_unknown_head = np.concatenate((features_testing_unknown_head, features_testing_unknown_head1), axis=1)
-        features_testing_unknown_backbone = np.concatenate((features_testing_unknown_backbone, features_testing_unknown_backbone1), axis=1)
+        #features_testing_unknown_head = np.concatenate((features_testing_unknown_head, features_testing_unknown_head1), axis=1)
+        #features_testing_unknown_backbone = np.concatenate((features_testing_unknown_backbone, features_testing_unknown_backbone1), axis=1)
     
     if opt.testing_unknown_features_path2 is not None:
         with open(opt.testing_unknown_features_path2, "rb") as f:               
@@ -466,24 +445,18 @@ def feature_classifier(opt):
             features_testing_unknown_head2 = np.squeeze(np.array(features_testing_unknown_head2))
             features_testing_unknown_backbone2 = np.squeeze(np.array(features_testing_unknown_backbone2))
             labels_testing_unknown2 = np.squeeze(np.array(labels_testing_unknown2))
-        features_testing_unknown_head = np.concatenate((features_testing_unknown_head, features_testing_unknown_head2), axis=1)
-        features_testing_unknown_backbone = np.concatenate((features_testing_unknown_backbone, features_testing_unknown_backbone2), axis=1)
+        #features_testing_unknown_head = np.concatenate((features_testing_unknown_head, features_testing_unknown_head2), axis=1)
+        #features_testing_unknown_backbone = np.concatenate((features_testing_unknown_backbone, features_testing_unknown_backbone2), axis=1)
 
     if opt.ensemble_features is True:
         features_testing_unknown_head = np.concatenate((features_testing_unknown_backbone, features_testing_unknown_head), axis=1)
-    features_testing_unknown_head, labels_testing_unknown = down_sampling(features_testing_unknown_head, labels_testing_unknown, opt.downsampling_ratio_unknown)
-    #features_testing_unknown_backbone, labels_testing_unknown = down_sampling(features_testing_unknown_backbone, labels_testing_unknown, opt.downsampling_ratio_unknown)
-    prediction_logits_unknown, predictions_unknown, _ = KNN_classifier(features_testing_unknown_head, labels_testing_unknown, sorted_features_examplar_head)
-    #prediction_logits_unknown, predictions_unknown, _ = KNN_classifier(features_testing_unknown_backbone, labels_testing_unknown, sorted_features_examplar_backbone)    #
-     
-    prediction_logits_unknown_dis_in, prediction_logits_unknown_dis_out, predictions_unknown_dis, acc_unknown_dis = distance_classifier(features_testing_unknown_head, labels_testing_unknown, sorted_features_examplar_head)
+    #features_testing_unknown_head, labels_testing_unknown = down_sampling(features_testing_unknown_head, labels_testing_unknown, opt.downsampling_ratio_unknown)
+    #prediction_logits_unknown, predictions_unknown, _ = KNN_classifier(features_testing_unknown_head, labels_testing_unknown, sorted_features_examplar_head)
+    #prediction_logits_unknown_dis_in, prediction_logits_unknown_dis_out, predictions_unknown_dis, acc_unknown_dis = distance_classifier(features_testing_unknown_head, labels_testing_unknown, sorted_features_examplar_head)
     
-    knn_predictions = np.concatenate((predictions_known, predictions_unknown), axis=0)
-    distance_predictions = np.concatenate((predictions_known_dis, predictions_unknown_dis), axis=0)
-    labels_testing = np.concatenate((labels_testing_known, labels_testing_unknown), axis=0)
-
-    with open(opt.prediction_save_path, "wb") as f:
-        pickle.dump((knn_predictions, distance_predictions, labels_testing), f)
+    #knn_predictions = np.concatenate((predictions_known, predictions_unknown), axis=0)
+    #distance_predictions = np.concatenate((predictions_known_dis, predictions_unknown_dis), axis=0)
+    #labels_testing = np.concatenate((labels_testing_known, labels_testing_unknown), axis=0)
 
     # Process results AUROC and OSCR
     # for AUROC, convert labels to binary labels, assume inliers are positive
@@ -492,22 +465,41 @@ def feature_classifier(opt):
     labels_binary = np.array(labels_binary_known + labels_binary_unknown)
     #print("labels_binary", labels_binary)
 
-    probs_binary = np.concatenate((prediction_logits_known, prediction_logits_unknown), axis=0) 
-    #with open("./prediction_logits_unknown_train_down", "wb") as f:
-    #    pickle.dump(prediction_logits_unknown, f)
+    models, _ = set_model(opt)
 
-    # TODO visualize the scores !!!!!
-    #plt.scatter(range(len(prediction_logits_known_dis_in)), prediction_logits_known_dis_in)
-    #plt.savefig("./prediction_logits_known_dis_in.pdf")
-    #plt.close("all")
-    #plt.scatter(range(len(prediction_logits_unknown_dis_in)), prediction_logits_unknown_dis_in)
-    #plt.savefig("./prediction_logits_unknown_dis_in.pdf")
+    features_testing_known_backbone = features_testing_known_backbone.astype(np.float32)
+    features_testing_unknown_backbone = features_testing_unknown_backbone.astype(np.float32)
+    features_testing_known_head = models[0].head(torch.tensor(features_testing_known_backbone))
+    features_testing_unknown_head = models[0].head(torch.tensor(features_testing_unknown_backbone))
 
+    if opt.exemplar_features_path1 is not None:
+        features_testing_known_backbone1 = features_testing_known_backbone1.astype(np.float32)
+        features_testing_unknown_backbone1 = features_testing_unknown_backbone1.astype(np.float32)
+        features_testing_known_head1 = models[1].head(torch.tensor(features_testing_known_backbone1))
+        features_testing_unknown_head1 = models[1].head(torch.tensor(features_testing_unknown_backbone1))
+        features_testing_known_head = torch.cat((features_testing_known_head, features_testing_known_head1), dim=1)
+        features_testing_unknown_head = torch.cat((features_testing_unknown_head, features_testing_unknown_head1), dim=1)
+
+    if opt.exemplar_features_path2 is not None:
+        features_testing_known_backbone2 = features_testing_known_backbone2.astype(np.float32)
+        features_testing_unknown_backbone2 = features_testing_unknown_backbone2.astype(np.float32)
+        features_testing_known_head2 = models[2].head(torch.tensor(features_testing_known_backbone2))
+        features_testing_unknown_head2 = models[2].head(torch.tensor(features_testing_unknown_backbone2))
+        features_testing_known_head = torch.cat((features_testing_known_head, features_testing_known_head2), dim=1)
+        features_testing_unknown_head = torch.cat((features_testing_unknown_head, features_testing_unknown_head2), dim=1)
+
+    norm_score_known = np.linalg.norm(features_testing_known_head.detach().numpy(), axis=1)
+    norm_score_unknown = np.linalg.norm(features_testing_unknown_head.detach().numpy(), axis=1)
+    norm_score_binary = np.concatenate((norm_score_known, norm_score_unknown), axis=0)
+    auroc = AUROC(labels_binary, norm_score_binary, opt)
+    print("AUROC norm is: ", auroc)
+
+    """
+    probs_binary = np.concatenate((prediction_logits_known, prediction_logits_unknown), axis=0)
     auroc = AUROC(labels_binary, probs_binary, opt)
     print("AUROC is: ", auroc)
 
-    probs_binary_dis = np.concatenate((prediction_logits_known_dis_in, prediction_logits_unknown_dis_in), axis=0) 
-    #print("probs_binary", probs_binary_dis)
+    probs_binary_dis = np.concatenate((prediction_logits_known_dis_in, prediction_logits_unknown_dis_in), axis=0)
 
     auroc = AUROC(labels_binary, probs_binary_dis, opt)
     print("Dis AUROC is: ", auroc)
@@ -523,6 +515,7 @@ def feature_classifier(opt):
     print("OSCR is: ", oscr)
 
     #print("Acc Known: ", acc_known)
+    """
 
     return auroc             # oscr, acc_known
 
