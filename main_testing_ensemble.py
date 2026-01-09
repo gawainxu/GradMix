@@ -33,6 +33,7 @@ from distance_utils import sortFeatures
 from datautil import get_test_datasets, get_outlier_datasets
 
 from sklearn.neighbors import LocalOutlierFactor
+from scipy import stats
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 
@@ -367,6 +368,20 @@ def feature_classifier(opt):
     norm_score_binary_score_sum = np.concatenate((norm_score_known_score_sum, norm_score_unknown_score_sum), axis=0)
     auroc = AUROC(labels_binary, norm_score_binary_score_sum, opt)
     print("AUROC norm score sum is: ", auroc)
+    
+    res12_known = stats.pearsonr(norm_score_known1, norm_score_known2)
+    res13_known = stats.pearsonr(norm_score_known1, norm_score_known3)
+    res23_known = stats.pearsonr(norm_score_known2, norm_score_known3)
+    print("res12_known", res12_known)
+    print("res13_known", res13_known)
+    print("res23_known", res23_known)
+    
+    res12_unknown = stats.pearsonr(norm_score_unknown1, norm_score_unknown2)
+    res13_unknown = stats.pearsonr(norm_score_unknown1, norm_score_unknown3)
+    res23_unknown = stats.pearsonr(norm_score_unknown2, norm_score_unknown3)
+    print("res12_unknown", res12_unknown)
+    print("res13_unknown", res13_unknown)
+    print("res23_unknown", res23_unknown)
     
 
     """
