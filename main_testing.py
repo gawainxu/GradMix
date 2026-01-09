@@ -34,7 +34,7 @@ from distance_utils  import sortFeatures
 from datautil import get_test_datasets, get_outlier_datasets
 
 from sklearn.neighbors import LocalOutlierFactor
-
+from scipy import stats
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 
@@ -469,36 +469,74 @@ def feature_classifier(opt):
 
     features_testing_known_backbone = features_testing_known_backbone.astype(np.float32)
     features_testing_unknown_backbone = features_testing_unknown_backbone.astype(np.float32)
-    features_testing_known_head = models[0].head(torch.tensor(features_testing_known_backbone))
-    features_testing_unknown_head = models[0].head(torch.tensor(features_testing_unknown_backbone))
-    norm_score_known = np.linalg.norm(features_testing_known_head.detach().numpy(), axis=1)
-    norm_score_unknown = np.linalg.norm(features_testing_unknown_head.detach().numpy(), axis=1)
+    features_testing_known_head1 = models[0].head(torch.tensor(features_testing_known_backbone))
+    features_testing_unknown_head1 = models[0].head(torch.tensor(features_testing_unknown_backbone))
+    norm_score_known1 = np.linalg.norm(features_testing_known_head1.detach().numpy(), axis=1)
+    norm_score_unknown1 = np.linalg.norm(features_testing_unknown_head1.detach().numpy(), axis=1)
+    norm_score_binary1 = np.concatenate((norm_score_known1, norm_score_unknown1), axis=0)
+    auroc = AUROC(labels_binary, norm_score_binary1, opt)
+    print("AUROC norm 1 is: ", auroc)
 
     if opt.exemplar_features_path1 is not None:
         features_testing_known_backbone1 = features_testing_known_backbone1.astype(np.float32)
         features_testing_unknown_backbone1 = features_testing_unknown_backbone1.astype(np.float32)
-        features_testing_known_head1 = models[1].head(torch.tensor(features_testing_known_backbone1))
-        features_testing_unknown_head1 = models[1].head(torch.tensor(features_testing_unknown_backbone1))
-        #features_testing_known_head = torch.cat((features_testing_known_head, features_testing_known_head1), dim=1)
-        #features_testing_unknown_head = torch.cat((features_testing_unknown_head, features_testing_unknown_head1), dim=1)
-        norm_score_known1 = np.linalg.norm(features_testing_known_head1.detach().numpy(), axis=1)
-        norm_score_unknown1 = np.linalg.norm(features_testing_unknown_head1.detach().numpy(), axis=1)
+        features_testing_known_head2 = models[1].head(torch.tensor(features_testing_known_backbone1))
+        features_testing_unknown_head2 = models[1].head(torch.tensor(features_testing_unknown_backbone1))
+        norm_score_known2 = np.linalg.norm(features_testing_known_head2.detach().numpy(), axis=1)
+        norm_score_unknown2= np.linalg.norm(features_testing_unknown_head2.detach().numpy(), axis=1)
+        norm_score_binary2 = np.concatenate((norm_score_known2, norm_score_unknown2), axis=0)
+        auroc = AUROC(labels_binary, norm_score_binary2, opt)
+        print("AUROC norm 2 is: ", auroc)
 
     if opt.exemplar_features_path2 is not None:
         features_testing_known_backbone2 = features_testing_known_backbone2.astype(np.float32)
         features_testing_unknown_backbone2 = features_testing_unknown_backbone2.astype(np.float32)
-        features_testing_known_head2 = models[2].head(torch.tensor(features_testing_known_backbone2))
-        features_testing_unknown_head2 = models[2].head(torch.tensor(features_testing_unknown_backbone2))
-        #features_testing_known_head = torch.cat((features_testing_known_head, features_testing_known_head2), dim=1)
-        #features_testing_unknown_head = torch.cat((features_testing_unknown_head, features_testing_unknown_head2), dim=1)
-        norm_score_known2 = np.linalg.norm(features_testing_known_head2.detach().numpy(), axis=1)
-        norm_score_unknown2 = np.linalg.norm(features_testing_unknown_head2.detach().numpy(), axis=1)
+        features_testing_known_head3 = models[2].head(torch.tensor(features_testing_known_backbone2))
+        features_testing_unknown_head3 = models[2].head(torch.tensor(features_testing_unknown_backbone2))
+        norm_score_known3 = np.linalg.norm(features_testing_known_head3.detach().numpy(), axis=1)
+        norm_score_unknown3 = np.linalg.norm(features_testing_unknown_head3.detach().numpy(), axis=1)
+        norm_score_binary3 = np.concatenate((norm_score_known3, norm_score_unknown3), axis=0)
+        auroc = AUROC(labels_binary, norm_score_binary3, opt)
+        print("AUROC norm 3 is: ", auroc)
 
-    norm_score_known = norm_score_known + norm_score_known1 + norm_score_known2
-    norm_score_unknown = norm_score_unknown + norm_score_unknown1 + norm_score_unknown2
-    norm_score_binary = np.concatenate((norm_score_known, norm_score_unknown), axis=0)
-    auroc = AUROC(labels_binary, norm_score_binary, opt)
-    print("AUROC norm is: ", auroc)
+    features_testing_known_head_cat = torch.cat((features_testing_known_head1, features_testing_known_head2, features_testing_known_head3), dim=1)
+    features_testing_known_head_sum = features_testing_known_head1 + features_testing_known_head2 + features_testing_known_head3
+    features_testing_unknown_head_cat = torch.cat((features_testing_unknown_head1, features_testing_unknown_head2, features_testing_unknown_head3), dim=1)
+    features_testing_unknown_head_sum = features_testing_unknown_head1 + features_testing_unknown_head2 + features_testing_unknown_head3
+
+    norm_score_known_cat = np.linalg.norm(features_testing_known_head_cat.detach().numpy(), axis=1)
+    norm_score_unknown_cat = np.linalg.norm(features_testing_unknown_head_cat.detach().numpy(), axis=1)
+    norm_score_binary_cat = np.concatenate((norm_score_known_cat, norm_score_unknown_cat), axis=0)
+    auroc = AUROC(labels_binary, norm_score_binary_cat, opt)
+    print("AUROC norm cat is: ", auroc)
+
+    norm_score_known_sum = np.linalg.norm(features_testing_known_head_sum.detach().numpy(), axis=1)
+    norm_score_unknown_sum = np.linalg.norm(features_testing_unknown_head_sum.detach().numpy(), axis=1)
+    norm_score_binary_sum = np.concatenate((norm_score_known_sum, norm_score_unknown_sum), axis=0)
+    auroc = AUROC(labels_binary, norm_score_binary_sum, opt)
+    print("AUROC norm sum is: ", auroc)
+
+    norm_score_known_score_sum = norm_score_known1 + norm_score_known2 + norm_score_known3
+    norm_score_unknown_score_sum = norm_score_unknown1 + norm_score_unknown2 + norm_score_unknown3
+    norm_score_binary_score_sum = np.concatenate((norm_score_known_score_sum, norm_score_unknown_score_sum), axis=0)
+    auroc = AUROC(labels_binary, norm_score_binary_score_sum, opt)
+    print("AUROC norm score sum is: ", auroc)
+
+    res12_known = stats.pearsonr(norm_score_known1, norm_score_known2)
+    res13_known = stats.pearsonr(norm_score_known1, norm_score_known3)
+    res23_known = stats.pearsonr(norm_score_known2, norm_score_known3)
+    print("res12_known", res12_known)
+    print("res13_known", res13_known)
+    print("res23_known", res23_known)
+
+    res12_unknown = stats.pearsonr(norm_score_unknown1, norm_score_unknown2)
+    res13_unknown = stats.pearsonr(norm_score_unknown1, norm_score_unknown3)
+    res23_unknown = stats.pearsonr(norm_score_unknown2, norm_score_unknown3)
+    print("res12_unknown", res12_unknown)
+    print("res13_unknown", res13_unknown)
+    print("res23_unknown", res23_unknown)
+
+
 
     """
     probs_binary = np.concatenate((prediction_logits_known, prediction_logits_unknown), axis=0)
