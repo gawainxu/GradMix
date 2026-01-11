@@ -487,6 +487,12 @@ def feature_classifier(opt):
         norm_score_binary2 = np.concatenate((norm_score_known2, norm_score_unknown2), axis=0)
         auroc = AUROC(labels_binary, norm_score_binary2, opt)
         print("AUROC norm 2 is: ", auroc)
+        features_testing_known_head_cat = torch.cat(
+            (features_testing_known_head1, features_testing_known_head2), dim=1)
+        features_testing_unknown_head_cat = torch.cat(
+            (features_testing_unknown_head1, features_testing_unknown_head2), dim=1)
+        features_testing_known_head_sum = features_testing_known_head1 + features_testing_known_head2
+        features_testing_unknown_head_sum = features_testing_unknown_head1 + features_testing_unknown_head2
 
     if opt.exemplar_features_path2 is not None:
         features_testing_known_backbone2 = features_testing_known_backbone2.astype(np.float32)
@@ -498,11 +504,16 @@ def feature_classifier(opt):
         norm_score_binary3 = np.concatenate((norm_score_known3, norm_score_unknown3), axis=0)
         auroc = AUROC(labels_binary, norm_score_binary3, opt)
         print("AUROC norm 3 is: ", auroc)
+        features_testing_known_head_cat = torch.cat(
+            (features_testing_known_head1, features_testing_known_head2, features_testing_known_head3), dim=1)
+        features_testing_unknown_head_cat = torch.cat(
+            (features_testing_unknown_head1, features_testing_unknown_head2, features_testing_unknown_head3), dim=1)
+        features_testing_known_head_sum = features_testing_known_head1 + features_testing_known_head2 + features_testing_known_head3
+        features_testing_unknown_head_sum = features_testing_unknown_head1 + features_testing_unknown_head2 + features_testing_unknown_head3
+    else:
+        norm_score_known3 = torch.zeros_like(norm_score_known2)
+        norm_score_unknown3 = torch.zeros_like(norm_score_unknown2)
 
-    features_testing_known_head_cat = torch.cat((features_testing_known_head1, features_testing_known_head2, features_testing_known_head3), dim=1)
-    features_testing_known_head_sum = features_testing_known_head1 + features_testing_known_head2 + features_testing_known_head3
-    features_testing_unknown_head_cat = torch.cat((features_testing_unknown_head1, features_testing_unknown_head2, features_testing_unknown_head3), dim=1)
-    features_testing_unknown_head_sum = features_testing_unknown_head1 + features_testing_unknown_head2 + features_testing_unknown_head3
 
     norm_score_known_cat = np.linalg.norm(features_testing_known_head_cat.detach().numpy(), axis=1)
     norm_score_unknown_cat = np.linalg.norm(features_testing_unknown_head_cat.detach().numpy(), axis=1)
