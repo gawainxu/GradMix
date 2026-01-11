@@ -59,13 +59,13 @@ def parse_option():
     parser.add_argument("--testing_known_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_0_128_256_600_test_known")
     parser.add_argument("--testing_unknown_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_0_128_256_600_test_unknown")
 
-    parser.add_argument("--exemplar_features_path1", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_train")
-    parser.add_argument("--testing_known_features_path1", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_test_known")
-    parser.add_argument("--testing_unknown_features_path1", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_test_unknown")
+    parser.add_argument("--exemplar_features_path1", type=str, default=None)
+    parser.add_argument("--testing_known_features_path1", type=str, default=None)
+    parser.add_argument("--testing_unknown_features_path1", type=str, default=None)
 
-    parser.add_argument("--exemplar_features_path2", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_0_128_256_600_train")
-    parser.add_argument("--testing_known_features_path2", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_0_128_256_600_test_known")
-    parser.add_argument("--testing_unknown_features_path2", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.005_trail_0_128_256_600_test_unknown")
+    parser.add_argument("--exemplar_features_path2", type=str, default=None)
+    parser.add_argument("--testing_known_features_path2", type=str, default=None)
+    parser.add_argument("--testing_unknown_features_path2", type=str, default=None)
 
     parser.add_argument("--trail", type=int, default=0)
     parser.add_argument("--split_train_val", type=bool, default=True)
