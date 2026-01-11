@@ -511,8 +511,8 @@ def feature_classifier(opt):
         features_testing_known_head_sum = features_testing_known_head1 + features_testing_known_head2 + features_testing_known_head3
         features_testing_unknown_head_sum = features_testing_unknown_head1 + features_testing_unknown_head2 + features_testing_unknown_head3
     else:
-        norm_score_known3 = torch.zeros_like(norm_score_known2)
-        norm_score_unknown3 = torch.zeros_like(norm_score_unknown2)
+        norm_score_known3 = np.zeros_like(norm_score_known2)
+        norm_score_unknown3 = np.zeros_like(norm_score_unknown2)
 
 
     norm_score_known_cat = np.linalg.norm(features_testing_known_head_cat.detach().numpy(), axis=1)
