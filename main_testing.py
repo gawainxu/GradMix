@@ -42,30 +42,39 @@ def parse_option():
 
     parser = argparse.ArgumentParser('argument for feature reading')
 
-    parser.add_argument('--datasets', type=str, default='cifar10',
+    parser.add_argument('--datasets', type=str, default='tinyimgnet',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "tinyimgnet", 'mnist', "svhn"], help='dataset')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
-    parser.add_argument('--model', type=str, default="resnet34",  choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "simCNN"])
+    parser.add_argument('--model', type=str, default="resnet18",  choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "simCNN"])
     parser.add_argument("--model_path", type=str, default="/save/SupCon/cifar10_models/cifar10_resnet18_original_data__vanilia__SimCLR_0.01_trail_0/ckpt_epoch_400.pth")
     parser.add_argument("--model_path1", type=str, default=None)
     parser.add_argument("--model_path2", type=str, default=None)
     parser.add_argument("--end", type=bool, default=False, help="if it is end to end training")
     parser.add_argument("--ensembles", type=int, default=1)
     parser.add_argument("--linear_model_path", type=str, default="/save/SupCon/cifar10_models/cifar10_resnet18_original_data__vanilia__SimCLR_0.01_trail_0/last_linear.pth")
-    parser.add_argument("--num_classes", type=int, default=6)
+    parser.add_argument("--num_classes", type=int, default=20)
     parser.add_argument("--feat_dim", type=int, default=128)
-    
-    parser.add_argument("--exemplar_features_path", type=str, default="/features/cifar10_resnet18_original_data__vanilia__SimCLR_1.0_3.2_trail_0_128_256_500_train")
-    parser.add_argument("--testing_known_features_path", type=str, default="/features/cifar10_resnet18_original_data__vanilia__SimCLR_1.0_3.2_trail_0_128_256_500_test_known")
-    parser.add_argument("--testing_unknown_features_path", type=str, default="/features/cifar10_resnet18_original_data__vanilia__SimCLR_1.0_3.2_trail_0_128_256_500_test_unknown")
 
-    parser.add_argument("--exemplar_features_path1", type=str, default=None)
-    parser.add_argument("--testing_known_features_path1", type=str, default=None)
-    parser.add_argument("--testing_unknown_features_path1", type=str, default=None)
+    parser.add_argument("--exemplar_features_path", type=str,
+                        default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_0_128_256_600_train")
+    parser.add_argument("--testing_known_features_path", type=str,
+                        default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_0_128_256_600_test_known")
+    parser.add_argument("--testing_unknown_features_path", type=str,
+                        default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_0_128_256_600_test_unknown")
 
-    parser.add_argument("--exemplar_features_path2", type=str, default=None)
-    parser.add_argument("--testing_known_features_path2", type=str, default=None)
-    parser.add_argument("--testing_unknown_features_path2", type=str, default=None)
+    parser.add_argument("--exemplar_features_path1", type=str,
+                        default=None)
+    parser.add_argument("--testing_known_features_path1", type=str,
+                        default=None)
+    parser.add_argument("--testing_unknown_features_path1", type=str,
+                        default=None)
+
+    parser.add_argument("--exemplar_features_path2", type=str,
+                        default=None)
+    parser.add_argument("--testing_known_features_path2", type=str,
+                        default=None)
+    parser.add_argument("--testing_unknown_features_path2", type=str,
+                        default=None)
 
     parser.add_argument("--trail", type=int, default=0)
     parser.add_argument("--split_train_val", type=bool, default=True)
@@ -427,25 +436,24 @@ def feature_classifier(opt):
             features_testing_known_head2 = np.squeeze(np.array(features_testing_known_head2))
             features_testing_known_backbone2 = np.squeeze(np.array(features_testing_known_backbone2))
             labels_testing_known2 = np.squeeze(np.array(labels_testing_known2))
-        features_testing_known_head2 = np.concatenate((features_testing_known_head, features_testing_known_head2), axis=1)
+        features_testing_known_head = np.concatenate((features_testing_known_head, features_testing_known_head2), axis=1)
         features_testing_known_backbone = np.concatenate((features_testing_known_backbone, features_testing_known_backbone2), axis=1)
 
     if opt.ensemble_features is True:
         features_testing_known_head = np.concatenate((features_testing_known_backbone, features_testing_known_head), axis=1)
     features_testing_known_head, labels_testing_known = down_sampling(features_testing_known_head, labels_testing_known, opt.downsampling_ratio_known)
     #features_testing_known_backbone, labels_testing_known = down_sampling(features_testing_known_backbone, labels_testing_known, opt.downsampling_ratio_known)
-    prediction_logits_known, predictions_known, acc_known = KNN_classifier(features_testing_known_head, labels_testing_known, sorted_features_examplar_head)   #
+    prediction_logits_known, predictions_known, acc_known = KNN_classifier(features_testing_known_head, labels_testing_known, sorted_features_examplar_head)
     #prediction_logits_known, predictions_known, acc_known = KNN_classifier(features_testing_known_backbone, labels_testing_known, sorted_features_examplar_backbone)
 
     prediction_logits_known_dis_in, prediction_logits_known_dis_out, predictions_known_dis, acc_known_dis = distance_classifier(features_testing_known_head, labels_testing_known, sorted_features_examplar_head)
 
-
+    """
     with open(opt.testing_unknown_features_path, "rb") as f:
         features_testing_unknown_head, features_testing_unknown_backbone, _, labels_testing_unknown = pickle.load(f)          
         features_testing_unknown_head = np.squeeze(np.array(features_testing_unknown_head))
         features_testing_unknown_backbone = np.squeeze(np.array(features_testing_unknown_backbone))
         labels_testing_unknown = np.squeeze(np.array(labels_testing_unknown))
-        
 
     if opt.testing_unknown_features_path1 is not None:
         with open(opt.testing_unknown_features_path1, "rb") as f:            
@@ -489,15 +497,6 @@ def feature_classifier(opt):
     #print("labels_binary", labels_binary)
 
     probs_binary = np.concatenate((prediction_logits_known, prediction_logits_unknown), axis=0) 
-    #with open("./prediction_logits_unknown_train_down", "wb") as f:
-    #    pickle.dump(prediction_logits_unknown, f)
-
-    # TODO visualize the scores !!!!!
-    #plt.scatter(range(len(prediction_logits_known_dis_in)), prediction_logits_known_dis_in)
-    #plt.savefig("./prediction_logits_known_dis_in.pdf")
-    #plt.close("all")
-    #plt.scatter(range(len(prediction_logits_unknown_dis_in)), prediction_logits_unknown_dis_in)
-    #plt.savefig("./prediction_logits_unknown_dis_in.pdf")
 
     auroc = AUROC(labels_binary, probs_binary, opt)
     print("AUROC is: ", auroc)
@@ -519,8 +518,9 @@ def feature_classifier(opt):
     #print("OSCR is: ", oscr)
 
     #print("Acc Known: ", acc_known)
+    """
 
-    return auroc             # oscr, acc_known
+    return 0             # oscr, acc_known
 
         
 if __name__ == "__main__":
@@ -531,38 +531,3 @@ if __name__ == "__main__":
     #print("Model loaded!!")
     
     auroc = feature_classifier(opt)                        # oscr, acc_known
-    
-    """
-    models, linear_model = set_model(opt)
-    test_loader, outlier_loader = set_loader(opt)
-    avg_accuracy_test, scores_max_test, preds, labels = testing_nn_classifier(models, linear_model, test_loader)
-    _, scores_max_outlier, _, _ = testing_nn_classifier(models, linear_model, outlier_loader)
-    #with open("./scores", "wb") as f:
-    #    pickle.dump((scores_max_test, scores_max_outlier), f)
-    print("ID", opt.trail, "Average NN accuracy on inlier testing data is: ", avg_accuracy_test)
-
-    labels_binary_known = [1 for _ in range(len(scores_max_test))]
-    labels_binary_unknown = [0 for _ in range(len(scores_max_outlier))]
-    labels_binary = np.array(labels_binary_known + labels_binary_unknown)
-    scores_binary = np.array(scores_max_test + scores_max_outlier)
-    auroc = AUROC(labels_binary, scores_binary, opt)
-    print("NN AUROC is: ", auroc)
-
-    scores_max_test = np.array(scores_max_test)
-    scores_max_outlier = np.array(scores_max_outlier)
-    oscr = OSCR(-scores_max_test, scores_max_outlier, preds, labels)
-    print("NN OSCR is: ", oscr)
-    """
-
-
-    """
-    1. use penultimate layer instead of head
-    2. use ecudien distance 
-    3. use kth distance instead of average distance
-    4. feature normalization
-    5. downsample training data
-    """
-
-    """
-    pay attention to the samples at boundary
-    """
