@@ -172,7 +172,7 @@ def train(train_loader, model, classifier, criterion, optimizer, epoch, opt):
     top5 = AverageMeter()
 
     end = time.time()
-    for idx, (images, labels, _) in enumerate(train_loader):
+    for idx, (images, labels) in enumerate(train_loader):
         data_time.update(time.time() - end)
 
         images = images.cuda(non_blocking=True)
@@ -236,7 +236,7 @@ def validate(val_loader, model, classifier, criterion, opt):
 
     with torch.no_grad():
         end = time.time()
-        for idx, (images, labels, _) in enumerate(val_loader):
+        for idx, (images, labels) in enumerate(val_loader):
             images = images.float().cuda()
             labels = labels.cuda()
             bsz = labels.shape[0]
