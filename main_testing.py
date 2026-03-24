@@ -176,6 +176,8 @@ def set_model(opt):
     else:
         in_channels = 3
 
+    opt.num_ensembles = 1
+
     if opt.model == "resnet18" or opt.model == "resnet34":
         model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
     elif opt.model == "preactresnet18" or opt.model == "preactresnet34":
@@ -183,15 +185,6 @@ def set_model(opt):
     else:
         model = simCNN_contrastive(opt)
 
-    if opt.end == True:
-        linear_model = LinearClassifier(name=opt.model, num_classes=opt.num_classes)
-        model, linear_model = load_model(model, linear_model, opt.model_path)
-        linear_model.eval()
-        linear_model = linear_model.cpu()
-    else:
-        model = load_model(model, opt.model_path)
-        linear_model = None
-    
     model.eval()
     model = model.cpu()
     models = []
@@ -201,20 +194,15 @@ def set_model(opt):
         model1 = copy.deepcopy(model)
         model1 = load_model(model1, opt.model_path1)
         models.append(model1)
+        opt.num_ensembles += 1
 
     if opt.model_path2 is not None:
         model2 = copy.deepcopy(model)
         model2 = load_model(model2, opt.model_path2)
         models.append(model2)
+        opt.num_ensembles += 1
 
-    if opt.linear_model_path is not None:
-        linear_model = LinearClassifier(name=opt.model, num_classes=opt.num_classes)
-        ckpt = torch.load(opt.linear_model_path, map_location='cpu')
-        #print(ckpt.keys())
-        state_dict = ckpt['model']
-        linear_model.load_state_dict(state_dict)
-        linear_model = linear_model.cpu()
-        linear_model.eval()
+    linear_model = 
 
     return models, linear_model
 
