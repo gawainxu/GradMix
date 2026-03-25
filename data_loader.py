@@ -1039,7 +1039,7 @@ def Cars(root, train=True, opt=None, limit=0, transform=None, metas=None):
 
 
 
-class fub(Dataset):
+class FUB(Dataset):
 
     def __init__(self, root="../datasets/fetal-ultrasound-brain"):
 
@@ -1056,12 +1056,12 @@ class fub(Dataset):
             reader = csv.reader(f, delimiter=' ', quotechar='|')
             next(reader)
             for row in reader:
-                self.names_labels_dict[row.split(",")[0]] = row.split(",")[1]
+                self.names_labels_dict[row[0].split(",")[0]] = row[0].split(",")[1]
 
         for fn in self.image_names:
             image = plt.imread(os.path.join(images_folder, fn))
             self.data.append(image)
-            data_name = fn.split["."][0]
+            data_name = fn.split(".")[0]
             label_name = self.names_labels_dict[data_name]
             self.labels.append(self.labels_dict[label_name])
 
@@ -1079,6 +1079,8 @@ if __name__ == "__main__":
     
     root_path = "../datasets/"
     transform = transforms.Compose([transforms.ToTensor(), transforms.Resize((224, 224))])
+
+    """
     dataset = ImageNet100_M(root=root_path, train=False, transform=transform)
     test_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True,
                                               num_workers=4, pin_memory=True)
@@ -1086,4 +1088,10 @@ if __name__ == "__main__":
         print(len(images), len(labels))
         print(len(annotations))
         print(annotations)
+    """
+
+    root = "../datasets/fetal-ultrasound-brain"
+    fub = FUB(root=root)
+    print(len(fub))
+
    
