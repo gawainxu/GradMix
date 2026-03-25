@@ -105,8 +105,6 @@ def parse_option():
     parser.add_argument("--downsample_ratio", type=float, default=0)
 
     opt = parser.parse_args()
-
-    opt = parser.parse_args()
     opt.main_dir = os.getcwd()
     opt.model_path = opt.main_dir + opt.model_path
     if opt.model_path1 is not None:

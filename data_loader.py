@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST, SVHN
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.folder import default_loader
@@ -11,6 +12,7 @@ import torch
 import struct
 import pickle
 from PIL import Image, ImageDraw
+import csv
 
 import torchvision.transforms as transforms
 from util import common_elements, TwoCropTransform
@@ -1034,6 +1036,43 @@ def Cars(root, train=True, opt=None, limit=0, transform=None, metas=None):
         data_dir = root + "/test"
            
     dataset = ImageFolder(data_dir, transform=transform)
+
+
+
+class fub(Dataset):
+
+    def __init__(self, root="../datasets/fetal-ultrasound-brain"):
+
+        self.labels_dict = {"Trans-thalamic": 0, "Trans-cerebellum": 1, "Trans-ventricular": 2, "Other": 4}
+        images_folder = os.path.join(root, "data")
+        self.image_names = os.listdir(images_folder)
+        self.labeling_file = os.path.join(root, "sample_submission.csv")
+        self.names_labels_dict = {}
+
+        self.data = []
+        self.labels = []
+
+        with open(self.labeling_file, newline="") as f:
+            reader = csv.reader(f, delimiter=' ', quotechar='|')
+            next(reader)
+            for row in reader:
+                self.names_labels_dict[row.split(",")[0]] = row.split(",")[1]
+
+        for fn in self.image_names:
+            image = plt.imread(os.path.join(images_folder, fn))
+            self.data.append(image)
+            data_name = fn.split["."][0]
+            label_name = self.names_labels_dict[data_name]
+            self.labels.append(self.labels_dict[label_name])
+
+    def __getitem__(self, idx):
+
+        return self.data[idx], self.labels[idx]
+
+    def __len__(self):
+
+        return len(self.data)
+
 
 
 if __name__ == "__main__":
