@@ -1079,9 +1079,9 @@ class FUB(Dataset):
     def __getitem__(self, idx):
 
         if self.transform is not None:
-            return self.transform(self.data[idx]), self.labels[idx], None
+            return self.transform(self.data[idx]), self.labels[idx], torch.tensor([0,0,0,0])
         else:
-            return self.data[idx], self.labels[idx], None
+            return self.data[idx], self.labels[idx], torch.tensor([0,0,0,0])
 
     def __len__(self):
 
@@ -1111,8 +1111,11 @@ if __name__ == "__main__":
 
     root = "../datasets/"
     fub = FUB(root=root, transform=transform, train=False)
-    img, _, _ = fub[0]
-    print(len(fub))
-    print(img.dtype, img.min(), img.max(), img.shape)
+    train_loader = torch.utils.data.DataLoader(fub, batch_size=32, shuffle=True,
+                                               num_workers=1, pin_memory=True,
+                                               drop_last=True,
+                                               persistent_workers=True)
+    for idx, (images, labels, anno) in enumerate(train_loader):
+        print("images", images[0].shape)
 
    
