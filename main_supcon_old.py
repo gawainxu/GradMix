@@ -362,7 +362,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
 
     for idx, (images, labels, annotations) in enumerate(train_loader):
 
-        #print("images", images[0].shape, len(annotations))
+        print("images", images[0].shape, len(annotations))
 
         data_time.update(time.time() - end)
         images1 = images[0]
