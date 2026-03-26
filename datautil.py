@@ -312,7 +312,7 @@ image_size_mapping = {"mnist": 32,
                       "imagenet100_m": 224,
                       "aircraft": 224,
                       "cub": 224,
-                      "FUB": 224}
+                      "FUB": 128}
 
 
 def label_to_dict(labels, outliers=False):
