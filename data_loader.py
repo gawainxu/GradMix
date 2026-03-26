@@ -2,8 +2,7 @@ import matplotlib.pyplot as plt
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST, SVHN
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.folder import default_loader
-from torchvision.datasets.utils import download_url
-from torchvision.datasets.utils import extract_archive
+
 import datautil
 import numpy as np
 import os
@@ -1041,13 +1040,16 @@ def Cars(root, train=True, opt=None, limit=0, transform=None, metas=None):
 
 class FUB(Dataset):
 
-    def __init__(self, root="../datasets/fetal-ultrasound-brain"):
+    def __init__(self, root, classes=range(3), train=True, opt=None, transform=None,
+                target_transform=None, download=False, label_dict = None, last_features_list=None,
+                last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
 
         self.labels_dict = {"Trans-thalamic": 0, "Trans-cerebellum": 1, "Trans-ventricular": 2, "Other": 4}
         images_folder = os.path.join(root, "data")
-        self.image_names = os.listdir(images_folder)
+        self.image_names = sorted(os.listdir(images_folder))
         self.labeling_file = os.path.join(root, "sample_submission.csv")
         self.names_labels_dict = {}
+        self.transform = transform
 
         self.data = []
         self.labels = []
@@ -1059,15 +1061,28 @@ class FUB(Dataset):
                 self.names_labels_dict[row[0].split(",")[0]] = row[0].split(",")[1]
 
         for fn in self.image_names:
-            image = plt.imread(os.path.join(images_folder, fn))
-            self.data.append(image)
             data_name = fn.split(".")[0]
             label_name = self.names_labels_dict[data_name]
-            self.labels.append(self.labels_dict[label_name])
+            label = self.labels_dict[label_name]
+            if label in classes:
+                self.labels.append(label)
+                image = plt.imread(os.path.join(images_folder, fn))
+                self.data.append(image)
+
+        if train:
+            del self.data[4::5]
+            del self.labels[4::5]
+        else:
+            self.data = self.data[:,:,5]
+            self.labels = self.labels[:,:,5]
+
 
     def __getitem__(self, idx):
 
-        return self.data[idx], self.labels[idx]
+        if self.transform is not None:
+            return self.transform(self.data[idx]), self.labels[idx]
+        else:
+            return self.data[idx], self.labels[idx]
 
     def __len__(self):
 
@@ -1078,7 +1093,12 @@ class FUB(Dataset):
 if __name__ == "__main__":
     
     root_path = "../datasets/"
-    transform = transforms.Compose([transforms.ToTensor(), transforms.Resize((224, 224))])
+    transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
+                                    transforms.CenterCrop((224, 224)),
+                                    transforms.RandomHorizontalFlip(), transforms.RandomRotation(15),
+                                    transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
+                                    transforms.RandomGrayscale(p=0.2),
+                                    ])
 
     """
     dataset = ImageNet100_M(root=root_path, train=False, transform=transform)
@@ -1091,7 +1111,9 @@ if __name__ == "__main__":
     """
 
     root = "../datasets/fetal-ultrasound-brain"
-    fub = FUB(root=root)
+    fub = FUB(root=root, transform=transform, train=True)
+    img, _ = fub[0]
     print(len(fub))
+    print(img.dtype, img.min(), img.max(), img.shape)
 
    

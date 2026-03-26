@@ -126,7 +126,9 @@ osr_splits_inliers = {
                       173, 176, 177, 181, 184, 188, 191, 194, 195, 2, 7, 9, 16, 20, 26, 28, 44, 54, 95,
                       98, 102, 127, 178, 182, 22, 41, 82, 93, 112, 125, 189]],
                   
-    "cifar100_macro": [[4, 54, 3, 22, 26, 8]], }
+    "cifar100_macro": [[4, 54, 3, 22, 26, 8]],
+
+    "fub": [[0, 1, 2]]}
 
 
 osr_splits_outliers = {
@@ -214,7 +216,9 @@ osr_splits_outliers = {
                       80, 85, 86, 87, 88, 89, 90, 91, 92, 101, 106, 107, 108, 109, 110,
                       111, 114, 115, 116, 118, 119, 120, 121, 124, 130, 131, 132]],
 
-    "cifar100_marco": [[1, 0, 5, 34, 6, 41]]
+    "cifar100_marco": [[1, 0, 5, 34, 6, 41]],
+
+    "fub": [[0]]
 }
 
 
@@ -231,7 +235,7 @@ def pickClass(classIdx):
 import cv2
 import random
 from data_loader import iCIFAR10, iCIFAR100, TinyImagenet, customSVHN, mnist, CUB, Aircraft, ImageNet100_M
-from data_loader import tinyimgnet_c, cifar10_c, cifar100_c, ImageNet100
+from data_loader import tinyimgnet_c, cifar10_c, cifar100_c, ImageNet100, FUB
 import torchvision
 from util import TwoCropTransform
 from torchvision import transforms, datasets
@@ -253,14 +257,17 @@ from sklearn.cluster import KMeans
 
 
 num_inlier_classes_mapping = {"cifar10": 6, "cifar-10-100-10": 4, "cifar-10-100-50": 4, "cifar100_marco": 6, "imagenet100": 100,
-                              "imagenet100_m": 100, "cifar100": 100, "tinyimgnet": 20, "mnist": 6, "svhn": 6, "cub": 100, "aircraft": 50}                         # !!!!!!!!!!!!!!!!!!!
+                              "imagenet100_m": 100, "cifar100": 100, "tinyimgnet": 20, "mnist": 6, "svhn": 6, "cub": 100, "aircraft": 50,
+                              "fub": 3}                         # !!!!!!!!!!!!!!!!!!!
 
 
 data_function_mapping = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR10, "cifar-10-100-50": iCIFAR10, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100,
-                         "imagenet100_m": ImageNet100_M, "cifar100": iCIFAR100, "tinyimgnet": TinyImagenet, "mnist": mnist, "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft}
+                         "imagenet100_m": ImageNet100_M, "cifar100": iCIFAR100, "tinyimgnet": TinyImagenet, "mnist": mnist, "svhn": customSVHN, "cub": CUB,
+                         "aircraft": Aircraft, "FUB": FUB}
 
 data_function_mapping_testing = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR100, "cifar-10-100-50": iCIFAR100, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100,
-                                 "imagenet100_m": ImageNet100_M, "cifar100": iCIFAR100, "tinyimgnet": TinyImagenet, "mnist": mnist, "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft}
+                                 "imagenet100_m": ImageNet100_M, "cifar100": iCIFAR100, "tinyimgnet": TinyImagenet, "mnist": mnist, "svhn": customSVHN, "cub": CUB,
+                                 "aircraft": Aircraft, "FUB": FUB}
 
 data_function_mapping_curruption = {"cifar10": cifar10_c, "cifar100": cifar100_c, "tinyimgnet": tinyimgnet_c,}
 
@@ -276,7 +283,8 @@ mean_mapping = {"mnist":  (0.1307,),
                 "imagenet100_m": (0.485, 0.456, 0.406),
                 "tinyimgnet": (0.485, 0.456, 0.406),
                 "aircraft": (0.485, 0.456, 0.406), 
-                "cub": (0.485, 0.456, 0.406)}                 # 0.408, 0.459, 0.502, 123., 117., 104.
+                "cub": (0.485, 0.456, 0.406),
+                "fub": (0.485, 0.456, 0.406),}       # 0.408, 0.459, 0.502, 123., 117., 104.
 
 std_mapping = {"mnist": (0.3081,),
                "svhn": (0.19803012, 0.20101562, 0.19703614),
@@ -289,8 +297,8 @@ std_mapping = {"mnist": (0.3081,),
                "imagenet100_m": (0.229, 0.224, 0.225),
                "tinyimgnet": (0.229, 0.224, 0.225),
                "aircraft": (0.229, 0.224, 0.225),
-               "cub": (0.229, 0.224, 0.225)}               # 1., 1., 1.
-
+               "cub": (0.229, 0.224, 0.225),
+               "fub": (0.229, 0.224, 0.225)}               # 1., 1., 1.
 
 image_size_mapping = {"mnist": 32,
                       "svhn": 32,
@@ -303,7 +311,8 @@ image_size_mapping = {"mnist": 32,
                       "imagenet100": 224,
                       "imagenet100_m": 224,
                       "aircraft": 224,
-                      "cub": 224}
+                      "cub": 224,
+                      "fub": 224}
 
 
 def label_to_dict(labels, outliers=False):
@@ -330,7 +339,14 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
     if opt.action == "training_supcon" or opt.action == "trainging_linear":
         if opt.datasets == "mnist":
             train_transform = transforms.Compose([transforms.ToTensor(), transforms.RandomRotation((-5, 5)),])
-                                                                            
+
+        elif opt.datasets == "fub":
+            train_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
+                                    transforms.CenterCrop((size, size)),
+                                    transforms.RandomHorizontalFlip(), transforms.RandomRotation(15),
+                                    transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
+                                    transforms.RandomGrayscale(p=0.2),])
+
         else:
             print("training_supcon!!!")
             train_transform = transforms.Compose([transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),                                     
@@ -352,6 +368,9 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
     else:
         if opt.datasets == "mnist":
             train_transform = transforms.Compose([transforms.ToTensor()])
+        elif opt.datasets == "fub":
+            train_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
+                                                  transforms.CenterCrop((size, size)),])
         else:
             train_transform = transforms.Compose([transforms.ToTensor(), normalize])
 
