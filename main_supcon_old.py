@@ -260,6 +260,8 @@ def set_model(opt):
 
     if opt.datasets == "mnist":
         in_channels = 1
+    elif opt.datasets == "FUB":
+        in_channels = 1
     else:
         in_channels = 3
 
