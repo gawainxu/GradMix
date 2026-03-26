@@ -14,7 +14,6 @@ def parse_option():
 
     return opt
 
-
 def load_dino(opt):
 
     model = torch.hub.load('facebookresearch/dino:main', opt.dino_type)

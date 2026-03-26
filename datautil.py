@@ -258,7 +258,7 @@ from sklearn.cluster import KMeans
 
 num_inlier_classes_mapping = {"cifar10": 6, "cifar-10-100-10": 4, "cifar-10-100-50": 4, "cifar100_marco": 6, "imagenet100": 100,
                               "imagenet100_m": 100, "cifar100": 100, "tinyimgnet": 20, "mnist": 6, "svhn": 6, "cub": 100, "aircraft": 50,
-                              "fub": 3}                         # !!!!!!!!!!!!!!!!!!!
+                              "FUB": 3}                         # !!!!!!!!!!!!!!!!!!!
 
 
 data_function_mapping = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR10, "cifar-10-100-50": iCIFAR10, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100,
@@ -284,7 +284,7 @@ mean_mapping = {"mnist":  (0.1307,),
                 "tinyimgnet": (0.485, 0.456, 0.406),
                 "aircraft": (0.485, 0.456, 0.406), 
                 "cub": (0.485, 0.456, 0.406),
-                "fub": (0.485, 0.456, 0.406),}       # 0.408, 0.459, 0.502, 123., 117., 104.
+                "FUB": (0.485, 0.456, 0.406),}       # 0.408, 0.459, 0.502, 123., 117., 104.
 
 std_mapping = {"mnist": (0.3081,),
                "svhn": (0.19803012, 0.20101562, 0.19703614),
@@ -298,7 +298,7 @@ std_mapping = {"mnist": (0.3081,),
                "tinyimgnet": (0.229, 0.224, 0.225),
                "aircraft": (0.229, 0.224, 0.225),
                "cub": (0.229, 0.224, 0.225),
-               "fub": (0.229, 0.224, 0.225)}               # 1., 1., 1.
+               "FUB": (0.229, 0.224, 0.225)}               # 1., 1., 1.
 
 image_size_mapping = {"mnist": 32,
                       "svhn": 32,
@@ -312,7 +312,7 @@ image_size_mapping = {"mnist": 32,
                       "imagenet100_m": 224,
                       "aircraft": 224,
                       "cub": 224,
-                      "fub": 224}
+                      "FUB": 224}
 
 
 def label_to_dict(labels, outliers=False):
