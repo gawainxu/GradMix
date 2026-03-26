@@ -152,7 +152,7 @@ def set_model(opt):
     else:
         in_channels = 3
         
-    model = SupCEResNet(name=opt.model, num_classes=opt.num_classes)                 # TODO
+    model = SupCEResNet(name=opt.model, in_channels=in_channels, num_classes=opt.num_classes)                 # TODO
     criterion = torch.nn.CrossEntropyLoss()
        
     if torch.cuda.is_available():
