@@ -415,7 +415,10 @@ def get_test_datasets(opt, class_idx = None):
     size = image_size_mapping[opt.datasets]
 
     if opt.datasets == "mnist":
-        test_transform = transforms.Compose([transforms.ToTensor(), ]) 
+        test_transform = transforms.Compose([transforms.ToTensor(), ])
+    elif opt.datasets == "fub":
+        test_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
+                                              transforms.CenterCrop((size, size)),])
     elif opt.datasets == "imagenet100" or opt.datasets == "cub":
         test_transform = transforms.Compose([transforms.ToTensor(), transforms.Resize((224, 224)), normalize])
     else:
@@ -488,6 +491,9 @@ def get_outlier_datasets(opt, class_idx=None):
     else:
         if opt.datasets == "mnist":
             test_transform = transforms.Compose([transforms.ToTensor(),])
+        elif opt.datasets == "fub":
+            test_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
+                                                 transforms.CenterCrop((size, size)), ])
         else:
             test_transform = transforms.Compose([transforms.ToTensor(), normalize])
 

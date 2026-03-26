@@ -1073,16 +1073,15 @@ class FUB(Dataset):
             del self.data[4::5]
             del self.labels[4::5]
         else:
-            self.data = self.data[:,:,5]
-            self.labels = self.labels[:,:,5]
-
+            self.data = self.data[::5]
+            self.labels = self.labels[::5]
 
     def __getitem__(self, idx):
 
         if self.transform is not None:
-            return self.transform(self.data[idx]), self.labels[idx]
+            return self.transform(self.data[idx]), self.labels[idx], None
         else:
-            return self.data[idx], self.labels[idx]
+            return self.data[idx], self.labels[idx], None
 
     def __len__(self):
 
@@ -1111,7 +1110,7 @@ if __name__ == "__main__":
     """
 
     root = "../datasets/fetal-ultrasound-brain"
-    fub = FUB(root=root, transform=transform, train=True)
+    fub = FUB(root=root, transform=transform, train=False)
     img, _ = fub[0]
     print(len(fub))
     print(img.dtype, img.min(), img.max(), img.shape)
