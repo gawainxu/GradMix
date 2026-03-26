@@ -70,7 +70,7 @@ def parse_option():
     parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "simCNN", "MLP", "MaskCon"])
     parser.add_argument("--resnet_wide", type=int, default=1, help="factor for expanding channels in wide resnet")
     parser.add_argument('--datasets', type=str, default='cifar10',
-                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft"], help='dataset')
+                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
     parser.add_argument('--mean', type=str, help='mean of dataset in path in form of str tuple')
     parser.add_argument('--std', type=str, help='std of dataset in path in form of str tuple')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
@@ -147,6 +147,8 @@ def set_model(opt):
 
     if opt.datasets == "mnist":
         in_channels = 1
+    elif opt.datasets == "FUB":
+        in_channels = 3
     else:
         in_channels = 3
         
