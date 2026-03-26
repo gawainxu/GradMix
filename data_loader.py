@@ -1066,7 +1066,7 @@ class FUB(Dataset):
             label = self.labels_dict[label_name]
             if label in classes:
                 self.labels.append(label)
-                image = plt.imread(os.path.join(images_folder, fn))
+                image = Image.open(os.path.join(images_folder, fn)).convert('L')
                 self.data.append(image)
 
         if train:
@@ -1109,9 +1109,9 @@ if __name__ == "__main__":
         print(annotations)
     """
 
-    root = "../datasets/fetal-ultrasound-brain"
+    root = "../datasets/"
     fub = FUB(root=root, transform=transform, train=False)
-    img, _ = fub[0]
+    img, _, _ = fub[0]
     print(len(fub))
     print(img.dtype, img.min(), img.max(), img.shape)
 
