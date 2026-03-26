@@ -340,7 +340,7 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
         if opt.datasets == "mnist":
             train_transform = transforms.Compose([transforms.ToTensor(), transforms.RandomRotation((-5, 5)),])
 
-        elif opt.datasets == "fub":
+        elif opt.datasets == "FUB":
             train_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
                                     transforms.CenterCrop((size, size)),
                                     transforms.RandomHorizontalFlip(), transforms.RandomRotation(15),
