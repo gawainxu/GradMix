@@ -128,7 +128,7 @@ osr_splits_inliers = {
                   
     "cifar100_macro": [[4, 54, 3, 22, 26, 8]],
 
-    "fub": [[0, 1, 2]]}
+    "FUB": [[0, 1, 2]]}
 
 
 osr_splits_outliers = {
@@ -218,7 +218,7 @@ osr_splits_outliers = {
 
     "cifar100_marco": [[1, 0, 5, 34, 6, 41]],
 
-    "fub": [[0]]
+    "FUB": [[0]]
 }
 
 
