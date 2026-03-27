@@ -1,6 +1,9 @@
 import torch
 
+import numpy as np
 import argparse
+
+from  datautil import get_train_datasets, get_test_datasets, get_outlier_datasets
 
 
 def parse_option():
@@ -9,10 +12,20 @@ def parse_option():
 
     parser.add_argument("--dino_type", type=str, default="dino_vits16",
                         choices=['dino_vits16', 'dino_vits8', 'dino_vitb16', 'dino_vitb8', 'dino_resnet50'])
+    parser.add_argument('--datasets', type=str, default='FUB',
+                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
+                                 "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "FUB"],
+                        help='dataset')
+    parser.add_argument("--action", type=str, default="testing_known",
+                        choices=["training_supcon", "trainging_linear", "testing_known", "testing_unknown",
+                                 "feature_reading"])
+    parser.add_argument("--trail", type=int, default=0, choices=[0, 1, 2, 3, 4, 5, 6],
+                        help="index of repeating training")
 
     opt = parser.parse_args()
 
     return opt
+
 
 def load_dino(opt):
 
@@ -24,8 +37,77 @@ def load_dino(opt):
     return model
 
 
+def load_data(opt):
+
+    train_dataset = get_train_datasets(opt)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1,
+                                              shuffle=False, num_workers=1,
+                                              pin_memory=True, drop_last=True, persistent_workers=True)
+
+    test_dataset = get_test_datasets(opt)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1,
+                                              shuffle=False, num_workers=1,
+                                              pin_memory=True, drop_last=True, persistent_workers=True)
+
+    outlier_dataset = get_outlier_datasets(opt)
+    outlier_loader = torch.utils.data.DataLoader(outlier_dataset, batch_size=1,
+                                              shuffle=False, num_workers=1,
+                                              pin_memory=True, drop_last=True, persistent_workers=True)
+
+    return train_loader, test_loader, outlier_loader
+
+
+def read_dino_features(test_loader, model):
+
+    features = []
+    labels = []
+
+    for i, (img, label, _) in enumerate(test_loader):
+        img = img.repeat(1, 3, 1, 1)
+        img = img.cuda() if torch.cuda.is_available() else img
+        f = model(img)
+        features.append(torch.squeeze(f.cup()))
+        labels.append(torch.squeeze(label.cpu()))
+
+    return features, labels
+
+
+def sort_features(mixedFeatures, labels, num_classes):
+    sortedFeatures = []
+    for i in range(num_classes):
+        sortedFeatures.append([])
+
+    for i, (features, l) in enumerate(zip(mixedFeatures, labels)):
+        l = l.item()
+        features = features.reshape([-1])
+        sortedFeatures[l].append(features)
+
+    return sortedFeatures
+
+
+def classification_evaluation(sorted_train_features, test_features, test_label):
+
+
+    return 0
+
+
+
+
+
 
 if __name__ == "__main__":
 
     opt = parse_option()
     model = load_dino(opt)
+    train_loader, test_loader, outlier_loader = load_data(opt)
+
+    train_features, train_labels = read_dino_features(train_loader, model)
+    sorted_train_features = sort_features(train_features, train_labels, num_classes=3)
+
+    test_features, test_labels = read_dino_features(test_loader, model)
+    outlier_features, _ = read_dino_features(outlier_loader, model)
+
+
+
+
+
