@@ -72,8 +72,10 @@ def read_dino_features(test_loader, model):
         img = img.repeat(1, 3, 1, 1)
         img = img.cuda() if torch.cuda.is_available() else img
         f = model(img)
-        features.append(torch.squeeze(f.cpu()))
-        labels.append(torch.squeeze(label.cpu()))
+        f = f.cpu()
+        label = label.cpu()
+        features.append(torch.squeeze(f))
+        labels.append(torch.squeeze(label))
 
     return features, labels
 
