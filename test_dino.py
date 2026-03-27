@@ -69,6 +69,7 @@ def read_dino_features(test_loader, model):
     labels = []
 
     for i, (img, label, _) in enumerate(test_loader):
+        print(i)
         img = img.repeat(1, 3, 1, 1)
         img = img.cuda() if torch.cuda.is_available() else img
         f = model(img)
@@ -91,7 +92,6 @@ def sort_features(mixedFeatures, labels, num_classes):
         sortedFeatures[l].append(features)
 
     return sortedFeatures
-
 
 
 def linear_probe(train_features, train_labels, test_features, test_labels, opt):
