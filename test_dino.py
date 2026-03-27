@@ -63,20 +63,21 @@ def load_data(opt):
     return train_loader, test_loader, outlier_loader
 
 
-def read_dino_features(test_loader, model):
+def read_dino_features(data_loader, model):
 
     features = []
     labels = []
 
-    for i, (img, label, _) in enumerate(test_loader):
-        print(i)
-        img = img.repeat(1, 3, 1, 1)
-        img = img.cuda() if torch.cuda.is_available() else img
-        f = model(img)
-        f = f.cpu()
-        label = label.cpu()
-        features.append(torch.squeeze(f))
-        labels.append(torch.squeeze(label))
+    with torch.inference_mode():
+        for i, (img, label, _) in enumerate(data_loader):
+            print(i)
+            img = img.repeat(1, 3, 1, 1)
+            img = img.cuda(non_blocking=True) if torch.cuda.is_available() else img
+            f = model(img)
+            f = f.cpu()
+            label = label.cpu()
+            features.append(torch.squeeze(f))
+            labels.append(torch.squeeze(label))
 
     return features, labels
 
