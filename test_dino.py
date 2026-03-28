@@ -1,3 +1,4 @@
+import numpy
 import torch
 from torch.utils.data import Dataset
 
@@ -6,6 +7,7 @@ import argparse
 
 from  datautil import get_train_datasets, get_test_datasets, get_outlier_datasets
 from feature_linear import set_model, train, test
+from util import accuracy_plain, AUROC
 
 
 def parse_option():
@@ -31,6 +33,8 @@ def parse_option():
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--print_freq", type=int, default=1)
+
+    parser.add_argument("--K", type=int, default=3)
 
     opt = parser.parse_args()
 
@@ -74,7 +78,7 @@ def read_dino_features(data_loader, model):
 
     with torch.inference_mode():
         for i, (img, label, _) in enumerate(data_loader):
-            print(i)
+            #print(i)
             img = img.repeat(1, 3, 1, 1)
             img = img.cuda(non_blocking=True) if torch.cuda.is_available() else img
             f = model(img)
@@ -113,6 +117,44 @@ def linear_probe(train_features, train_labels, test_features, test_labels, opt):
     print("original testing accuracy", test_acc)
 
 
+def KNN_classifier(testing_features, testing_labels, sorted_training_features):
+
+    print("Begin KNN Classifier!")
+    testing_similarity_logits = KNN_logits(testing_features, sorted_training_features)
+    prediction_logits, predictions = np.amax(testing_similarity_logits, axis=1), np.argmax(testing_similarity_logits, axis=1)
+
+    acc = accuracy_plain(predictions, testing_labels)
+    print("KNN Accuracy is: ", acc)
+
+    return prediction_logits, predictions, acc
+
+
+def KNN_logits(testing_features, sorted_exemplar_features):
+    testing_similarity_logits = []
+
+    for idx, testing_feature in enumerate(testing_features):
+
+        testing_feature = testing_feature.numpy()
+        similarity_logits = []
+        for training_features_c in sorted_exemplar_features:
+            training_features_c = [t.numpy() for t in training_features_c]
+            training_features_c = numpy.array(training_features_c)
+
+            similarities = np.matmul(training_features_c, testing_feature) / np.linalg.norm(training_features_c,
+                                                                                            axis=1) / np.linalg.norm(testing_feature)
+            ind = np.argsort(similarities)[-opt.K:]
+            top_k_similarities = similarities[ind]
+            similarity_logits.append(np.sum(top_k_similarities))
+
+        testing_similarity_logits.append(similarity_logits)
+
+    testing_similarity_logits = np.array(testing_similarity_logits)
+    testing_similarity_logits = np.divide(testing_similarity_logits.T, np.sum(testing_similarity_logits,
+                                                                              axis=1)).T  # normalization, maybe not necessary???
+
+    return testing_similarity_logits
+
+
 class features_set(Dataset):
 
     def __init__(self, features, labels, transform=None):
@@ -140,7 +182,17 @@ if __name__ == "__main__":
     test_features, test_labels = read_dino_features(test_loader, model)
     outlier_features, _ = read_dino_features(outlier_loader, model)
 
+    print("linear probe")
     linear_probe(train_features, train_labels, test_features, test_labels, opt)
+
+    prediction_logits_id, predictions_id, acc_id = KNN_classifier(test_features, test_labels, sorted_train_features)
+    prediction_logits_ood, predictions_ood, acc_ood = KNN_classifier(outlier_features, test_labels, sorted_train_features)
+    probs_binary_dis = np.concatenate((prediction_logits_id, prediction_logits_ood), axis=0)
+    labels_binary_id = [1 for _ in range(len(test_features))]
+    labels_binary_ood = [0 for _ in range(len(outlier_features))]
+    labels_binary = np.array(labels_binary_id + labels_binary_ood)
+    auroc =  AUROC(labels_binary, probs_binary_dis, opt)
+    print("AUROC ", auroc)
 
 
 
