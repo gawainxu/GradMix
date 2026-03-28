@@ -1,10 +1,11 @@
 import torch
+from torch.utils.data import Dataset
 
 import numpy as np
 import argparse
 
 from  datautil import get_train_datasets, get_test_datasets, get_outlier_datasets
-from feature_linear import set_model, train, test, features_set
+from feature_linear import set_model, train, test
 
 
 def parse_option():
@@ -22,11 +23,14 @@ def parse_option():
                                  "feature_reading"])
     parser.add_argument("--trail", type=int, default=0, choices=[0, 1, 2, 3, 4, 5, 6],
                         help="index of repeating training")
-    parser.add_argument("--test_mode", type=str, default="linear", choices=["linear", "cosine", "knn"])
     parser.add_argument("--num_classes", type=int, default=3)
-    parser.add_argument("--linear_input_dim", type=int, default=128)
+
+    parser.add_argument("--test_mode", type=str, default="linear", choices=["linear", "cosine", "knn"])
+    parser.add_argument("--linear_input_dim", type=int, default=384)
     parser.add_argument("--learning_rate", type=float, default=0.01)
     parser.add_argument("--epochs", type=int, default=5)
+    parser.add_argument("--batch_size", type=int, default=64)
+    parser.add_argument("--print_freq", type=int, default=1)
 
     opt = parser.parse_args()
 
@@ -99,7 +103,7 @@ def linear_probe(train_features, train_labels, test_features, test_labels, opt):
 
     train_set = features_set(train_features, train_labels)
     test_set = features_set(test_features, test_labels)
-    train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=64, shuffle=True,
+    train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=opt.batch_size, shuffle=True,
                                                    num_workers=1, pin_memory=True)
     test_dataloader = torch.utils.data.DataLoader(test_set, batch_size=1, shuffle=False,
                                                   num_workers=1, pin_memory=True)
@@ -107,6 +111,21 @@ def linear_probe(train_features, train_labels, test_features, test_labels, opt):
     losses, top1, top5 = train(classifier, criterion, optimizer, train_dataloader, opt)
     test_acc = test(classifier, test_dataloader, opt)
     print("original testing accuracy", test_acc)
+
+
+class features_set(Dataset):
+
+    def __init__(self, features, labels, transform=None):
+        self.features = features
+        self.labels = labels
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.features)
+
+    def __getitem__(self, index):
+
+        return  self.features[index], self.labels[index]
 
 
 if __name__ == "__main__":

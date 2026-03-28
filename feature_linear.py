@@ -137,7 +137,7 @@ def train(classifier, criterion, optimizer, dataloader, opt):
             loss = criterion(output, labels)
             
             losses.update(loss.item(), opt.batch_size)
-            acc = accuracy(output, labels, topk=(1, 5))
+            acc = accuracy(output, labels, topk=(1, opt.num_classes))
             acc1, acc5 = acc[0].item(), acc[1].item()
             top1.update(acc1, opt.batch_size)
             top5.update(acc5, opt.batch_size)
@@ -168,7 +168,7 @@ def test(classifier, dataloader, opt):
         label = label.cuda()
         output = classifier(data)
         #print(output, label)
-        acc = accuracy(output, label, topk=(1, 5))
+        acc = accuracy(output, label, topk=(1, opt.num_classes))
         acc1, _ = acc[0].item(), acc[1].item()
         top1.update(acc1, 1)
         
