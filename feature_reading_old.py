@@ -41,19 +41,20 @@ breaks = {"cifar-10-100-10": {"train": 5000, "test_known":500, "test_unknown": 5
            "tinyimgnet":{"train": 5000, "test_known": 100, "test_unknown": 20, "full": 100000}, 
            'mnist':{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000}, 
            "svhn":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
-           "cub":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000}}
+           "cub":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
+           "FUB": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},}
 
 def parse_option():
 
     parser = argparse.ArgumentParser('argument for feature reading')
 
-    parser.add_argument('--datasets', type=str, default='cifar10',
-                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft"], help='dataset')
+    parser.add_argument('--datasets', type=str, default='FUB',
+                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
-    parser.add_argument('--model', type=str, default="resnet18", choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "simCNN", "MLP"])
-    parser.add_argument("--model_path", type=str, default="/save/SupCon/cifar10_resnet18_original_data__mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_no_[2, 3]_SimCLR_1.0_1.2_0.05_trail_3_128_256_twostage/ckpt_epoch_2.pth")
+    parser.add_argument('--model', type=str, default="simCNN", choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "simCNN", "MLP"])
+    parser.add_argument("--model_path", type=str, default="/save/SupCon/FUB_models/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_128/last.pth")
     parser.add_argument("--linear_model_path", type=str, default=None)
-    parser.add_argument("--trail", type=int, default=3)
+    parser.add_argument("--trail", type=int, default=0)
     parser.add_argument("--split_train_val", type=bool, default=True)
     parser.add_argument("--action", type=str, default="feature_reading",
                         choices=["training_supcon", "trainging_linear", "testing_known", "testing_unknown", "feature_reading"])
@@ -77,7 +78,7 @@ def parse_option():
 
     parser.add_argument("--lr", type=str, default=0.01)
     parser.add_argument("--training_bz", type=int, default=600)
-    parser.add_argument("--if_train", type=str, default="test_unknown", choices=['train', 'val', 'test_known', 'test_unknown', "full"])
+    parser.add_argument("--if_train", type=str, default="train", choices=['train', 'val', 'test_known', 'test_unknown', "full"])
     parser.add_argument('--batch_size', type=int, default=1, help='batch_size')
     parser.add_argument('--num_workers', type=int, default=4, help='num of workers to use')
 
@@ -126,6 +127,8 @@ def parse_option():
 def load_model(opt):
 
     if opt.datasets == "mnist":
+        in_channels = 1
+    elif opt.datasets == "FUB":
         in_channels = 1
     else:
         in_channels = 3

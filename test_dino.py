@@ -191,7 +191,6 @@ if __name__ == "__main__":
     labels_binary_ood = [0 for _ in range(len(outlier_features))]
     labels_binary = np.array(labels_binary_id + labels_binary_ood)
 
-    """
     print("linear probe")
     linear_probe(train_features, train_labels, test_features, test_labels, opt)
 
@@ -200,7 +199,6 @@ if __name__ == "__main__":
     probs_binary_dis = np.concatenate((prediction_logits_id, prediction_logits_ood), axis=0)
     auroc =  AUROC(labels_binary, probs_binary_dis, opt)
     print("AUROC KNN ", auroc)
-    """
 
     norm_scores_id = norm_scores(test_features)
     norm_scores_ood = norm_scores(outlier_features)

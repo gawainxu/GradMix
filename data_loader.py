@@ -1044,7 +1044,7 @@ class FUB(Dataset):
                 target_transform=None, download=False, label_dict = None, last_features_list=None,
                 last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
 
-        self.labels_dict = {"Trans-thalamic": 0, "Trans-cerebellum": 1, "Trans-ventricular": 2, "Other": 4}
+        self.labels_dict = {"Trans-thalamic": 0, "Trans-cerebellum": 1, "Trans-ventricular": 2, "Other": 3}
         images_folder = os.path.join(root, "fetal-ultrasound-brain/data")
         self.image_names = sorted(os.listdir(images_folder))
         self.labeling_file = os.path.join(root, "fetal-ultrasound-brain/sample_submission.csv")

@@ -31,14 +31,14 @@ from util import  feature_stats
 def parse_option():
 
     parser = argparse.ArgumentParser('argument for visulization')
-    parser.add_argument("--inlier_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_4_128_256_600_train")
-    parser.add_argument("--outlier_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256_600_test_unknown")
+    parser.add_argument("--inlier_features_path", type=str, default="/features/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_128_600_train")
+    parser.add_argument("--outlier_features_path", type=str, default="/features/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_128_600_test_unknown")
     parser.add_argument("--inlier_features_path1", type=str, default=None)
     parser.add_argument("--outlier_features_path1", type=str, default=None) 
     parser.add_argument("--inlier_features_path2", type=str, default=None)
     parser.add_argument("--outlier_features_path2", type=str, default=None)
-    parser.add_argument("--num_classes", type=int, default=20)
-    parser.add_argument("--save_path", type=str, default="/plots/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_4_128_256_600_test_unknown_tsne.pdf")
+    parser.add_argument("--num_classes", type=int, default=3)
+    parser.add_argument("--save_path", type=str, default="/plots/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_128_600_test_unknown_tsne.pdf")
     parser.add_argument("--reduced_len", type=int, default=30)
     parser.add_argument("--ensemble_features", type=bool, default=False)
     parser.add_argument("--downsample_ratio", type=int, default=None)
@@ -207,12 +207,13 @@ if __name__ == "__main__":
     #closest_similarities_outliers = center_similarity(features_outliers, centers)
     #print("Average Similarity Inliers: ", np.mean(np.array(closest_similarities_inliers)))
     #print("Average Similarity Outliers: ", np.mean(np.array(closest_similarities_outliers)))
-        
+
+    """    
     indices = range(len(features_test))
     indices = random.sample(indices, 5000)    # 5000
-    
     features_test = features_test[indices]
     labels_test = labels_test[indices]
+    """
         
     features_SNE = np.empty([0, 2])    
     features = pca(np.squeeze(np.array(features_test)), 50)
