@@ -155,6 +155,11 @@ def KNN_logits(testing_features, sorted_exemplar_features):
     return testing_similarity_logits
 
 
+def norm_scores(testing_features):
+
+    return [torch.norm(testing_feature) for testing_feature in testing_features]
+
+
 class features_set(Dataset):
 
     def __init__(self, features, labels, transform=None):
@@ -182,17 +187,27 @@ if __name__ == "__main__":
     test_features, test_labels = read_dino_features(test_loader, model)
     outlier_features, _ = read_dino_features(outlier_loader, model)
 
+    labels_binary_id = [1 for _ in range(len(test_features))]
+    labels_binary_ood = [0 for _ in range(len(outlier_features))]
+    labels_binary = np.array(labels_binary_id + labels_binary_ood)
+
+    """
     print("linear probe")
     linear_probe(train_features, train_labels, test_features, test_labels, opt)
 
     prediction_logits_id, predictions_id, acc_id = KNN_classifier(test_features, test_labels, sorted_train_features)
     prediction_logits_ood, predictions_ood, acc_ood = KNN_classifier(outlier_features, test_labels, sorted_train_features)
     probs_binary_dis = np.concatenate((prediction_logits_id, prediction_logits_ood), axis=0)
-    labels_binary_id = [1 for _ in range(len(test_features))]
-    labels_binary_ood = [0 for _ in range(len(outlier_features))]
-    labels_binary = np.array(labels_binary_id + labels_binary_ood)
     auroc =  AUROC(labels_binary, probs_binary_dis, opt)
-    print("AUROC ", auroc)
+    print("AUROC KNN ", auroc)
+    """
+
+    norm_scores_id = norm_scores(test_features)
+    norm_scores_ood = norm_scores(outlier_features)
+    norm_scores = norm_scores_id + norm_scores_ood
+    auroc = AUROC(labels_binary, norm_scores, opt)
+    print("AUROC Norm ", auroc)
+
 
 
 
