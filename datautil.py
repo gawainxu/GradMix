@@ -342,7 +342,7 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
 
         elif opt.datasets == "FUB":
             train_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
-                                    transforms.Resize((size),
+                                    transforms.Resize((size)),
                                     transforms.RandomHorizontalFlip(), transforms.RandomRotation(15),
                                     transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
                                     transforms.RandomGrayscale(p=0.2),])
