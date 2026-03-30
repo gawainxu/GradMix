@@ -1096,22 +1096,14 @@ class FUB(Dataset):
 if __name__ == "__main__":
     
     root_path = "../datasets/"
+
+    """
     transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
-                                    transforms.CenterCrop((224, 224)),
+                                    transforms.Resize(224),
                                     transforms.RandomHorizontalFlip(), transforms.RandomRotation(15),
                                     transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
                                     transforms.RandomGrayscale(p=0.2),
                                     ])
-
-    """
-    dataset = ImageNet100_M(root=root_path, train=False, transform=transform)
-    test_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True,
-                                              num_workers=4, pin_memory=True)
-    for i, (images, labels, annotations) in enumerate(test_loader):
-        print(len(images), len(labels))
-        print(len(annotations))
-        print(annotations)
-    """
 
     root = "../datasets/"
     fub0 = FUB(root=root, classes=[0], transform=transform, train=True)
@@ -1124,5 +1116,19 @@ if __name__ == "__main__":
     print(len(fub0))
     print(len(fub1))
     print(len(fub2))
+    """
 
+    transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
+                                    transforms.Resize(224),
+                                    transforms.RandomHorizontalFlip(), transforms.RandomRotation(15),
+                                    transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
+                                    transforms.RandomGrayscale(p=0.2),])
+
+    dataset = CUB(root=root_path, train=True, transform=transform)
+    test_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True,
+                                              num_workers=4, pin_memory=True)
+    for i, (images, labels, annotations) in enumerate(test_loader):
+        print(len(images), len(labels))
+        print(len(annotations))
+        print(annotations)
    
