@@ -52,7 +52,7 @@ def parse_option():
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
     parser.add_argument('--model', type=str, default="simCNN", choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "simCNN", "MLP"])
-    parser.add_argument("--model_path", type=str, default="/save/SupCon/FUB_models/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_128/last.pth")
+    parser.add_argument("--model_path", type=str, default="/save/SupCon/FUB_models/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_256/last.pth")
     parser.add_argument("--linear_model_path", type=str, default=None)
     parser.add_argument("--trail", type=int, default=0)
     parser.add_argument("--split_train_val", type=bool, default=True)
@@ -78,7 +78,7 @@ def parse_option():
 
     parser.add_argument("--lr", type=str, default=0.01)
     parser.add_argument("--training_bz", type=int, default=600)
-    parser.add_argument("--if_train", type=str, default="train", choices=['train', 'val', 'test_known', 'test_unknown', "full"])
+    parser.add_argument("--if_train", type=str, default="test_unknown", choices=['train', 'val', 'test_known', 'test_unknown', "full"])
     parser.add_argument('--batch_size', type=int, default=1, help='batch_size')
     parser.add_argument('--num_workers', type=int, default=4, help='num of workers to use')
 

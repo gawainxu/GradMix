@@ -52,12 +52,15 @@ def parse_option():
     parser.add_argument("--end", type=bool, default=False, help="if it is end to end training")
     parser.add_argument("--ensembles", type=int, default=1)
     parser.add_argument("--linear_model_path", type=str, default=None)
-    parser.add_argument("--num_classes", type=int, default=20)
+    parser.add_argument("--num_classes", type=int, default=3)
     parser.add_argument("--feat_dim", type=int, default=128)
-    
-    parser.add_argument("--exemplar_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_0_128_256_600_train")
-    parser.add_argument("--testing_known_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_0_128_256_600_test_known")
-    parser.add_argument("--testing_unknown_features_path", type=str, default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_0_128_256_600_test_unknown")
+
+    parser.add_argument("--exemplar_features_path", type=str,
+                        default="/features/FUB_simCNN_vanilia__SimCLR_1.0_1.0_0.1_trail_0_128_256_600_train")
+    parser.add_argument("--testing_known_features_path", type=str,
+                        default="/features/FUB_simCNN_vanilia__SimCLR_1.0_1.0_0.1_trail_0_128_256_600_test_known")
+    parser.add_argument("--testing_unknown_features_path", type=str,
+                        default="/features/FUB_simCNN_vanilia__SimCLR_1.0_1.0_0.1_trail_0_128_256_600_test_unknown")
 
     parser.add_argument("--exemplar_features_path1", type=str, default=None)
     parser.add_argument("--testing_known_features_path1", type=str, default=None)
@@ -460,8 +463,8 @@ def feature_classifier(opt):
 
     # Process results AUROC and OSCR
     # for AUROC, convert labels to binary labels, assume inliers are positive
-    labels_binary_known = [1 if i < 100 else 0 for i in labels_testing_known]
-    labels_binary_unknown = [1 if i < 100 else 0 for i in labels_testing_unknown]
+    labels_binary_known = [1 if i < opt.num_classes else 0 for i in labels_testing_known]
+    labels_binary_unknown = [1 if i < opt.num_classes else 0 for i in labels_testing_unknown]
     labels_binary = np.array(labels_binary_known + labels_binary_unknown)
     #print("labels_binary", labels_binary)
 
@@ -469,14 +472,15 @@ def feature_classifier(opt):
 
     features_testing_known_backbone = features_testing_known_backbone.astype(np.float32)
     features_testing_unknown_backbone = features_testing_unknown_backbone.astype(np.float32)
-    features_testing_known_head1 = models[0].head(torch.tensor(features_testing_known_backbone))
-    features_testing_unknown_head1 = models[0].head(torch.tensor(features_testing_unknown_backbone))
-    norm_score_known1 = np.linalg.norm(features_testing_known_head1.detach().numpy(), axis=1)
-    norm_score_unknown1 = np.linalg.norm(features_testing_unknown_head1.detach().numpy(), axis=1)
+    #features_testing_known_head1 = models[0].head(torch.tensor(features_testing_known_backbone))
+    #features_testing_unknown_head1 = models[0].head(torch.tensor(features_testing_unknown_backbone))
+    norm_score_known1 = np.linalg.norm(features_testing_known_backbone, axis=1)
+    norm_score_unknown1 = np.linalg.norm(features_testing_unknown_backbone, axis=1)
     norm_score_binary1 = np.concatenate((norm_score_known1, norm_score_unknown1), axis=0)
     auroc = AUROC(labels_binary, norm_score_binary1, opt)
     print("AUROC norm 1 is: ", auroc)
 
+    """
     if opt.exemplar_features_path1 is not None:
         features_testing_known_backbone1 = features_testing_known_backbone1.astype(np.float32)
         features_testing_unknown_backbone1 = features_testing_unknown_backbone1.astype(np.float32)
@@ -546,30 +550,6 @@ def feature_classifier(opt):
     print("res12_unknown", res12_unknown)
     print("res13_unknown", res13_unknown)
     print("res23_unknown", res23_unknown)
-
-
-
-    """
-    probs_binary = np.concatenate((prediction_logits_known, prediction_logits_unknown), axis=0)
-    auroc = AUROC(labels_binary, probs_binary, opt)
-    print("AUROC is: ", auroc)
-
-    probs_binary_dis = np.concatenate((prediction_logits_known_dis_in, prediction_logits_unknown_dis_in), axis=0)
-
-    auroc = AUROC(labels_binary, probs_binary_dis, opt)
-    print("Dis AUROC is: ", auroc)
-    
-    # AUROC based on LoF
-    #all_testing_features = np.concatenate((features_testing_known_backbone, features_testing_unknown_backbone), axis=0)
-    #scores = LoF(all_testing_features, sorted_features_examplar_backbone, opt)
-    #auroc = AUROC(labels_binary, scores, opt)
-    #print("LoF AUROC is: ", auroc)
-
-    # OSCR
-    oscr = OSCR(np.array(prediction_logits_known_dis_out), np.array(prediction_logits_unknown_dis_out), predictions_known, labels_testing_known)
-    print("OSCR is: ", oscr)
-
-    #print("Acc Known: ", acc_known)
     """
 
     return auroc             # oscr, acc_known

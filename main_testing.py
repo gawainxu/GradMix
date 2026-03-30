@@ -52,15 +52,15 @@ def parse_option():
     parser.add_argument("--end", type=bool, default=False, help="if it is end to end training")
     parser.add_argument("--ensembles", type=int, default=1)
     parser.add_argument("--linear_model_path", type=str, default="/save/SupCon/cifar10_models/cifar10_resnet18_original_data__vanilia__SimCLR_0.01_trail_0/last_linear.pth")
-    parser.add_argument("--num_classes", type=int, default=20)
+    parser.add_argument("--num_classes", type=int, default=3)
     parser.add_argument("--feat_dim", type=int, default=128)
 
     parser.add_argument("--exemplar_features_path", type=str,
-                        default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_0_128_256_600_train")
+                        default="/features/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_256_600_train")
     parser.add_argument("--testing_known_features_path", type=str,
-                        default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_0_128_256_600_test_known")
+                        default="/features/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_256_600_test_known")
     parser.add_argument("--testing_unknown_features_path", type=str,
-                        default="/features1/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_0_128_256_600_test_unknown")
+                        default="/features/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_256_600_test_unknown")
 
     parser.add_argument("--exemplar_features_path1", type=str,
                         default=None)
@@ -93,7 +93,7 @@ def parse_option():
     parser.add_argument("--downsampling_ratio_unknown", type=int, default=10)
     parser.add_argument("--ensemble_features", type=bool, default=False)
 
-    parser.add_argument("--K", type=int, default=10)
+    parser.add_argument("--K", type=int, default=3)
     parser.add_argument("--LoF_K", type=int, default=5)
     parser.add_argument("--LoF_contamination", type=float, default=0.01)
 
@@ -171,6 +171,8 @@ def set_model(opt):
 
     if opt.datasets == "mnist":
         in_channels = 1
+    elif opt.datasets == "FUB":
+        in_channels = 1
     else:
         in_channels = 3
 
@@ -200,9 +202,7 @@ def set_model(opt):
         models.append(model2)
         opt.num_ensembles += 1
 
-    linear_model = 
-
-    return models, linear_model
+    return models
 
 
 
@@ -427,14 +427,13 @@ def feature_classifier(opt):
 
     if opt.ensemble_features is True:
         features_testing_known_head = np.concatenate((features_testing_known_backbone, features_testing_known_head), axis=1)
-    features_testing_known_head, labels_testing_known = down_sampling(features_testing_known_head, labels_testing_known, opt.downsampling_ratio_known)
+    #features_testing_known_head, labels_testing_known = down_sampling(features_testing_known_head, labels_testing_known, opt.downsampling_ratio_known)
     #features_testing_known_backbone, labels_testing_known = down_sampling(features_testing_known_backbone, labels_testing_known, opt.downsampling_ratio_known)
-    prediction_logits_known, predictions_known, acc_known = KNN_classifier(features_testing_known_head, labels_testing_known, sorted_features_examplar_head)
+    prediction_logits_known, predictions_known, acc_known = KNN_classifier(features_testing_known_backbone, labels_testing_known, sorted_features_examplar_backbone)
     #prediction_logits_known, predictions_known, acc_known = KNN_classifier(features_testing_known_backbone, labels_testing_known, sorted_features_examplar_backbone)
 
-    prediction_logits_known_dis_in, prediction_logits_known_dis_out, predictions_known_dis, acc_known_dis = distance_classifier(features_testing_known_head, labels_testing_known, sorted_features_examplar_head)
+    prediction_logits_known_dis_in, prediction_logits_known_dis_out, predictions_known_dis, acc_known_dis = distance_classifier(features_testing_known_backbone, labels_testing_known, sorted_features_examplar_backbone)
 
-    """
     with open(opt.testing_unknown_features_path, "rb") as f:
         features_testing_unknown_head, features_testing_unknown_backbone, _, labels_testing_unknown = pickle.load(f)          
         features_testing_unknown_head = np.squeeze(np.array(features_testing_unknown_head))
@@ -461,12 +460,12 @@ def feature_classifier(opt):
 
     if opt.ensemble_features is True:
         features_testing_unknown_head = np.concatenate((features_testing_unknown_backbone, features_testing_unknown_head), axis=1)
-    features_testing_unknown_head, labels_testing_unknown = down_sampling(features_testing_unknown_head, labels_testing_unknown, opt.downsampling_ratio_unknown)
+    #features_testing_unknown_head, labels_testing_unknown = down_sampling(features_testing_unknown_head, labels_testing_unknown, opt.downsampling_ratio_unknown)
     #features_testing_unknown_backbone, labels_testing_unknown = down_sampling(features_testing_unknown_backbone, labels_testing_unknown, opt.downsampling_ratio_unknown)
-    prediction_logits_unknown, predictions_unknown, _ = KNN_classifier(features_testing_unknown_head, labels_testing_unknown, sorted_features_examplar_head)
+    prediction_logits_unknown, predictions_unknown, _ = KNN_classifier(features_testing_unknown_backbone, labels_testing_unknown, sorted_features_examplar_backbone)
     #prediction_logits_unknown, predictions_unknown, _ = KNN_classifier(features_testing_unknown_backbone, labels_testing_unknown, sorted_features_examplar_backbone)    #
      
-    prediction_logits_unknown_dis_in, prediction_logits_unknown_dis_out, predictions_unknown_dis, acc_unknown_dis = distance_classifier(features_testing_unknown_head, labels_testing_unknown, sorted_features_examplar_head)
+    prediction_logits_unknown_dis_in, prediction_logits_unknown_dis_out, predictions_unknown_dis, acc_unknown_dis = distance_classifier(features_testing_unknown_backbone, labels_testing_unknown, sorted_features_examplar_backbone)
     
     knn_predictions = np.concatenate((predictions_known, predictions_unknown), axis=0)
     distance_predictions = np.concatenate((predictions_known_dis, predictions_unknown_dis), axis=0)
@@ -477,8 +476,8 @@ def feature_classifier(opt):
 
     # Process results AUROC and OSCR
     # for AUROC, convert labels to binary labels, assume inliers are positive
-    labels_binary_known = [1 if i < 100 else 0 for i in labels_testing_known]
-    labels_binary_unknown = [1 if i < 100 else 0 for i in labels_testing_unknown]
+    labels_binary_known = [1 if i < opt.num_classes else 0 for i in labels_testing_known]
+    labels_binary_unknown = [1 if i < opt.num_classes else 0 for i in labels_testing_unknown]
     labels_binary = np.array(labels_binary_known + labels_binary_unknown)
     #print("labels_binary", labels_binary)
 
@@ -504,7 +503,6 @@ def feature_classifier(opt):
     #print("OSCR is: ", oscr)
 
     #print("Acc Known: ", acc_known)
-    """
 
     return 0             # oscr, acc_known
 
