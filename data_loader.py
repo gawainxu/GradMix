@@ -1122,7 +1122,7 @@ if __name__ == "__main__":
                                     transforms.Resize(224),
                                     transforms.RandomHorizontalFlip(), transforms.RandomRotation(15),
                                     transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
-                                    transforms.RandomGrayscale(p=0.2),])
+                                    transforms.RandomGrayscale(p=0.2)])
 
     dataset = CUB(root=root_path, train=True, transform=transform)
     test_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True,
