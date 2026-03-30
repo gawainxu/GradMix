@@ -1065,9 +1065,13 @@ class FUB(Dataset):
             label_name = self.names_labels_dict[data_name]
             label = self.labels_dict[label_name]
             if label in classes:
-                self.labels.append(label)
                 image = Image.open(os.path.join(images_folder, fn)).convert('L')
+                self.labels.append(label)
                 self.data.append(image)
+                # upsampling
+                if label in [1,2]:
+                    self.labels.append(label)
+                    self.data.append(image)
 
         if train:
             del self.data[4::5]
@@ -1110,12 +1114,15 @@ if __name__ == "__main__":
     """
 
     root = "../datasets/"
-    fub = FUB(root=root, transform=transform, train=False)
-    train_loader = torch.utils.data.DataLoader(fub, batch_size=32, shuffle=True,
+    fub0 = FUB(root=root, classes=[0], transform=transform, train=True)
+    fub1 = FUB(root=root, classes=[1], transform=transform, train=True)
+    fub2 = FUB(root=root, classes=[2], transform=transform, train=True)
+    train_loader = torch.utils.data.DataLoader(fub0, batch_size=32, shuffle=True,
                                                num_workers=1, pin_memory=True,
                                                drop_last=True,
                                                persistent_workers=True)
-    for idx, (images, labels, anno) in enumerate(train_loader):
-        print("images", images[0].shape)
+    print(len(fub0))
+    print(len(fub1))
+    print(len(fub2))
 
    
