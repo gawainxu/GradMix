@@ -1130,5 +1130,5 @@ if __name__ == "__main__":
     test_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True,
                                               num_workers=4, pin_memory=True)
     for i, (images, labels) in enumerate(test_loader):
-        print(len(images), len(labels))
+        print(images[0].shape)
    
