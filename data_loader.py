@@ -1036,6 +1036,8 @@ def Cars(root, train=True, opt=None, limit=0, transform=None, metas=None):
            
     dataset = ImageFolder(data_dir, transform=transform)
 
+    return dataset
+
 
 
 class FUB(Dataset):
@@ -1127,8 +1129,6 @@ if __name__ == "__main__":
     dataset = CUB(root=root_path, train=True, transform=transform)
     test_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True,
                                               num_workers=4, pin_memory=True)
-    for i, (images, labels, annotations) in enumerate(test_loader):
+    for i, (images, labels) in enumerate(test_loader):
         print(len(images), len(labels))
-        print(len(annotations))
-        print(annotations)
    
