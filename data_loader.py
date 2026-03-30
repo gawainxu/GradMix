@@ -1126,9 +1126,20 @@ if __name__ == "__main__":
                                           transforms.RandomGrayscale(p=0.2),
                                           transforms.ToTensor(),])
 
-    dataset = CUB(root=root_path, train=True, transform=transform)
-    test_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True,
+    cub = CUB(root=root_path, train=True, transform=transform)
+    cub_loader = torch.utils.data.DataLoader(cub, batch_size=32, shuffle=True,
                                               num_workers=4, pin_memory=True)
-    for i, (images, labels) in enumerate(test_loader):
-        print(images[0].shape)
+
+    aircraft = Aircraft(root=root_path, train=True, transform=transform)
+    aircraft_loader = torch.utils.data.DataLoader(aircraft, batch_size=32, shuffle=True,
+                                             num_workers=4, pin_memory=True)
+
+    car = Cars(root=root_path, train=True, transform=transform)
+    car_loader = torch.utils.data.DataLoader(car, batch_size=32, shuffle=True,
+                                                  num_workers=4, pin_memory=True)
+
+    print("cub", len(cub))
+    print("aircraft", len(aircraft))
+    print("car", len(car))
+
    
