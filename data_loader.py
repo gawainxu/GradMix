@@ -1030,9 +1030,9 @@ def Cars(root, train=True, opt=None, limit=0, transform=None, metas=None):
         TODO check the classes!!!!!
     """
     if train:
-        data_dir = os.path.join(root, "train")
+        data_dir = os.path.join(root, "Cars/train")
     else:
-        data_dir = os.path.join(root, "test")
+        data_dir = os.path.join(root, "Cars/test")
            
     dataset = ImageFolder(data_dir, transform=transform)
 
