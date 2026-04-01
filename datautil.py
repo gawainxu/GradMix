@@ -1376,7 +1376,7 @@ class parallel_gradients(torch.nn.Module):
                 self.encoder = self.model.encoder
 
         self.encoder_layers = {"resnet18": [self.encoder.layer1[-1], self.encoder.layer2[-1],
-                                            self.encoder.layer3[-1], self.encoder.layer4[-4]],
+                                            self.encoder.layer3[-1], self.encoder.layer4[-1]],
                                "simCNN": [self.encoder.bn10[-1], self.encoder.bn9[-1],
                                           self.encoder.bn8[-1], self.encoder.bn7[-1]]}
 
