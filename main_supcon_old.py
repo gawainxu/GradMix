@@ -414,8 +414,8 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                     mixed_positive_samples1, mixed_positive_samples2, lam = vanilla_cutmix(images1, images2, opt)
                 elif opt.positive_method == "saliencymix":
                     mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model, opt)
-                #elif opt.positive_method == "layersaliencymix":
-                #    mixed_positive_samples1, mixed_positive_samples2, lam, ious = salient_cutmix(images1, images2, model, annotations, opt)
+                elif opt.positive_method == "layersaliencymix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam, ious = salient_cutmix(images1, images2, model, annotations, opt)
                 elif opt.positive_method == "attentive_mix":
                     mixed_positive_samples1, mixed_positive_samples2, lam = attentive_cutmix(images1, images2, opt)
                 elif opt.positive_method == "cv2saliency":

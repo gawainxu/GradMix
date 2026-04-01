@@ -17,6 +17,7 @@ def weights_init(m):
         m.weight.data.normal_(1.0, 0.02)
         m.bias.data.fill_(0)
 
+
 class simCNN_contrastive(nn.Module):
     def __init__(self, opt, num_ABN=5, head='linear', feature_dim=128, in_channels=3):
         super(self.__class__, self).__init__()
@@ -69,39 +70,39 @@ class simCNN_contrastive(nn.Module):
 
         x = self.conv1(x)
         x, _ = self.bn1(x, bn_label)
-        x = F.relu_(x)
+        x = F.relu(x)
 
         x = self.conv2(x)
         x, _ = self.bn2(x, bn_label)
-        x = F.relu_(x)
+        x = F.relu(x)
 
         x = self.conv3(x)
         x, _ = self.bn3(x, bn_label)
-        x = F.relu_(x)
+        x = F.relu(x)
 
         x = self.conv4(x)
         x, _ = self.bn4(x, bn_label)
-        x = F.relu_(x)
+        x = F.relu(x)
 
         x = self.conv5(x)
         x, _ = self.bn5(x, bn_label)
-        x = F.relu_(x)
+        x = F.relu(x)
 
         x = self.conv6(x)
         x, _ = self.bn6(x, bn_label)
-        x = F.relu_(x)
+        x = F.relu(x)
 
         x = self.conv7(x)
         x, _ = self.bn7(x, bn_label)
-        x = F.relu_(x)
+        x = F.relu(x)
 
         x = self.conv8(x)
         x, _ = self.bn8(x, bn_label)
-        x = F.relu_(x)
+        x = F.relu(x)
 
         x = self.conv9(x)
         x, _ = self.bn9(x, bn_label)
-        x = F.relu_(x)
+        x = F.relu(x)
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
@@ -228,3 +229,16 @@ class MLPClassifier(LinearClassifier):
             nn.ReLU(inplace=True),
             nn.utils.spectral_norm(nn.Linear(self.feature_dim, self.num_classes))
         )
+
+
+
+if __name__ == "__main__":
+
+    import argparse
+    parser = argparse.ArgumentParser('argument for training')
+    parser.add_argument('--num_classes', type=int, default=10)
+    opt = parser.parse_args()
+
+    simcnn = simCNN_contrastive(opt=opt)
+    for name, layer in simcnn.named_modules():
+        print(name)

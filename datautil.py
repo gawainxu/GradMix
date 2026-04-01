@@ -1356,7 +1356,7 @@ def salient_cutmix(batch_data1, batch_data2, model, annotations, opt):
 
 class parallel_gradients(torch.nn.Module):
 
-    def __init__(self, model, mode="saliencymix", opt=None):    
+    def __init__(self, model, mode="saliencymix", opt=None):
         super(parallel_gradients, self).__init__()
         self.activations = {}
         self.gradients = {}
@@ -1375,32 +1375,37 @@ class parallel_gradients(torch.nn.Module):
             else:
                 self.encoder = self.model.encoder
 
+        self.encoder_layers = {"resnet18": [self.encoder.layer1[-1], self.encoder.layer2[-1],
+                                            self.encoder.layer3[-1], self.encoder.layer4[-4]],
+                               "simCNN": [self.encoder.bn10[-1], self.encoder.bn9[-1],
+                                          self.encoder.bn8[-1], self.encoder.bn7[-1]]}
+
         if opt.method == "MoCo":
             if mode == "saliencymix":
-                self.hooks.append(self.encoder.layer4[-1].register_forward_hook(hook=self.save_activation_hook))
-                self.hooks.append(self.encoder.layer4[-1].register_full_backward_hook(hook=self.save_backward_hook))
+                self.hooks.append(self.encoder_layers[opt.model][-1].register_forward_hook(hook=self.save_activation_hook))
+                self.hooks.append(self.encoder_layers[opt.model][-1].register_full_backward_hook(hook=self.save_backward_hook))
             elif mode == "layersaliencymix":
-                self.hooks.append(self.encoder.layer3[-1].register_forward_hook(hook=self.save_activation_hook))
-                self.hooks.append(self.encoder.layer3[-1].register_full_backward_hook(hook=self.save_backward_hook))
+                self.hooks.append(self.encoder_layers[opt.model][-2].register_forward_hook(hook=self.save_activation_hook))
+                self.hooks.append(self.encoder_layers[opt.model][-2].register_full_backward_hook(hook=self.save_backward_hook))
         else:
             if mode == "saliencymix":
-                self.hooks.append(self.encoder.layer4[-1].register_forward_hook(hook=self.save_activation_hook)) 
-                self.hooks.append(self.encoder.layer4[-1].register_full_backward_hook(hook=self.save_backward_hook)) 
+                self.hooks.append(self.encoder_layers[opt.model][-1].register_forward_hook(hook=self.save_activation_hook))
+                self.hooks.append(self.encoder_layers[opt.model][-1].register_full_backward_hook(hook=self.save_backward_hook))
                     
             elif mode == "layersaliencymix":
                 
                 if 1 in self.opt.grad_layers:
-                    self.hooks.append(self.encoder.layer1[-1].register_forward_hook(hook=self.save_activation_hook)) 
-                    self.hooks.append(self.encoder.layer1[-1].register_full_backward_hook(hook=self.save_backward_hook))
+                    self.hooks.append(self.encoder_layers[opt.model][0].register_forward_hook(hook=self.save_activation_hook))
+                    self.hooks.append(self.encoder_layers[opt.model][0].register_full_backward_hook(hook=self.save_backward_hook))
                 if 2 in self.opt.grad_layers:
-                    self.hooks.append(self.encoder.layer2[-1].register_forward_hook(hook=self.save_activation_hook)) 
-                    self.hooks.append(self.encoder.layer2[-1].register_full_backward_hook(hook=self.save_backward_hook))
+                    self.hooks.append(self.encoder_layers[opt.model][1].register_forward_hook(hook=self.save_activation_hook))
+                    self.hooks.append(self.encoder_layers[opt.model][1].register_full_backward_hook(hook=self.save_backward_hook))
                 if 3 in self.opt.grad_layers:
-                    self.hooks.append(self.encoder.layer3[-1].register_forward_hook(hook=self.save_activation_hook)) 
-                    self.hooks.append(self.encoder.layer3[-1].register_full_backward_hook(hook=self.save_backward_hook))
+                    self.hooks.append(self.encoder_layers[opt.model][2].register_forward_hook(hook=self.save_activation_hook))
+                    self.hooks.append(self.encoder_layers[opt.model][2].register_full_backward_hook(hook=self.save_backward_hook))
                 if 4 in self.opt.grad_layers:
-                    self.hooks.append(self.encoder.layer4[-1].register_forward_hook(hook=self.save_activation_hook)) 
-                    self.hooks.append(self.encoder.layer4[-1].register_full_backward_hook(hook=self.save_backward_hook))
+                    self.hooks.append(self.encoder_layers[opt.model][3].register_forward_hook(hook=self.save_activation_hook))
+                    self.hooks.append(self.encoder_layers[opt.model][3].register_full_backward_hook(hook=self.save_backward_hook))
                
                 
     def save_activation_hook(self, _, input, output):
@@ -1458,6 +1463,8 @@ class parallel_gradients(torch.nn.Module):
         for h in self.hooks:
             h.remove()
 
+        print("activation", self.activations.keys())
+        print("gradients", self.gradients.keys())
         return self.activations, self.gradients
 
 
