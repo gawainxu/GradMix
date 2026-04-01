@@ -1382,6 +1382,8 @@ class parallel_gradients(torch.nn.Module):
             self.encoder_layers=  [self.encoder.bn10[-1], self.encoder.bn9[-1],
                                    self.encoder.bn8[-1], self.encoder.bn7[-1]]
 
+        print("encoder_layers", len(self.encoder_layers))
+
         if opt.method == "MoCo":
             if mode == "saliencymix":
                 self.hooks.append(self.encoder_layers[-1].register_forward_hook(hook=self.save_activation_hook))
