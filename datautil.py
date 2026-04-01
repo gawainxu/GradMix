@@ -1414,6 +1414,7 @@ class parallel_gradients(torch.nn.Module):
         # use the output size here as the key to save the hooks, as well as the device name for multiple gpus
         #print("forward hook", str(input[0].shape[-1]), input[0].get_device())
 
+        print("activation input device", input[0].get_device())
         if str(4-input[0].shape[-1]/8) in self.activations:
            self.activations[str(4-input[0].shape[-1]/8)][str(input[0].get_device())] = output.detach()
         else:
@@ -1424,6 +1425,7 @@ class parallel_gradients(torch.nn.Module):
     def save_backward_hook(self, _, input, output):
         #print("backward hook", str(input[0].shape[-1]), input[0].get_device())
 
+        print("gradients input device", input[0].get_device())
         if str(4-input[0].shape[-1]/8) in self.gradients:
            self.gradients[str(4-input[0].shape[-1]/8)][str(input[0].get_device())] = output[0].detach()
         else:
