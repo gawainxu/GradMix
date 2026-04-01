@@ -1382,7 +1382,7 @@ class parallel_gradients(torch.nn.Module):
             self.encoder_layers=  [self.encoder.bn10[-1], self.encoder.bn9[-1],
                                    self.encoder.bn8[-1], self.encoder.bn7[-1]]
 
-        print("encoder_layers", len(self.encoder_layers))
+        print("encoder_layers", len(self.encoder_layers), self.encoder_layers)
 
         if opt.method == "MoCo":
             if mode == "saliencymix":
