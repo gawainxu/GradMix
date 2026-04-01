@@ -1375,10 +1375,10 @@ class parallel_gradients(torch.nn.Module):
             else:
                 self.encoder = self.model.encoder
 
-        if self.model == "resnet18":
+        if self.opt.model == "resnet18":
             self.encoder_layers = [self.encoder.layer1[-1], self.encoder.layer2[-1],
                                    self.encoder.layer3[-1], self.encoder.layer4[-1]],
-        elif self.model == "simCNN":
+        elif self.opt.model == "simCNN":
             self.encoder_layers=  [self.encoder.bn10[-1], self.encoder.bn9[-1],
                                    self.encoder.bn8[-1], self.encoder.bn7[-1]]
 
