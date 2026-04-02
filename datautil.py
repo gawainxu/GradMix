@@ -1367,21 +1367,19 @@ class LayerTracker:
         # This wrapper creates the actual hook functions
         def forward_hook(module, input, output):
             if name not in self.activations.keys():
-                print("name", name)
+                print("activations name", name)
                 self.activations[name] = dict()
-            else:
-                device_name = output[0].get_device() if isinstance(output, tuple) else str(output.get_device())
-                print("device_name", device_name)
-                self.activations[name][device_name] = output[0].detach() if isinstance(output, tuple) else output.detach()
+            device_name = output[0].get_device() if isinstance(output, tuple) else str(output.get_device())
+            print("device_name", device_name)
+            self.activations[name][device_name] = output[0].detach() if isinstance(output, tuple) else output.detach()
 
         def backward_hook(module, grad_input, grad_output):
             if name not in self.gradients.keys():
-                print("name", name)
+                print("gradients name", name)
                 self.gradients[name] = dict()
-            else:
-                device_name = grad_output[0].get_device() if isinstance(grad_output, tuple) else str(grad_output.get_device())
-                print("device_name", device_name)
-                self.activations[name][device_name] = grad_output[0].detach() if isinstance(grad_output, tuple) else grad_output.detach()
+            device_name = grad_output[0].get_device() if isinstance(grad_output, tuple) else str(grad_output.get_device())
+            print("device_name", device_name)
+            self.activations[name][device_name] = grad_output[0].detach() if isinstance(grad_output, tuple) else grad_output.detach()
 
         return forward_hook, backward_hook
 
