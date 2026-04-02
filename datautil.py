@@ -1367,18 +1367,14 @@ class LayerTracker:
         # This wrapper creates the actual hook functions
         def forward_hook(module, input, output):
             if name not in self.activations.keys():
-                print("activations name", name)
                 self.activations[name] = dict()
             device_name = output[0].get_device() if isinstance(output, tuple) else str(output.get_device())
-            print("gradients device_name", device_name)
             self.activations[name][device_name] = output[0].detach().cpu() if isinstance(output, tuple) else output.detach().cpu()
 
         def backward_hook(module, grad_input, grad_output):
             if name not in self.gradients.keys():
-                print("gradients name", name)
                 self.gradients[name] = dict()
             device_name = grad_output[0].get_device() if isinstance(grad_output, tuple) else str(grad_output.get_device())
-            print("gradients device_name", device_name)
             self.gradients[name][device_name] = grad_output[0].detach().cpu() if isinstance(grad_output, tuple) else grad_output.detach().cpu()
 
         return forward_hook, backward_hook
@@ -1477,19 +1473,14 @@ def sort_hooks(activations, gradients):
     activations_np = []
     gradients_np = []
 
-    print("activations.keys()", activations.keys())
     for k in activations.keys():
         activation_layer = []
         gradient_layer = []
-        print("activations[k].keys()", activations[k].keys())
         for device_name in activations[k].keys():
-            print("activations[k] device_name", device_name)
             activation = activations[k][device_name]
             activation_layer.append(activation)
 
-        print("gradients[k]", gradients[k])
         for device_name in gradients[k].keys():
-            print("gradients[k] device_name", device_name)
             gradient = gradients[k][device_name]
             gradient_layer.append(gradient)
 
