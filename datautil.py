@@ -1476,11 +1476,11 @@ def sort_hooks(activations, gradients):
     for k in activations.keys():
         activation_layer = []
         gradient_layer = []
-        for device_name in activations[k].keys():
+        for device_name in sorted(activations[k].keys()):
             activation = activations[k][device_name]
             activation_layer.append(activation)
 
-        for device_name in gradients[k].keys():
+        for device_name in sorted(gradients[k].keys()):   # To assure that the device names are aligned for activations and gradients
             gradient = gradients[k][device_name]
             gradient_layer.append(gradient)
 
