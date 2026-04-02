@@ -1485,8 +1485,10 @@ def sort_hooks(activations, gradients):
         for device_name in activations[k].keys():
             print("activations[k] device_name", device_name)
             activation = activations[k][device_name]
-            gradient = gradients[k][device_name]
             activation_layer.append(activation)
+        for device_name in gradients[k].keys():
+            print("gradients[k] device_name", device_name)
+            gradient = gradients[k][device_name]
             gradient_layer.append(gradient)
 
         activation_layer = torch.cat(activation_layer, axis=0)
