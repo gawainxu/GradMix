@@ -1474,15 +1474,13 @@ def sort_hooks(activations, gradients):
     """
     activations_np = []
     gradients_np = []
-    num_devices = torch.cuda.device_count()
 
     print("activations.keys()", activations.keys())
     for k in activations.keys():
         activation_layer = []
         gradient_layer = []
-        for device_idx in range(num_devices):
-            device_name = str(device_idx)
-            #print(activations[k].keys())
+        print("activations[k].keys()", activations[k].keys())
+        for device_name in activations[k].keys():
             activation = activations[k][device_name].cpu().detach()
             gradient = gradients[k][device_name].cpu().detach()
             activation_layer.append(activation)
