@@ -1428,11 +1428,9 @@ class parallel_gradients(torch.nn.Module):
         else:
             if mode == "saliencymix":
                 self.tracker.register_layer(self.encoder_layer_names[-1], self.encoder_layers[-1])
-                    
             elif mode == "layersaliencymix":
                 for i in self.opt.grad_layers:
                     self.tracker.register_layer(self.encoder_layer_names[i], self.encoder_layers[i])
-
 
     def forward(self, x):
         
@@ -1478,6 +1476,7 @@ def sort_hooks(activations, gradients):
     gradients_np = []
     num_devices = torch.cuda.device_count()
 
+    print("activations.keys()", activations.keys())
     for k in activations.keys():
         activation_layer = []
         gradient_layer = []
