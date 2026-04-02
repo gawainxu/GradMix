@@ -1369,14 +1369,16 @@ class LayerTracker:
             if name not in self.activations.keys():
                 self.activations[name] = dict()
             else:
-                device_name = str(output[0].get_device()) if isinstance(output, tuple) else str(output.get_device())
+                device_name = output[0].get_device() if isinstance(output, tuple) else str(output.get_device())
+                print("device_name", device_name)
                 self.activations[name][device_name] = output[0].detach() if isinstance(output, tuple) else output.detach()
 
         def backward_hook(module, grad_input, grad_output):
             if name not in self.gradients.keys():
                 self.gradients[name] = dict()
             else:
-                device_name = str(grad_output[0].get_device()) if isinstance(grad_output, tuple) else str(grad_output.get_device())
+                device_name = grad_output[0].get_device() if isinstance(grad_output, tuple) else str(grad_output.get_device())
+                print("device_name", device_name)
                 self.activations[name][device_name] = grad_output[0].detach() if isinstance(grad_output, tuple) else grad_output.detach()
 
         return forward_hook, backward_hook
