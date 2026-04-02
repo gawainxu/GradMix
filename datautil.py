@@ -1367,6 +1367,7 @@ class LayerTracker:
         # This wrapper creates the actual hook functions
         def forward_hook(module, input, output):
             if name not in self.activations.keys():
+                print("name", name)
                 self.activations[name] = dict()
             else:
                 device_name = output[0].get_device() if isinstance(output, tuple) else str(output.get_device())
@@ -1375,6 +1376,7 @@ class LayerTracker:
 
         def backward_hook(module, grad_input, grad_output):
             if name not in self.gradients.keys():
+                print("name", name)
                 self.gradients[name] = dict()
             else:
                 device_name = grad_output[0].get_device() if isinstance(grad_output, tuple) else str(grad_output.get_device())
