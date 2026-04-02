@@ -1486,8 +1486,8 @@ def sort_hooks(activations, gradients):
 
         activation_layer = torch.cat(activation_layer, axis=0)
         gradient_layer = torch.cat(gradient_layer, axis=0)
-        print("gradient_layer", gradient_layer.shape)
-        print("activation_layer", activation_layer.shape)
+        #print("gradient_layer", gradient_layer.shape)
+        #print("activation_layer", activation_layer.shape)
 
         activations_np.append(activation_layer)
         gradients_np.append(gradient_layer)
