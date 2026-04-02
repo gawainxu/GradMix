@@ -237,6 +237,7 @@ import random
 from data_loader import iCIFAR10, iCIFAR100, TinyImagenet, customSVHN, mnist, CUB, Aircraft, ImageNet100_M
 from data_loader import tinyimgnet_c, cifar10_c, cifar100_c, ImageNet100, FUB
 import torchvision
+import torch
 from util import TwoCropTransform
 from torchvision import transforms, datasets
 import torch.nn.functional as F
@@ -244,6 +245,7 @@ from config import data_root
 from augmentations.randaugment import RandAugment
 from augmentations.cut_out import *
 from scipy.spatial.distance import mahalanobis
+from collections import OrderedDict
 from util import  feature_stats
 from PIL import Image
 from util import accuracy_plain
@@ -1352,17 +1354,51 @@ def salient_cutmix(batch_data1, batch_data2, model, annotations, opt):
     batch_data2_new = torch.stack(batch_data2_new)
 
     return batch_data1_new, batch_data2_new, new_lam, ious
-    
+
+
+class LayerTracker:
+    def __init__(self):
+        # We use OrderedDict to maintain the order in which layers are registered
+        self.activations = dict()
+        self.gradients = dict()
+        self.handles = []
+
+    def _get_hook(self, name):
+        # This wrapper creates the actual hook functions
+        def forward_hook(module, input, output):
+            if name not in self.activations.keys():
+                self.activations[name] = dict()
+            else:
+                device_name = str(output[0].get_device()) if isinstance(output, tuple) else str(output.get_device())
+                self.activations[name][device_name] = output[0].detach() if isinstance(output, tuple) else output.detach()
+
+        def backward_hook(module, grad_input, grad_output):
+            if name not in self.gradients.keys():
+                self.gradients[name] = dict()
+            else:
+                device_name = str(grad_output[0].get_device()) if isinstance(grad_output, tuple) else str(grad_output.get_device())
+                self.activations[name][device_name] = grad_output[0].detach() if isinstance(grad_output, tuple) else grad_output.detach()
+
+        return forward_hook, backward_hook
+
+    def register_layer(self, name, layer):
+        f_hook, b_hook = self._get_hook(name)
+        h1 = layer.register_forward_hook(f_hook)
+        h2 = layer.register_full_backward_hook(b_hook)
+        self.handles.extend([h1, h2])
+
+    def remove_hooks(self):
+        for handle in self.handles:
+            handle.remove()
+
 
 class parallel_gradients(torch.nn.Module):
 
     def __init__(self, model, mode="saliencymix", opt=None):
         super(parallel_gradients, self).__init__()
-        self.activations = {}
-        self.gradients = {}
         self.model = model
         self.opt = opt
-        self.hooks = []
+        self.tracker = LayerTracker()
         
         if torch.cuda.device_count() > 1:
             if opt.method =="MoCo":
@@ -1378,64 +1414,27 @@ class parallel_gradients(torch.nn.Module):
         if self.opt.model == "resnet18":
             self.encoder_layers = [self.encoder.layer1[-1], self.encoder.layer2[-1],
                                    self.encoder.layer3[-1], self.encoder.layer4[-1]]
+            self.encoder_layer_names = ["encoder.layer1", "encoder.layer2", "encoder.layer3", "encoder.layer4"]
         elif self.opt.model == "simCNN":
             self.encoder_layers=  [self.encoder.bn10[-1], self.encoder.bn9[-1],
                                    self.encoder.bn8[-1], self.encoder.bn7[-1]]
+            self.encoder_layer_names = ["bn7", "bn8", "bn9", "bn10"]
 
         if opt.method == "MoCo":
             if mode == "saliencymix":
-                self.hooks.append(self.encoder_layers[-1].register_forward_hook(hook=self.save_activation_hook))
-                self.hooks.append(self.encoder_layers[-1].register_full_backward_hook(hook=self.save_backward_hook))
+                self.tracker.register_layer(self.encoder_layer_names[-1], self.encoder_layers[-1])
             elif mode == "layersaliencymix":
-                self.hooks.append(self.encoder_layers[-2].register_forward_hook(hook=self.save_activation_hook))
-                self.hooks.append(self.encoder_layers[-2].register_full_backward_hook(hook=self.save_backward_hook))
+                self.tracker.register_layer(self.encoder_layer_names[-2], self.encoder_layers[-2])
         else:
             if mode == "saliencymix":
-                self.hooks.append(self.encoder_layers[-1].register_forward_hook(hook=self.save_activation_hook))
-                self.hooks.append(self.encoder_layers[-1].register_full_backward_hook(hook=self.save_backward_hook))
+                self.tracker.register_layer(self.encoder_layer_names[-1], self.encoder_layers[-1])
                     
             elif mode == "layersaliencymix":
-                
-                if 1 in self.opt.grad_layers:
-                    self.hooks.append(self.encoder_layers[0].register_forward_hook(hook=self.save_activation_hook))
-                    self.hooks.append(self.encoder_layers[0].register_full_backward_hook(hook=self.save_backward_hook))
-                if 2 in self.opt.grad_layers:
-                    self.hooks.append(self.encoder_layers[1].register_forward_hook(hook=self.save_activation_hook))
-                    self.hooks.append(self.encoder_layers[1].register_full_backward_hook(hook=self.save_backward_hook))
-                if 3 in self.opt.grad_layers:
-                    self.hooks.append(self.encoder_layers[2].register_forward_hook(hook=self.save_activation_hook))
-                    self.hooks.append(self.encoder_layers[2].register_full_backward_hook(hook=self.save_backward_hook))
-                if 4 in self.opt.grad_layers:
-                    self.hooks.append(self.encoder_layers[3].register_forward_hook(hook=self.save_activation_hook))
-                    self.hooks.append(self.encoder_layers[3].register_full_backward_hook(hook=self.save_backward_hook))
-               
-                
-    def save_activation_hook(self, _, input, output):
-        # use the output size here as the key to save the hooks, as well as the device name for multiple gpus
-        #print("forward hook", str(input[0].shape[-1]), input[0].get_device())
-
-        print("activation input device", input[0].get_device())
-        if str(4-input[0].shape[-1]/8) in self.activations:
-           self.activations[str(4-input[0].shape[-1]/8)][str(input[0].get_device())] = output.detach()
-        else:
-           self.activations[str(4-input[0].shape[-1]/8)] = {}
-           self.activations[str(4-input[0].shape[-1]/8)][str(input[0].get_device())] = output.detach()
-
-
-    def save_backward_hook(self, _, input, output):
-        #print("backward hook", str(input[0].shape[-1]), input[0].get_device())
-
-        print("gradients input device", input[0].get_device())
-        if str(4-input[0].shape[-1]/8) in self.gradients:
-           self.gradients[str(4-input[0].shape[-1]/8)][str(input[0].get_device())] = output[0].detach()
-        else:
-           self.gradients[str(4-input[0].shape[-1]/8)] = {}
-           self.gradients[str(4-input[0].shape[-1]/8)][str(input[0].get_device())] = output[0].detach()
+                for i in self.opt.grad_layers:
+                    self.tracker.register_layer(self.encoder_layer_names[i], self.encoder_layers[i])
 
 
     def forward(self, x):
-        
-        # TODO different for moco and simclr here
         
         if self.opt.method == "SimCLR":
             batch_data1, batch_data2 = x
@@ -1464,12 +1463,9 @@ class parallel_gradients(torch.nn.Module):
             loss = criterion(logits, labels)
             loss.backward()
 
-        for h in self.hooks:
-            h.remove()
+        self.tracker.remove_hooks()
 
-        print("activation", self.activations.keys())
-        print("gradients", self.gradients.keys())
-        return self.activations, self.gradients
+        return self.tracker.activations, self.tracker.gradients
 
 
 def sort_hooks(activations, gradients):
@@ -1492,11 +1488,11 @@ def sort_hooks(activations, gradients):
             gradient = gradients[k][device_name].cpu().detach()
             activation_layer.append(activation)
             gradient_layer.append(gradient)
-    
+
         activation_layer = torch.cat(activation_layer, axis=0)
         gradient_layer = torch.cat(gradient_layer, axis=0)
-        #print("gradient_layer", gradient_layer.shape)
-        #print("activation_layer", activation_layer.shape)
+        print("gradient_layer", gradient_layer.shape)
+        print("activation_layer", activation_layer.shape)
 
         activations_np.append(activation_layer)
         gradients_np.append(gradient_layer)

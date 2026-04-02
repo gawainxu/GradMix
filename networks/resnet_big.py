@@ -374,4 +374,11 @@ class LinearClassifier(nn.Module):
 
 if __name__ == "__main__":
 
-    model = SupConResNet()
+    import argparse
+    parser = argparse.ArgumentParser('argument for training')
+    parser.add_argument('--num_classes', type=int, default=10)
+    opt = parser.parse_args()
+
+    simcnn = SupConResNet()
+    for name, layer in simcnn.named_modules():
+        print(name)

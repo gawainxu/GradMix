@@ -41,9 +41,9 @@ class VGG(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        out = self.avgpool(out)
+        out = self.avgpool(x)
         out = torch.flatten(out, 1)
-        return x
+        return out
 
     def _initialize_weights(self):
         for m in self.modules():
