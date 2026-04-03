@@ -242,3 +242,13 @@ if __name__ == "__main__":
     simcnn = simCNN_contrastive(opt=opt)
     for name, layer in simcnn.named_modules():
         print(name)
+
+    param_size = 0
+    for param in simcnn.parameters():
+        param_size += param.nelement() * param.element_size()
+    buffer_size = 0
+    for buffer in simcnn.buffers():
+        buffer_size += buffer.nelement() * buffer.element_size()
+
+    size_all_mb = (param_size + buffer_size) / 1024 ** 2
+    print('model size: {:.3f}MB'.format(size_all_mb))

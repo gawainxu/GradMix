@@ -379,6 +379,16 @@ if __name__ == "__main__":
     parser.add_argument('--num_classes', type=int, default=10)
     opt = parser.parse_args()
 
-    simcnn = SupConResNet()
-    for name, layer in simcnn.named_modules():
+    resnet18 = SupConResNet()
+    for name, layer in resnet18.named_modules():
         print(name)
+
+    param_size = 0
+    for param in resnet18.parameters():
+        param_size += param.nelement() * param.element_size()
+    buffer_size = 0
+    for buffer in resnet18.buffers():
+        buffer_size += buffer.nelement() * buffer.element_size()
+
+    size_all_mb = (param_size + buffer_size) / 1024 ** 2
+    print('model size: {:.3f}MB'.format(size_all_mb))

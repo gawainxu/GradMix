@@ -23,6 +23,7 @@ from networks.maskcon import MaskCon
 from networks.simCNN import simCNN_contrastive
 from networks.resnet_preact import SupConpPreactResNet
 from networks.mlp import SupConMLP
+from networks.vgg import SupConVGG
 from losses import SupConLoss
 from datautil import get_train_datasets, get_test_datasets
 
@@ -64,7 +65,7 @@ def parse_option():
     parser.add_argument("--pretrained", type=int, default=1)
 
     # model dataset
-    parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18", "resnet34", "resnet50", "preactresnet18", "preactresnet34", "simCNN", "MLP"])
+    parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18", "resnet34", "resnet50", "vgg16", "simCNN", "MLP"])
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
                                  "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
@@ -287,6 +288,8 @@ def set_model(opt):
             model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "MLP":
             model = SupConMLP(feat_dim=opt.feat_dim)
+        elif opt.model == "vgg16":
+            model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         else:
             model = simCNN_contrastive(opt, feature_dim=opt.feat_dim, in_channels=in_channels)
             

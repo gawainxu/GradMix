@@ -1,13 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
-
+import torch.nn.functional as F
 
 __all__ = [
     'VGG', 'vgg11', 'vgg11_bn', 'vgg13', 'vgg13_bn', 'vgg16', 'vgg16_bn',
     'vgg19_bn', 'vgg19',
 ]
-
 
 model_urls = {
     'vgg11': 'https://download.pytorch.org/models/vgg11-bbd30ac9.pth',
@@ -20,12 +19,53 @@ model_urls = {
     'vgg19_bn': 'https://download.pytorch.org/models/vgg19_bn-c79401a0.pth',
 }
 
+"""
+class VGG(nn.Module):
+
+    def __init__(self, encoder, num_classes=1000, init_weights=True):
+        super(VGG, self).__init__()
+        self.encoder = encoder                   
+        self.fc1 = nn.Linear(512, 128)
+        self.relu1 = nn.ReLU(True)
+        self.dropout = nn.Dropout()
+        self.fc = nn.Linear(128, num_classes)
+
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        if init_weights:
+            self._initialize_weights()
+
+    def forward(self, x):
+        out = self.encoder(x)
+        out = self.avgpool(out)
+        out = torch.flatten(out, start_dim=1)
+        out = self.fc1(out)
+        out = self.relu1(out)
+        out = self.dropout(out)
+        out = self.fc(out)
+        return out
+
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(
+                    m.weight, mode='fan_out', nonlinearity='relu')
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                nn.init.normal_(m.weight, 0, 0.01)
+                nn.init.constant_(m.bias, 0)
+"""
+
 
 class VGG(nn.Module):
 
     def __init__(self, features, num_classes=1000, init_weights=True):
         super(VGG, self).__init__()
         self.features = features
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
             nn.Linear(512 * 7 * 7, 4096),
             nn.ReLU(True),
@@ -35,15 +75,14 @@ class VGG(nn.Module):
             nn.Dropout(),
             nn.Linear(4096, num_classes),
         )
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         if init_weights:
             self._initialize_weights()
 
     def forward(self, x):
         x = self.features(x)
-        out = self.avgpool(x)
-        out = torch.flatten(out, 1)
-        return out
+        x = x.view(x.size(0), -1)
+        x = self.classifier(x)
+        return x
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -77,11 +116,24 @@ def make_layers(cfg, batch_norm=False):
 
 
 cfg = {
+    'S': [64, 'M', 128, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M'],
     'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
     'B': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
     'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
     'E': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
 }
+
+
+def vgg_s_bn(pretrained=False, **kwargs):
+    """VGG 11-layer model (configuration "A") with batch normalization
+
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    if pretrained:
+        kwargs['init_weights'] = False
+    model = VGG(make_layers(cfg['S'], batch_norm=True), **kwargs)
+    return model
 
 
 def vgg11(pretrained=False, **kwargs):
@@ -196,14 +248,17 @@ def vgg19_bn(pretrained=False, **kwargs):
     return model
 
 
-model_dict = {"vgg16": vgg11, "vgg13": vgg13, "vgg16": vgg16, "vgg19": vgg19}
+model_dict = {"vgg11": (vgg11, 512), "vgg13": (vgg13, 512), "vgg16": (vgg16, 512), "vgg19": (vgg19, 512)}
+
 
 class SupConVGG(nn.Module):
     """backbone + projection head"""
-    def __init__(self, name='vgg16', head='mlp', feat_dim=128):
+
+    def __init__(self, name='vgg16', head='mlp', feat_dim=128, in_channels=3, pretrained=False):
         super(SupConVGG, self).__init__()
         model_fun, dim_in = model_dict[name]
-        self.encoder = model_fun()
+        self.vgg_base = model_fun(pretrained=pretrained)
+        self.encoder = self.vgg_base.features  # self.vgg_base.encoder
 
         if head == 'linear':
             self.head = nn.Linear(dim_in, feat_dim)
@@ -219,6 +274,34 @@ class SupConVGG(nn.Module):
 
     def forward(self, x):
         feat = self.encoder(x)
-        #feat = torch.flatten(feat, 1)                                     #
+        feat = self.vgg_base.avgpool(feat)
+        feat = torch.flatten(feat, start_dim=1)
         feat = F.normalize(self.head(feat), dim=1)
         return feat
+
+
+class LinearClassifier_VGG(nn.Module):
+    """Linear classifier"""
+
+    def __init__(self, name='resnet50', num_classes=10, feat_dim=512):
+        super(LinearClassifier_VGG, self).__init__()
+        # _, feat_dim = model_dict[name]
+        self.fc = nn.Linear(feat_dim, num_classes, bias=False)
+
+    def forward(self, features):
+        return self.fc(features)
+
+
+if __name__ == "__main__":
+    vgg = vgg16(pretrained=False)
+
+    param_size = 0
+    for param in vgg.parameters():
+        param_size += param.nelement() * param.element_size()
+    buffer_size = 0
+    for buffer in vgg.buffers():
+        buffer_size += buffer.nelement() * buffer.element_size()
+
+    size_all_mb = (param_size + buffer_size) / 1024 ** 2
+    print('model size: {:.3f}MB'.format(size_all_mb))
+
