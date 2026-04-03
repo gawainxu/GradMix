@@ -1414,8 +1414,8 @@ class parallel_gradients(torch.nn.Module):
                                    self.encoder.layer3[-1], self.encoder.layer4[-1]]
             self.encoder_layer_names = ["encoder.layer1", "encoder.layer2", "encoder.layer3", "encoder.layer4"]
         elif self.opt.model == "simCNN":
-            self.encoder_layers=  [self.encoder.bn10[-1], self.encoder.bn9[-1],
-                                   self.encoder.bn8[-1], self.encoder.bn7[-1]]
+            self.encoder_layers=  [self.bn10[-1], self.bn9[-1],
+                                   self.bn8[-1], self.bn7[-1]]
             self.encoder_layer_names = ["bn7", "bn8", "bn9", "bn10"]
 
         if opt.method == "MoCo":
