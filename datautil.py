@@ -352,7 +352,7 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
         else:
             print("training_supcon!!!")
             train_transform = transforms.Compose([transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),                                     
-                                                  #transforms.Resize((size, size)),
+                                                  transforms.Resize((size, size)),
                                                   transforms.RandomResizedCrop(size=size, scale=(0.2, 1.)),    #!!!!!!
                                                   transforms.RandomHorizontalFlip(),
                                                   transforms.RandomGrayscale(p=0.2),
@@ -364,7 +364,7 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
                 train_transform.transforms.insert(0, RandAugment(args=opt))    
             
             if opt.augmix:
-                # TODO all are default settings
+                # all are default settings
                 train_transform.transforms.insert(0, transforms.AugMix())
                 
     else:
@@ -1619,3 +1619,21 @@ def layer_salient_maps(batch_data1, batch_data2, model):
     return norm_cam
 
 """
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser('argument for training')
+    parser.add_argument('--dataset', type=str, default=10)
+    parser.add_argument('--datasets', type=str, default='cifar10',
+                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
+                                 "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "FUB"],
+                        help='dataset')
+    parser.add_argument("--augmix", type=bool, default=False)
+    parser.add_argument("--action", type=str, default="training_supcon",
+                        choices=["training_supcon", "trainging_linear", "testing_known", "testing_unknown",
+                                 "feature_reading"])
+    opt = parser.parse_args()
+
+    dataset = get_train_datasets(opt)
