@@ -370,7 +370,6 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
             image3 = images[2]
             
         images = torch.cat([images1, images2], dim=0)
-        print("labels", labels)
 
         if torch.cuda.is_available():
             images = images.cuda(non_blocking=True)

@@ -293,7 +293,10 @@ class LinearClassifier_VGG(nn.Module):
 
 
 if __name__ == "__main__":
-    vgg = vgg16(pretrained=False)
+    vgg = SupConVGG(pretrained=False)
+
+    for name, layer in vgg.named_modules():
+        print(name)
 
     param_size = 0
     for param in vgg.parameters():
