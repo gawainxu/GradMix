@@ -1298,7 +1298,7 @@ def layer_salient_maps(batch_data1, batch_data2, model, opt):
     return cam
 
 
-def salient_cutmix(batch_data1, batch_data2, model, annotations, opt):
+def salient_cutmix(batch_data1, batch_data2, model, opt):
 
     """
     A mixup method that patch on the most activated area of the 
@@ -1324,7 +1324,6 @@ def salient_cutmix(batch_data1, batch_data2, model, annotations, opt):
 
     batch_data1_new = []
     batch_data2_new = []
-    ious = []
 
     for i in range(bsz):
        
@@ -1337,8 +1336,6 @@ def salient_cutmix(batch_data1, batch_data2, model, annotations, opt):
         hl, hh, wl, wh, bbox_area = rand_bbox(img_h=h, img_w=w, lam=lam, activation=activation1)
         x11_new = torch.empty_like(x11).copy_(x11)
         x21_new = torch.empty_like(x21).copy_(x21)
-        if sum(annotations[i]) > 0:
-            ious.append((iou(annotations[i], (wl, hl, wh, hh)), annotations[i], (wl, hl, wh, hh)))
             
         x11_new[:, hl:hh, wl:wh] = torch.rand(hh-hl, wh-wl)             #torchvision.transforms.functional.resize(x12, (hh-hl, wh-wl))
         #print("hl, hh, wl, wh", hl, hh, wl, wh)
@@ -1353,7 +1350,7 @@ def salient_cutmix(batch_data1, batch_data2, model, annotations, opt):
     batch_data1_new = torch.stack(batch_data1_new)
     batch_data2_new = torch.stack(batch_data2_new)
 
-    return batch_data1_new, batch_data2_new, new_lam, ious
+    return batch_data1_new, batch_data2_new, new_lam
 
 
 class LayerTracker:

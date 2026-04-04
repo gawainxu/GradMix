@@ -365,7 +365,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
     loss_sl_hessian = []
     loss_ssl_hessian = []
 
-    for idx, (images, labels, annotations) in enumerate(train_loader):
+    for idx, (images, labels) in enumerate(train_loader):
 
         data_time.update(time.time() - end)
         images1 = images[0]
@@ -418,7 +418,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                 elif opt.positive_method == "saliencymix":
                     mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model, opt)
                 elif opt.positive_method == "layersaliencymix":
-                    mixed_positive_samples1, mixed_positive_samples2, lam, ious = salient_cutmix(images1, images2, model, annotations, opt)
+                    mixed_positive_samples1, mixed_positive_samples2, lam, ious = salient_cutmix(images1, images2, model, opt)
                 elif opt.positive_method == "attentive_mix":
                     mixed_positive_samples1, mixed_positive_samples2, lam = attentive_cutmix(images1, images2, opt)
                 elif opt.positive_method == "cv2saliency":
@@ -550,7 +550,7 @@ def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoc
     end = time.time()
     ious_epoch = []
 
-    for idx, (images, labels, annotations) in enumerate(vali_loader):
+    for idx, (images, labels) in enumerate(vali_loader):
 
         images1 = images[0]
         images2 = images[1]
@@ -599,8 +599,7 @@ def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoc
                     mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model, opt)
                 elif opt.positive_method == "layersaliencymix":
                     mixed_positive_samples1, mixed_positive_samples2, lam, ious = salient_cutmix(images1, images2,
-                                                                                                 model, annotations,
-                                                                                                 opt)
+                                                                                                 model, opt)
                 elif opt.positive_method == "attentive_mix":
                     mixed_positive_samples1, mixed_positive_samples2, lam = attentive_cutmix(images1, images2, opt)
                 elif opt.positive_method == "cv2saliency":

@@ -102,7 +102,7 @@ class iCIFAR10(CIFAR10):
         if self.label_dict is not None:
             target = self.label_dict[str(target)]
 
-        return img, target, torch.tensor([0,0,0,0])
+        return img, target
 
     def __len__(self):
         if self.train:
@@ -194,7 +194,7 @@ class iCIFAR100(CIFAR100):
         if self.label_dict is not None:
             target = self.label_dict[str(target)]
 
-        return img, target, torch.tensor([0,0,0,0])
+        return img, target
 
     def __len__(self):
         if self.train:
@@ -676,7 +676,7 @@ class ImageNet100_M(Dataset):
        if self.target_transform is not None:
             target = self.target_transform(target)
 
-       return  img, target, annotation
+       return  img, target
 
     def read_annotation(self, annotation_path):
         tree = ET.parse(annotation_path)
@@ -1023,7 +1023,6 @@ class Aircraft(VisionDataset):
         return images, labels
 
 
-
 def Cars(root, train=True, opt=None, limit=0, transform=None, metas=None):
     """
         Cars Dataset
@@ -1087,7 +1086,7 @@ class FUB(Dataset):
         if self.transform is not None:
             return self.transform(self.data[idx]), self.labels[idx], torch.tensor([0,0,0,0])
         else:
-            return self.data[idx], self.labels[idx], torch.tensor([0,0,0,0])
+            return self.data[idx], self.labels[idx]
 
     def __len__(self):
 
