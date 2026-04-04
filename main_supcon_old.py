@@ -65,7 +65,7 @@ def parse_option():
     parser.add_argument("--pretrained", type=int, default=1)
 
     # model dataset
-    parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18", "resnet34", "resnet50", "vgg16", "simCNN", "MLP"])
+    parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18", "resnet34", "resnet50", "vgg16", "vgg11", "simCNN", "MLP"])
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
                                  "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
