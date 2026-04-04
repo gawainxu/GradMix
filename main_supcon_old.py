@@ -105,7 +105,7 @@ def parse_option():
     parser.add_argument("--architecture", type=str, default="single", choices=["single", "multi"])
     parser.add_argument("--ensemble_num", type=int, default=1)
     parser.add_argument("--feat_dim", type=int, default=128)
-    parser.add_argument("--grad_layers", type=str, default="3")
+    parser.add_argument("--grad_layers", type=str, default="0")
     parser.add_argument("--old_augmented", type=bool, default=False)
     
     # moco parameters
