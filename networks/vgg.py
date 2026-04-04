@@ -256,7 +256,7 @@ model_dict = {"vgg_s_bn": (vgg_s_bn, 128), "vgg11": (vgg11, 512), "vgg13": (vgg1
 class SupConVGG(nn.Module):
     """backbone + projection head"""
 
-    def __init__(self, name='vgg16', head='mlp', feat_dim=128, in_channels=3, pretrained=False):
+    def __init__(self, name='vgg16', head='linear', feat_dim=128, in_channels=3, pretrained=False):
         super(SupConVGG, self).__init__()
         model_fun, dim_in = model_dict[name]
         self.vgg_base = model_fun(pretrained=pretrained)
