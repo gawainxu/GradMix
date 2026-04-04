@@ -250,7 +250,7 @@ def vgg19_bn(pretrained=False, **kwargs):
     return model
 
 
-model_dict = {"vgg11": (vgg11, 512), "vgg13": (vgg13, 512), "vgg16": (vgg16, 512), "vgg19": (vgg19, 512)}
+model_dict = {"vgg_s_bn": (vgg_s_bn, 512), "vgg11": (vgg11, 512), "vgg13": (vgg13, 512), "vgg16": (vgg16, 512), "vgg19": (vgg19, 512)}
 
 
 class SupConVGG(nn.Module):
