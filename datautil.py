@@ -1423,6 +1423,7 @@ class parallel_gradients(torch.nn.Module):
         elif self.opt.model == "vgg16" or self.opt.model == "vgg11":
             self.encoder_layers = [self.model.vgg_base.features]
             self.encoder_layer_names = ["vgg_base.features"]
+
         if opt.method == "MoCo":
             if mode == "saliencymix":
                 self.tracker.register_layer(self.encoder_layer_names[-1], self.encoder_layers[-1])
