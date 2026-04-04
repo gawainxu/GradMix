@@ -65,6 +65,8 @@ class VGG(nn.Module):
     def __init__(self, features, num_classes=1000, init_weights=True):
         super(VGG, self).__init__()
         self.features = features
+
+        """
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
             nn.Linear(512 * 7 * 7, 4096),
@@ -77,11 +79,12 @@ class VGG(nn.Module):
         )
         if init_weights:
             self._initialize_weights()
+        """
 
     def forward(self, x):
         x = self.features(x)
         x = x.view(x.size(0), -1)
-        x = self.classifier(x)
+        #x = self.classifier(x)
         return x
 
     def _initialize_weights(self):
