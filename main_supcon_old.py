@@ -241,18 +241,13 @@ def set_loader(opt):
         test_dataset = get_test_datasets(opt)
 
     train_sampler = None
-    if opt.datasets != "imagenet100":
-       train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True,
-                                                  num_workers=opt.num_workers, pin_memory=True, sampler=train_sampler, drop_last=True,
-                                                  persistent_workers = True)
-       test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1,
-                                                  shuffle=False,
-                                                  num_workers=opt.num_workers, pin_memory=True, sampler=train_sampler,
-                                                  drop_last=True,
-                                                  persistent_workers=True)
-    else:
-       train_loader = train_dataset
-       test_loader = test_dataset
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True,
+                                                num_workers=opt.num_workers, pin_memory=True, sampler=train_sampler, drop_last=True,
+                                                persistent_workers = True)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1,
+                                              shuffle=False, num_workers=opt.num_workers, pin_memory=True,
+                                              sampler=train_sampler, drop_last=True, persistent_workers=True)
+
 
     return train_loader, test_loader
 

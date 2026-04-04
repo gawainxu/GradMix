@@ -341,18 +341,24 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
     if opt.action == "training_supcon" or opt.action == "trainging_linear":
         if opt.datasets == "mnist":
             train_transform = transforms.Compose([transforms.ToTensor(), transforms.RandomRotation((-5, 5)),])
-
         elif opt.datasets == "FUB":
             train_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
                                     transforms.Resize((size)),
                                     transforms.RandomHorizontalFlip(), transforms.RandomRotation(15),
                                     transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
                                     transforms.RandomGrayscale(p=0.2),])
-
+        elif opt.datasets == "imagenet100":
+            train_transform = transforms.Compose(
+                [transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
+                 transforms.Resize((size, size)),
+                 transforms.RandomHorizontalFlip(),
+                 transforms.RandomGrayscale(p=0.2),
+                 # transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 2.0)),    # !!!!!!!!!!!
+                 transforms.ToTensor(),
+                 normalize, ])
         else:
-            print("training_supcon!!!")
             train_transform = transforms.Compose([transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),                                     
-                                                  transforms.Resize((size, size)),
+                                                  #transforms.Resize((size, size)),
                                                   transforms.RandomResizedCrop(size=size, scale=(0.2, 1.)),    #!!!!!!
                                                   transforms.RandomHorizontalFlip(),
                                                   transforms.RandomGrayscale(p=0.2),
