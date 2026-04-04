@@ -1420,7 +1420,7 @@ class parallel_gradients(torch.nn.Module):
             self.encoder_layers = [self.model.bn10, self.model.bn9,
                                    self.model.bn8, self.model.bn7]
             self.encoder_layer_names = ["bn7", "bn8", "bn9", "bn10"]
-        elif self.opt.model == "vgg16":
+        elif self.opt.model == "vgg16" or self.opt.model == "vgg11":
             self.encoder_layers = [self.model.vgg_base.features]
             self.encoder_layer_names = ["vgg_base.features"]
         if opt.method == "MoCo":
