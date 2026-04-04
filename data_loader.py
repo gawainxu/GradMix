@@ -1084,7 +1084,7 @@ class FUB(Dataset):
     def __getitem__(self, idx):
 
         if self.transform is not None:
-            return self.transform(self.data[idx]), self.labels[idx], torch.tensor([0,0,0,0])
+            return self.transform(self.data[idx]), self.labels[idx]
         else:
             return self.data[idx], self.labels[idx]
 
