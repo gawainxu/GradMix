@@ -283,7 +283,7 @@ def set_model(opt):
             model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "MLP":
             model = SupConMLP(feat_dim=opt.feat_dim)
-        elif opt.model == "vgg16":
+        elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
             model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         else:
             model = simCNN_contrastive(opt, feature_dim=opt.feat_dim, in_channels=in_channels)
