@@ -118,7 +118,7 @@ def make_layers(cfg, batch_norm=False):
 
 
 cfg = {
-    'S': [64, 'M', 128, 'M', 128, 128, 'M', 256, 256, 'M', 256, 256, 'M'],
+    'S': [64, 'M', 64, 'M', 64, 64, 'M', 128, 128, 'M', 128, 128, 'M'],
     'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
     'B': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
     'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
@@ -250,7 +250,7 @@ def vgg19_bn(pretrained=False, **kwargs):
     return model
 
 
-model_dict = {"vgg_s_bn": (vgg_s_bn, 256), "vgg11": (vgg11, 512), "vgg13": (vgg13, 512), "vgg16": (vgg16, 512), "vgg19": (vgg19, 512)}
+model_dict = {"vgg_s_bn": (vgg_s_bn, 128), "vgg11": (vgg11, 512), "vgg13": (vgg13, 512), "vgg16": (vgg16, 512), "vgg19": (vgg19, 512)}
 
 
 class SupConVGG(nn.Module):
