@@ -114,7 +114,6 @@ def parse_option():
     parser.add_argument("--grad_layers", type=str, default="3")
     parser.add_argument("--old_augmented", type=bool, default=False)
 
-
     # upsampling parameters
     parser.add_argument("--upsample", type=bool, default=False)
     parser.add_argument("--portion_out", type=float, default=0.5)
@@ -383,9 +382,15 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                 
             if opt.method == "SimCLR":
                 mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
-                gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1, grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam)
+                gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1, loss_fcn2=criterion2,
+                                     grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam)
                 loss = gc2(model_inputs=images, model_inputs_mix=mixed_positive_samples)
-                losses.update(loss.item())
+                losses.update(loss.cpu().item())
+            elif opt.method == "SupCon":
+                gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion2,
+                                     grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam)
+                loss = gc2(model_inputs=images)
+                losses.update(loss.cpu().item())
             elif opt.method == "MoCo":
                 if idx == 0:
                     model.temp_cache = []

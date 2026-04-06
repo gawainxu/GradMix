@@ -19,7 +19,7 @@ class gradient_cache():
      A reimplementation of gradient_cache in https://github.com/luyug/GradCache/
      """
      
-     def __init__(self, model, splits, fp16, loss_fcn, grad_scalar=None, optimizer=None, if_normal=False, lam=1):
+     def __init__(self, model, splits, fp16, loss_fcn, loss_fcn2=None, grad_scalar=None, optimizer=None, if_normal=False, lam=1, opt=None):
          
          """
          model: the model that to be trained
@@ -32,12 +32,14 @@ class gradient_cache():
          self.model = model
          self.splits = splits
          self.loss_fcn = loss_fcn
+         self.loss_fcn2 = loss_fcn2
          self.fp16 = fp16
          self.grad_scalar = grad_scalar
          self.if_normal = if_normal
          self.optimizer = optimizer
          self.reps_norm = []
          self.lam = lam
+         self.opt = opt
          
      def __call__(self, model_inputs, model_inputs_mix=None):
         
@@ -76,9 +78,12 @@ class gradient_cache():
          return reps
      
         
-     def compute_loss(self, reps, mixed_reps=None):
-         
-         loss = self.loss_fcn(features=reps, features_positive=mixed_reps)  # TODO check the format of loss_fcn
+     def compute_loss(self, reps, labels=None):
+
+         if self.loss_fcn2 is None:
+             loss = self.loss_fcn(features=reps, labels=labels)
+         else:
+             loss = self.opt.method_gama * self.loss_fcn(features=reps) + self.opt.method_beta * self.loss_fcn2(features=reps, labels=labels)
          
          return loss
      
@@ -278,9 +283,9 @@ class gradient_cache_activations():
                 self.encoder = self.model.encoder
                 
     
-    def compute_loss(self, reps, mixed_reps=None):
+    def compute_loss(self, reps, mixed_reps=None, labels=None):
           
-        loss = self.loss_fcn(features=reps, features_positive=mixed_reps)  # TODO check the format of loss_fcn
+        loss = self.loss_fcn(features=reps, features_positive=mixed_reps, labels=labels)  # TODO check the format of loss_fcn
         return loss
       
         
