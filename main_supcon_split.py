@@ -383,12 +383,12 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
             if opt.method == "SimCLR":
                 mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1, loss_fcn2=criterion2,
-                                     grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam)
+                                     grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam, opt=opt)
                 loss = gc2(model_inputs=images, model_inputs_mix=mixed_positive_samples)
                 losses.update(loss.cpu().item())
             elif opt.method == "SupCon":
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion2,
-                                     grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam)
+                                     grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam, opt=opt)
                 loss = gc2(model_inputs=images)
                 losses.update(loss.cpu().item())
             elif opt.method == "MoCo":
