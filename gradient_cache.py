@@ -109,7 +109,7 @@ class gradient_cache():
              mix_reps = torch.cat([mix_reps1.unsqueeze(1), mix_reps2.unsqueeze(1)], dim=1)
              mix_reps.requires_grad_().retain_grad()
              loss1 = self.compute_loss(all_reps)
-             loss2 = self.compute_loss(reps=all_reps, mixed_reps=mix_reps)
+             loss2 = self.compute_loss(reps=all_reps)
              loss = loss1 + self.lam * loss2
               
          if self.fp16:
@@ -228,7 +228,7 @@ class gradient_cache():
              
          # build cache
          if model_inputs_mix is not None:
-             reps_grad_ori, reps_grad_mix, loss = self.build_cache(all_reps, mix_reps)
+             reps_grad_ori, reps_grad_mix, loss = self.build_cache(all_reps)
              reps_grad_ori = reps_grad_ori.split(self.splits, dim=0)
              reps_grad_mix = reps_grad_mix.split(self.splits, dim=0)
          else:
