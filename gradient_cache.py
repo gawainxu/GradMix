@@ -83,7 +83,7 @@ class gradient_cache():
          if self.loss_fcn2 is None:
              loss = self.loss_fcn(features=reps, labels=labels)
          else:
-             loss = self.opt.method_gama * self.loss_fcn(features=reps) + self.opt.method_beta * self.loss_fcn2(features=reps, labels=labels)
+             loss = self.opt.method_gama * self.loss_fcn(features=reps) + self.opt.method_lam * self.loss_fcn2(features=reps, labels=labels)
          
          return loss
      
