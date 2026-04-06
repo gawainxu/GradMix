@@ -10,7 +10,6 @@ import numpy as np
 
 import torch
 import torch.backends.cudnn as cudnn
-from torchvision import datasets
 
 from util import TwoCropTransform, AverageMeter
 from util import adjust_learning_rate
@@ -44,7 +43,7 @@ def parse_option():
                         help='print frequency')
     parser.add_argument('--save_freq', type=int, default=50,
                         help='save frequency')
-    parser.add_argument('--batch_size', type=int, default=128,
+    parser.add_argument('--batch_size', type=int, default=256,
                         help='batch_size')
     parser.add_argument('--num_workers', type=int, default=4,
                         help='num of workers to use')
@@ -81,7 +80,7 @@ def parse_option():
     # method
     parser.add_argument('--method', type=str, default='SimCLR',
                         choices=['SupCon', 'SimCLR', "SimCLR_CE", "MoCo"], help='choose method')
-    parser.add_argument("--method_gama", type=float, default=0.0)
+    parser.add_argument("--method_gama", type=float, default=1.0)
     parser.add_argument("--method_lam", type=float, default=1.0)
     parser.add_argument("--trail", type=int, default=0, choices=[0,1,2,3,4,5,6], help="index of repeating training")
     parser.add_argument("--action", type=str, default="training_supcon",
@@ -388,7 +387,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
             logits = linear(model.encoder(image3))
             
         if opt.method == 'SupCon':
-            with torch.cuda.amp.autocast():
+            with torch.cuda.amp.autocast(dtype=torch.float32):
                 features = model(images)
                 features1, features2 = torch.split(features, [bsz, bsz], dim=0)
                 features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
@@ -396,7 +395,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                 loss = loss2 = loss1
 
         elif opt.method == 'SimCLR':
-            with torch.cuda.amp.autocast():
+            with torch.cuda.amp.autocast(dtype=torch.float32):
                 features = model(images)
                 features1, features2 = torch.split(features, [bsz, bsz], dim=0)
                 features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
@@ -441,28 +440,28 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                         loss_ssl = loss2 = loss_ssl_mix
                     losses_ssl_mix.update(loss_ssl_mix.detach().cpu().item())
 
-                    loss = opt.method_gama * loss_sup + opt.method_lam * loss_ssl
-                    losses_ssl.update(loss_ssl.detach().cpu().item())
-                    losses_sup.update(loss_sup.detach().cpu().item())
-                    #ious_epoch.append(ious)
+                loss = opt.method_gama * loss_sup + opt.method_lam * loss_ssl
+                losses_ssl.update(loss_ssl.detach().cpu().item())
+                losses_sup.update(loss_sup.detach().cpu().item())
+                #ious_epoch.append(ious)
 
-                    if opt.record_grad:
-                        # Here the model parameters can be other intermdiate parameters
-                        g_ssl = torch.autograd.grad(loss_ssl, [model.head[0].weight, model.head[2].weight],
-                                                    retain_graph=True)  # model.encoder.layer4[-1].conv2.weight,
-                        g_sl = torch.autograd.grad(loss_sup, [model.head[0].weight, model.head[2].weight],
-                                                   retain_graph=True)  # model.encoder.layer4[-1].conv2.weight,
-                        loss_ssl_grad.append([x.detach().cpu() for x in g_ssl])
-                        loss_sl_grad.append([x.detach().cpu() for x in g_sl])
-                        print("g_sup", torch.sum(torch.abs(loss_sl_grad[-1][0])),
-                              torch.sum(torch.abs(loss_sl_grad[-1][1])))
-                        print("g_ssl", torch.sum(torch.abs(loss_ssl_grad[-1][0])),
-                              torch.sum(torch.abs(loss_ssl_grad[-1][1])))
-                        # loss_ssl_hessian.append([x.detach().cpu() for x in hessian_ssl])
-                        # loss_sl_hessian.append([x.detach().cpu() for x in hessian_sl])
+                if opt.record_grad:
+                    # Here the model parameters can be other intermdiate parameters
+                    g_ssl = torch.autograd.grad(loss_ssl, [model.head[0].weight, model.head[2].weight],
+                                                retain_graph=True)  # model.encoder.layer4[-1].conv2.weight,
+                    g_sl = torch.autograd.grad(loss_sup, [model.head[0].weight, model.head[2].weight],
+                                               retain_graph=True)  # model.encoder.layer4[-1].conv2.weight,
+                    loss_ssl_grad.append([x.detach().cpu() for x in g_ssl])
+                    loss_sl_grad.append([x.detach().cpu() for x in g_sl])
+                    print("g_sup", torch.sum(torch.abs(loss_sl_grad[-1][0])),
+                          torch.sum(torch.abs(loss_sl_grad[-1][1])))
+                    print("g_ssl", torch.sum(torch.abs(loss_ssl_grad[-1][0])),
+                          torch.sum(torch.abs(loss_ssl_grad[-1][1])))
+                    # loss_ssl_hessian.append([x.detach().cpu() for x in hessian_ssl])
+                    # loss_sl_hessian.append([x.detach().cpu() for x in hessian_sl])
 
         elif opt.method == 'SimCLR_CE':
-            with torch.cuda.amp.autocast():
+            with torch.cuda.amp.autocast(dtype=torch.float32):
                 features = model(images)
                 features1, features2 = torch.split(features, [bsz, bsz], dim=0)
                 features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
@@ -474,7 +473,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                 losses_sup.update(loss_ce.detach().cpu().item())
              
         elif opt.method == "MoCo":
-            with torch.cuda.amp.autocast():
+            with torch.cuda.amp.autocast(dtype=torch.float32):
                 logits, labels_moco = model(images1, images2, mode="moco")
                 loss_moco = loss2 = criterion1(logits, labels_moco)
 
@@ -585,7 +584,7 @@ def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoc
             logits = linear(model.encoder(image3))
 
         if opt.method == 'SupCon':
-            with torch.cuda.amp.autocast():
+            with torch.cuda.amp.autocast(dtype=torch.float32):
                 features = model(images)
                 features1, features2 = torch.split(features, [bsz, bsz], dim=0)
                 features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
@@ -593,7 +592,7 @@ def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoc
                 loss = loss2 = loss1
 
         elif opt.method == 'SimCLR':
-            with torch.cuda.amp.autocast():
+            with torch.cuda.amp.autocast(dtype=torch.float32):
                 features = model(images)
                 features1, features2 = torch.split(features, [bsz, bsz], dim=0)
                 features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
@@ -647,7 +646,7 @@ def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoc
 
 
         elif opt.method == 'SimCLR_CE':
-            with torch.cuda.amp.autocast():
+            with torch.cuda.amp.autocast(dtype=torch.float32):
                 features = model(images)
                 features1, features2 = torch.split(features, [bsz, bsz], dim=0)
                 features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
@@ -659,7 +658,7 @@ def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoc
                 losses_sup.update(loss_ce.detach().cpu().item())
 
         elif opt.method == "MoCo":
-            with torch.cuda.amp.autocast():
+            with torch.cuda.amp.autocast(dtype=torch.float32):
                 logits, labels_moco = model(images1, images2, mode="moco")
                 loss_moco = loss2 = criterion1(logits, labels_moco)
 
@@ -733,7 +732,7 @@ def main():
 
     # build optimizer
     optimizer = set_optimizer(opt, model)
-    scaler = torch.cuda.amp.GradScaler()
+    scalar = torch.cuda.amp.GradScaler()
 
     losses = []
     all_ious = []
