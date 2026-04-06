@@ -251,7 +251,6 @@ def set_loader(opt):
     return train_loader
 
 
-
 def set_model(opt):
 
     if opt.datasets == "mnist":
@@ -316,7 +315,6 @@ def set_model(opt):
     return model, linear, criterion1, criterion2
 
 
-
 def load_model(opt, model=None):
     if model is None:
         model = SupConResNet(name=opt.model)
@@ -335,7 +333,6 @@ def load_model(opt, model=None):
     model.eval()
 
     return model
-
 
 
 def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt):
@@ -402,6 +399,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                 losses_ssl.update(loss_moco.item())
                 losses_mix.update(loss_mix.item())
                 loss.backward()
+
         else:
             if opt.method == "SimCLR":
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1, grad_scalar=scaler, optimizer=optimizer, if_normal=True)

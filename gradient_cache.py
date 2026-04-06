@@ -53,7 +53,7 @@ class gradient_cache():
          inputs = torch.split(inputs, [bsz, bsz], dim=0)
          inputs = [t.split(splits, dim=0) for t in inputs]
          # reorganize the data that each element in splits_inputs is list of two view of splited data, 
-         #[[split_x1_1, split_x2_1], [split_x1_2, split_x2_2]]
+         # [[split_x1_1, split_x2_1], [split_x1_2, split_x2_2]]
          inputs = [list(s) for s in zip(*inputs)] 
          
          return inputs
@@ -135,7 +135,6 @@ class gradient_cache():
                  one_split_reps1, one_split_reps2 = torch.split(one_split_reps, [bsz, bsz], dim=0)
                  one_split_reps = torch.cat([one_split_reps1.unsqueeze(1), one_split_reps2.unsqueeze(1)], dim=1)   
                  surrogate = torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
-             
              else:
                  one_split_inputs = torch.cat([one_split_inputs[0], one_split_inputs[1]], dim=0)  
                  one_split_reps = self.model_call(self.model, one_split_inputs)
@@ -373,9 +372,9 @@ class gradient_cache_activations():
         
         all_reps = self.forward_no_grad(model_inputs)
         reps_gradient_cache, loss = self.build_cache(all_reps)
-        reps_gradient_cache = reps_gradient_cache.split(self.splits, dim=0) 
-        
+        reps_gradient_cache = reps_gradient_cache.split(self.splits, dim=0)
         model_inputs = self.split_inputs(model_inputs, self.splits)
+
         self.hooks.append(self.encoder.layer4[-1].register_forward_hook(hook=self.save_activation_hook))
         self.hooks.append(self.encoder.layer4[-1].register_full_backward_hook(hook=self.save_backward_hook))
         self.forward_backward(model_inputs, reps_gradient_cache)        
