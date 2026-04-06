@@ -23,6 +23,7 @@ from networks.resnet_big import MoCoResNet
 from networks.maskcon import MaskCon
 from networks.simCNN import simCNN_contrastive
 from networks.resnet_preact import SupConpPreactResNet
+from networks.vgg import SupConVGG
 from networks.mlp import SupConMLP
 from losses import SupConLoss
 from loss_mixup import SupConLoss_mix
@@ -67,7 +68,7 @@ def parse_option():
     parser.add_argument("--pretrained", type=int, default=1)
 
     # model dataset
-    parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "simCNN", "MLP"])
+    parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18", "resnet34", "vgg16", "simCNN", "MLP"])
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "tinyimgnet", "imagenet100", 'mnist', "svhn", "cub", "aircraft"], help='dataset')
     parser.add_argument('--mean', type=str, help='mean of dataset in path in form of str tuple')
@@ -278,6 +279,8 @@ def set_model(opt):
             model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model in ["preactresnet18", "preactresnet34"]:
             model = SupConpPreactResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
+        elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
+            model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "MLP":
             model = SupConMLP(feat_dim=opt.feat_dim)
         else:
