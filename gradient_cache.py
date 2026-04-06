@@ -228,9 +228,9 @@ class gradient_cache():
              
          # build cache
          if model_inputs_mix is not None:
-             reps_grad_ori, reps_grad_mix, loss = self.build_cache(all_reps)
+             reps_grad_ori, loss = self.build_cache(all_reps)
              reps_grad_ori = reps_grad_ori.split(self.splits, dim=0)
-             reps_grad_mix = reps_grad_mix.split(self.splits, dim=0)
+             #reps_grad_mix = reps_grad_mix.split(self.splits, dim=0)
          else:
             reps_grad_ori, loss = self.build_cache(all_reps)
             # split again for pairing with splited gradients
@@ -246,7 +246,7 @@ class gradient_cache():
  
          # sub-batch gradient accumulation
          #self.optimizer.zero_grad()
-         self.forward_backward(model_inputs, reps_grad_ori, model_inputs_mix=model_inputs_mix, reps_grad_mix=reps_grad_mix)           #!!!!!
+         self.forward_backward(model_inputs, reps_grad_ori, model_inputs_mix=model_inputs_mix)           #!!!!!
          
          
          """
