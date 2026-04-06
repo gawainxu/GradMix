@@ -171,7 +171,7 @@ class gradient_cache():
              for p in self.model.parameters():
                  #print(p.grad.norm())
                  norms += p.grad.norm()
-             print("model gradients norms", norms)
+             #print("model gradients norms", norms)
              
          return
      
@@ -192,7 +192,7 @@ class gradient_cache():
              
              reps_grad = one_split_reps.grad
              grad_norm = torch.norm(reps_grad)
-             print("feature gradient norm full", grad_norm)
+             #print("feature gradient norm full", grad_norm)
              
              self.optimizer.zero_grad()         #!!!!!!
              
@@ -332,7 +332,7 @@ class gradient_cache_activations():
         loss.backward()
         
         cache = all_reps.grad
-        print("feature gradient norm seperate", torch.norm(cache))
+        #print("feature gradient norm seperate", torch.norm(cache))
         return cache, loss
     
     
