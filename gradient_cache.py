@@ -157,7 +157,7 @@ class gradient_cache():
                  one_split_reps_mix.requires_grad_()
                     
                  surrogate = torch.sum(one_split_reps_mix.flatten() * one_split_reps_grad_mix.flatten()) + torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
-              
+
              """
              bsz = int(one_split_reps.shape[0] / 2)
              one_split_reps1, one_split_reps2 = torch.split(one_split_reps, [bsz, bsz], dim=0)
