@@ -220,7 +220,7 @@ class gradient_cache():
          return loss
     
 
-     def cache_step(self, model_inputs, model_inputs_mix=None):
+     def cache_step(self, model_inputs, labels, model_inputs_mix=None):
          
          # read features for all data without gradients
          all_reps = self.forward_no_grad(model_inputs)
@@ -229,11 +229,11 @@ class gradient_cache():
              
          # build cache
          if model_inputs_mix is not None:
-             reps_grad_ori, loss = self.build_cache(all_reps)
+             reps_grad_ori, loss = self.build_cache(all_reps, labels=labels)
              reps_grad_ori = reps_grad_ori.split(self.splits, dim=0)
              #reps_grad_mix = reps_grad_mix.split(self.splits, dim=0)
          else:
-            reps_grad_ori, loss = self.build_cache(all_reps)
+            reps_grad_ori, loss = self.build_cache(all_reps, labels=labels)
             # split again for pairing with splited gradients
             reps_grad_ori = reps_grad_ori.split(self.splits, dim=0)           #!!!!!!, (bsz, 2, f)
             reps_grad_mix = None
