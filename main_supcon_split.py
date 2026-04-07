@@ -131,7 +131,7 @@ def parse_option():
     parser.add_argument("--intra_inter_mix_positive", type=bool, default=True, help="intra=True, inter=False")
     parser.add_argument("--intra_inter_mix_negative", type=bool, default=True, help="intra=True, inter=False")
     parser.add_argument("--intra_inter_mix_hybrid", type=bool, default=True, help="intra=True, inter=False")
-    parser.add_argument("--mixup_positive", type=bool, default=True)
+    parser.add_argument("--mixup_positive", type=bool, default=False)
     parser.add_argument("--mixup_negative", type=bool, default=False)
     parser.add_argument("--mixup_hybrid", type=bool, default=False)
     parser.add_argument("--mixup_vanilla", type=bool, default=False)
@@ -382,13 +382,19 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                 
             if opt.method == "SimCLR":
                 mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
-                gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1, loss_fcn2=criterion2,
+                gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1,
                                      grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam, opt=opt)
                 loss = gc2(model_inputs=images)
                 losses.update(loss.cpu().item())
             elif opt.method == "SupCon":
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion2,
                                      grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam, opt=opt)
+                loss = gc2(model_inputs=images)
+                losses.update(loss.cpu().item())
+            elif opt.method == "Joint":
+                mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
+                gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1,
+                                     loss_fcn2=criterion2, grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam, opt=opt)
                 loss = gc2(model_inputs=images)
                 losses.update(loss.cpu().item())
             elif opt.method == "MoCo":
@@ -410,9 +416,20 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
 
         else:
             if opt.method == "SimCLR":
-                gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1, grad_scalar=scaler, optimizer=optimizer, if_normal=True)
+                gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1,
+                                     grad_scalar=scaler, optimizer=optimizer, if_normal=True, opt=opt)
                 loss = gc2(model_inputs=images)
-                losses.update(loss.item())
+                losses.update(loss.cpu().item())
+            elif opt.method == "SupCon":
+                gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion2,
+                                     grad_scalar=scaler, optimizer=optimizer, if_normal=True, opt=opt)
+                loss = gc2(model_inputs=images)
+                losses.update(loss.cpu().item())
+            elif opt.method == "Joint":
+                gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1,
+                                     loss_fcn2=criterion2, grad_scalar=scaler, optimizer=optimizer, if_normal=True, opt=opt)
+                loss = gc2(model_inputs=images)
+                losses.update(loss.cpu().item())
             elif opt.method == "MoCo":
                 if idx == 0:
                     model.temp_cache = []
@@ -420,9 +437,15 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                     update_cache = False
                 else:
                     update_cache = True
-                logits, labels_moco = model(images1, images2, mode="moco", update_cache=update_cache)
-                loss = criterion1(logits, labels_moco)
+                logits, labels_moco = model(images1, images2, mode="moco")
+                loss_moco = criterion1(logits, labels_moco)
+                logits_mix, labels_mix = model(mixed_positive_samples1, mixed_positive_samples2, mode="moco",
+                                               update_cache=update_cache)
+                loss_mix = criterion1(logits_mix, labels_mix)
+                loss = loss_moco + lam * loss_mix
                 losses.update(loss.item())
+                losses_ssl.update(loss_moco.item())
+                losses_mix.update(loss_mix.item())
                 loss.backward()
            
         
