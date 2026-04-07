@@ -323,7 +323,7 @@ class gradient_cache_activations():
         return inputs
     
     
-    def build_cache(self, all_reps):
+    def build_cache(self, all_reps, labels):
         
         """
         compute and store the gradients of the loss_fun over the representations
@@ -334,7 +334,7 @@ class gradient_cache_activations():
         all_reps = torch.cat([all_reps1.unsqueeze(1), all_reps2.unsqueeze(1)], dim=1)    
         all_reps.requires_grad_().retain_grad()
 
-        loss = self.compute_loss(all_reps)
+        loss = self.compute_loss(all_reps, labels=labels)
         loss.backward()
         
         cache = all_reps.grad
@@ -374,10 +374,10 @@ class gradient_cache_activations():
         self.gradients.append(output[0].detach())
         
     
-    def cache_step(self, model_inputs):
+    def cache_step(self, model_inputs, labels):
         
         all_reps = self.forward_no_grad(model_inputs)
-        reps_gradient_cache, loss = self.build_cache(all_reps)
+        reps_gradient_cache, loss = self.build_cache(all_reps, labels=labels)
         reps_gradient_cache = reps_gradient_cache.split(self.splits, dim=0)
         model_inputs = self.split_inputs(model_inputs, self.splits)
 
