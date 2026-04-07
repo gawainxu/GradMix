@@ -80,8 +80,10 @@ class gradient_cache():
         
      def compute_loss(self, reps, labels=None):
 
-         if self.loss_fcn2 is None:
-             loss = self.loss_fcn(features=reps, labels=labels)
+         if "SimCLR" in self.opt.method:
+             loss = self.loss_fcn(features=reps)
+         elif "SupCon" in self.opt.method:
+             loss = self.loss_fcn(features=reps, labels=label)
          else:
              loss = self.opt.method_gama * self.loss_fcn(features=reps) + self.opt.method_lam * self.loss_fcn2(features=reps, labels=labels)
          
