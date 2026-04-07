@@ -384,18 +384,18 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                 mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1,
                                      grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam, opt=opt)
-                loss = gc2(model_inputs=images)
+                loss = gc2(model_inputs=images, labels=labels)
                 losses.update(loss.cpu().item())
             elif opt.method == "SupCon":
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion2,
                                      grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam, opt=opt)
-                loss = gc2(model_inputs=images)
+                loss = gc2(model_inputs=images, labels=labels)
                 losses.update(loss.cpu().item())
             elif opt.method == "Joint":
                 mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1,
                                      loss_fcn2=criterion2, grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam, opt=opt)
-                loss = gc2(model_inputs=images)
+                loss = gc2(model_inputs=images, labels=labels)
                 losses.update(loss.cpu().item())
             elif opt.method == "MoCo":
                 if idx == 0:
@@ -418,17 +418,17 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
             if opt.method == "SimCLR":
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1,
                                      grad_scalar=scaler, optimizer=optimizer, if_normal=True, opt=opt)
-                loss = gc2(model_inputs=images)
+                loss = gc2(model_inputs=images, labels=labels)
                 losses.update(loss.cpu().item())
             elif opt.method == "SupCon":
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion2,
                                      grad_scalar=scaler, optimizer=optimizer, if_normal=True, opt=opt)
-                loss = gc2(model_inputs=images)
+                loss = gc2(model_inputs=images, labels=labels)
                 losses.update(loss.cpu().item())
             elif opt.method == "Joint":
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1,
                                      loss_fcn2=criterion2, grad_scalar=scaler, optimizer=optimizer, if_normal=True, opt=opt)
-                loss = gc2(model_inputs=images)
+                loss = gc2(model_inputs=images, labels=labels)
                 losses.update(loss.cpu().item())
             elif opt.method == "MoCo":
                 if idx == 0:
