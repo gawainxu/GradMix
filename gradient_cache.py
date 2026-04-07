@@ -41,9 +41,9 @@ class gradient_cache():
          self.lam = lam
          self.opt = opt
          
-     def __call__(self, model_inputs, model_inputs_mix=None):
+     def __call__(self, model_inputs, labels, model_inputs_mix=None):
         
-        return self.cache_step(model_inputs, model_inputs_mix)
+        return self.cache_step(model_inputs, labels, model_inputs_mix)
     
     
      def split_inputs(self, inputs, splits):
@@ -83,13 +83,13 @@ class gradient_cache():
              loss = self.loss_fcn(features=reps)
          elif "SupCon" in self.opt.method:
              loss = self.loss_fcn(features=reps, labels=labels)
-         else:
+         elif "Joint" in self.opt.method:
              loss = self.opt.method_gama * self.loss_fcn(features=reps) + self.opt.method_lam * self.loss_fcn2(features=reps, labels=labels)
          
          return loss
      
         
-     def build_cache(self, all_reps, mix_reps=None):
+     def build_cache(self, all_reps, labels, mix_reps=None):
          
          """
          compute and store the gradients of the loss_fun over the representations
@@ -104,13 +104,13 @@ class gradient_cache():
          all_reps.requires_grad_().retain_grad()
          
          if mix_reps is None:
-             loss = self.compute_loss(all_reps)
+             loss = self.compute_loss(all_reps, labels)
          else:
              mix_reps1, mix_reps2 = torch.split(mix_reps, [bsz, bsz], dim=0)
              mix_reps = torch.cat([mix_reps1.unsqueeze(1), mix_reps2.unsqueeze(1)], dim=1)
              mix_reps.requires_grad_().retain_grad()
-             loss1 = self.compute_loss(all_reps)
-             loss2 = self.compute_loss(reps=all_reps)
+             loss1 = self.compute_loss(all_reps, labels)
+             loss2 = self.compute_loss(reps=all_reps, labels)
              loss = loss1 + self.lam * loss2
               
          if self.fp16:

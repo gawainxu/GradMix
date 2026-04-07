@@ -457,7 +457,6 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
         print("model gradients norms", norms)
         """
         if opt.method == "SimCLR":
-            #print("new batch")
             optimizer.step()
             optimizer.zero_grad()
         else:
