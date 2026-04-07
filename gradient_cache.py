@@ -73,8 +73,7 @@ class gradient_cache():
          
          with torch.no_grad():
               reps = self.model_call(self.model, model_inputs)
-         #reps = self.model_call(model, model_inputs)                 # !!!!!!!
-                
+
          return reps
      
         
@@ -83,7 +82,7 @@ class gradient_cache():
          if "SimCLR" in self.opt.method:
              loss = self.loss_fcn(features=reps)
          elif "SupCon" in self.opt.method:
-             loss = self.loss_fcn(features=reps, labels=label)
+             loss = self.loss_fcn(features=reps, labels=labels)
          else:
              loss = self.opt.method_gama * self.loss_fcn(features=reps) + self.opt.method_lam * self.loss_fcn2(features=reps, labels=labels)
          
