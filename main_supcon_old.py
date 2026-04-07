@@ -49,6 +49,7 @@ def parse_option():
                         help='num of workers to use')
     parser.add_argument('--epochs', type=int, default=100,
                         help='number of training epochs')
+    parser.add_argument("--grad_splits", type=int, default=1)
 
     # optimization
     parser.add_argument('--learning_rate', type=float, default=0.001,
