@@ -65,7 +65,7 @@ def parse_option():
     parser.add_argument("--pretrained", type=int, default=1)
 
     # model dataset
-    parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18", "resnet34", "resnet50", "vgg16", "vgg11", "vgg_s_bn", "simCNN", "MLP"])
+    parser.add_argument('--model', type=str, default='vgg16', choices=["resnet18", "resnet34", "resnet50", "vgg16", "vgg11", "vgg_s_bn", "simCNN", "MLP"])
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
                                  "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
@@ -79,7 +79,7 @@ def parse_option():
     parser.add_argument("--augmix", type=bool, default=False) 
 
     # method
-    parser.add_argument('--method', type=str, default='SimCLR',
+    parser.add_argument('--method', type=str, default='SupCon',
                         choices=['SupCon', 'SimCLR', "SimCLR_CE", "MoCo"], help='choose method')
     parser.add_argument("--method_gama", type=float, default=1.0)
     parser.add_argument("--method_lam", type=float, default=1.0)
@@ -394,6 +394,8 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                 features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
                 loss1 = criterion1(features, labels)
                 loss = loss2 = loss1
+                loss_sup = loss
+                loss_ssl = torch.tensor([0])
 
         elif opt.method == 'SimCLR':
             with torch.cuda.amp.autocast(dtype=torch.float32):
@@ -516,6 +518,12 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
         optimizer.zero_grad()
         scalar.scale(loss).backward(retain_graph=False)
         optimizer.step()
+
+        norms = 0
+        for p in model.parameters():
+            # print(p.grad.norm())
+            norms += p.grad.norm()
+        print("model gradients norms", norms)
 
         # measure elapsed time
         batch_time.update(time.time() - end)

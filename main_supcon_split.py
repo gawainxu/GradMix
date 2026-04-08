@@ -47,11 +47,11 @@ def parse_option():
                         help='print frequency')
     parser.add_argument('--save_freq', type=int, default=50,
                         help='save frequency')
-    parser.add_argument('--batch_size', type=int, default=64,
+    parser.add_argument('--batch_size', type=int, default=256,
                         help='batch_size')
     parser.add_argument('--num_workers', type=int, default=4,
                         help='num of workers to use')
-    parser.add_argument('--epochs', type=int, default=1,
+    parser.add_argument('--epochs', type=int, default=10,
                         help='number of training epochs')
 
     # optimization
@@ -68,7 +68,7 @@ def parse_option():
     parser.add_argument("--pretrained", type=int, default=1)
 
     # model dataset
-    parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18", "resnet34", "vgg16", "simCNN", "MLP"])
+    parser.add_argument('--model', type=str, default='vgg16', choices=["resnet18", "resnet34", "vgg16", "simCNN", "MLP"])
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "tinyimgnet", "imagenet100", 'mnist', "svhn", "cub", "aircraft"], help='dataset')
     parser.add_argument('--mean', type=str, help='mean of dataset in path in form of str tuple')
@@ -80,8 +80,8 @@ def parse_option():
     parser.add_argument("--argmentation_m", type=int, default=6)
 
     # method
-    parser.add_argument('--method', type=str, default='MoCo',
-                        choices=['SupCon', 'SimCLR', "SimCLR_CE", "MoCo"], help='choose method')
+    parser.add_argument('--method', type=str, default='SimCLR',
+                        choices=['SupCon', 'SimCLR', "SimCLR_CE", "Joint", "MoCo"], help='choose method')
     parser.add_argument("--method_gama", type=float, default=0.0)
     parser.add_argument("--method_lam", type=float, default=1.0)
     parser.add_argument("--trail", type=int, default=0, choices=[0,1,2,3,4,5], help="index of repeating training")
@@ -90,7 +90,7 @@ def parse_option():
     # temperature
     parser.add_argument('--temp', type=float, default=0.05, help='temperature for loss')
     parser.add_argument("--clip", type=float, default=None, help="for gradient clipping")
-    parser.add_argument("--grad_splits", type=int, default=64)
+    parser.add_argument("--grad_splits", type=int, default=256)
     
     # moco parameters
     parser.add_argument("--K", type=int, default=4096, help="buffer size in moco")
