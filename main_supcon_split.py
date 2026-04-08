@@ -80,7 +80,7 @@ def parse_option():
     parser.add_argument("--argmentation_m", type=int, default=6)
 
     # method
-    parser.add_argument('--method', type=str, default='SimCLR',
+    parser.add_argument('--method', type=str, default='SupCon',
                         choices=['SupCon', 'SimCLR', "SimCLR_CE", "Joint", "MoCo"], help='choose method')
     parser.add_argument("--method_gama", type=float, default=0.0)
     parser.add_argument("--method_lam", type=float, default=1.0)
@@ -90,7 +90,7 @@ def parse_option():
     # temperature
     parser.add_argument('--temp', type=float, default=0.05, help='temperature for loss')
     parser.add_argument("--clip", type=float, default=None, help="for gradient clipping")
-    parser.add_argument("--grad_splits", type=int, default=256)
+    parser.add_argument("--grad_splits", type=int, default=128)
     
     # moco parameters
     parser.add_argument("--K", type=int, default=4096, help="buffer size in moco")

@@ -129,7 +129,8 @@ class gradient_cache():
      
         
      def forward_backward(self, model_inputs, reps_gradient_cache, model_inputs_mix=None, reps_grad_mix=None):
-         
+
+         surrogate = 0
          for idx, (one_split_inputs, one_split_rep_grad) in enumerate(zip(model_inputs, reps_gradient_cache)):
              
              if model_inputs_mix is None:
@@ -139,7 +140,7 @@ class gradient_cache():
                  bsz = int(one_split_reps.shape[0] / 2)
                  one_split_reps1, one_split_reps2 = torch.split(one_split_reps, [bsz, bsz], dim=0)
                  one_split_reps = torch.cat([one_split_reps1.unsqueeze(1), one_split_reps2.unsqueeze(1)], dim=1)   
-                 surrogate = torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
+                 surrogate += torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
              else:
                  one_split_inputs = torch.cat([one_split_inputs[0], one_split_inputs[1]], dim=0)  
                  one_split_reps = self.model_call(self.model, one_split_inputs)
@@ -171,12 +172,12 @@ class gradient_cache():
              self.reps_norm.append(grad_norm)
              """
                           
-             surrogate.backward()
-             norms = 0
-             for p in self.model.parameters():
-                 #print(p.grad.norm())
-                 norms += p.grad.norm()
-             print("model gradients norms", norms)
+         surrogate.backward()
+         norms = 0
+         for p in self.model.parameters():
+             #print(p.grad.norm())
+             norms += p.grad.norm()
+         print("model gradients norms", norms)
              
          return
      
