@@ -191,7 +191,7 @@ def parse_option():
     elif opt.method == "SimCLR":
         opt.model_name += "_SimCLR_"
     elif opt.method == "Joint":
-        opt.model_name += "_Joint_" + str(opt.method_lam) + "_"
+        opt.model_name += "_Joint_" + str(opt.method_gama) + "_"  + str(opt.method_lam) + "_"
     elif opt.method == "SimCLR_CE":
         opt.model_name += "_SimCLR_CE_" + str(opt.method_lam) + "_"
 
