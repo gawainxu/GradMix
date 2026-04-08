@@ -16,7 +16,7 @@ from util import adjust_learning_rate, warmup_learning_rate, accuracy
 from util import set_optimizer, save_model
 from networks.resnet_big import SupConResNet, LinearClassifier
 from networks.resnet_big import MoCoResNet
-from networks.resnet_preact import SupConpPreactResNet
+from networks.vgg import SupConVGG
 from networks.simCNN import simCNN_contrastive
 from networks.mlp import SupConMLP
 from datautil import osr_splits_inliers
@@ -66,12 +66,13 @@ def parse_option():
     parser.add_argument('--temp', type=float, default=0.05, help='temperature for loss')
     parser.add_argument("--clip", type=float, default=None, help="for gradient clipping")
     
-    parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "resnet50", "simCNN", "MLP"])
+    parser.add_argument('--model', type=str, default='vgg16', choices=["resnet18", "resnet34", "vgg16", "resnet50", "simCNN", "MLP"])
+    parser.add_argument("--feat_dim", type=int, default=128)
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', 'imagenet100', 'imagenet100_m', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft"], help='dataset')
-    parser.add_argument("--backbone_model_direct", type=str, default="/save/SupCon/imagenet100_models/imagenet100_resnet18_original_data__vanilia__SimCLR_0.0_1.0_0.05_trail_0_128_256")      
-    parser.add_argument("--backbone_model_name", type=str, default="ckpt_epoch_100.pth")                                             
-    parser.add_argument("--trail", type=int, default=5)
+    parser.add_argument("--backbone_model_direct", type=str, default="/save/SupCon/cifar10_models/cifar10_vgg16_original_data__vanilia_Joint_trail_0_128_256_split_128/")
+    parser.add_argument("--backbone_model_name", type=str, default="last.pth")
+    parser.add_argument("--trail", type=int, default=0)
     parser.add_argument("--temp_list", type=str, default="")
     parser.add_argument("--randaug", type=int, default=0)
     parser.add_argument("--apool", type=bool, default=False)
@@ -84,7 +85,6 @@ def parse_option():
     parser.add_argument("--upsample_times", type=int, default=1)
     parser.add_argument("--last_feature_path", type=str, default=None)
     parser.add_argument("--last_model_path", type=str, default=None)
-    parser.add_argument("--feat_dim", type=int, default=128)
 
     # other setting
     parser.add_argument('--cosine', type=bool, default=False,
@@ -133,7 +133,7 @@ def load_model(model, path):
 
 def set_model(opt):
     criterion = torch.nn.CrossEntropyLoss()
-    classifier = LinearClassifier(name=opt.model, num_classes=opt.num_classes)
+    classifier = LinearClassifier(feat_dim=opt.feat_dim, num_classes=opt.num_classes)
     classifier = classifier.cuda()
     criterion = criterion.cuda()
 
@@ -147,8 +147,8 @@ def set_model(opt):
     else:
         if opt.model == "resnet18" or opt.model == "resnet34" or opt.model == "resnet50":
             model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
-        elif opt.model == "preactresnet18" or opt.model == "preactresnet34":
-            model = SupConpPreactResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
+        elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
+            model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "MLP":
             model = SupConMLP(feat_dim=opt.feat_dim)
         else:
@@ -172,7 +172,7 @@ def train(train_loader, model, classifier, criterion, optimizer, epoch, opt):
     top5 = AverageMeter()
 
     end = time.time()
-    for idx, (images, labels, annotations) in enumerate(train_loader):
+    for idx, (images, labels) in enumerate(train_loader):
         data_time.update(time.time() - end)
 
         images = images.cuda(non_blocking=True)
@@ -184,10 +184,13 @@ def train(train_loader, model, classifier, criterion, optimizer, epoch, opt):
 
         # compute loss
         with torch.no_grad():
-            if opt.method == "MoCo":
-                features = model.encoder_q(images)
-            else:
-                features = model.encoder(images)       
+            if "resnet" in opt.model:
+                if opt.method == "MoCo":
+                    features = model.encoder_q(images)
+                else:
+                    features = model.encoder(images)
+            elif "vgg" in opt.model:
+                features = model(images)
             features = features.cuda(non_blocking=True)
         
         output = classifier(features)
@@ -236,17 +239,21 @@ def validate(val_loader, model, classifier, criterion, opt):
 
     with torch.no_grad():
         end = time.time()
-        for idx, (images, labels, annotations) in enumerate(val_loader):
+        for idx, (images, labels) in enumerate(val_loader):
             images = images.float().cuda()
             labels = labels.cuda()
             bsz = labels.shape[0]
 
             # forward
-            if opt.method == "MoCo":
-                output = classifier(model.encoder_q(images))
-            else:
-                output = classifier(model.encoder(images))   
-           
+            if "resnet" in opt.model:
+                if opt.method == "MoCo":
+                    features = model.encoder_q(images)
+                else:
+                    features = model.encoder(images)
+            elif "vgg" in opt.model:
+                features = model(images)
+
+            output = classifier(features)
             loss = criterion(output, labels)
 
             # update metric
