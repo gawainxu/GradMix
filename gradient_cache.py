@@ -94,7 +94,7 @@ class gradient_cache():
          """
          compute and store the gradients of the loss_fun over the representations
          """
-         print("reps norm ", torch.norm(all_reps))
+         #print("reps norm ", torch.norm(all_reps))
          bsz = int(all_reps.shape[0] / 2)
          all_reps1, all_reps2 = torch.split(all_reps, [bsz, bsz], dim=0)
          all_reps = torch.cat([all_reps1.unsqueeze(1), all_reps2.unsqueeze(1)], dim=1)
@@ -119,7 +119,7 @@ class gradient_cache():
          
          if mix_reps is None:
              cache = all_reps.grad   # [bsz, 2, f] !!!!!  torch.ones_like(all_reps)  # 
-             print("feature gradient norm seperate", torch.norm(cache))
+             #print("feature gradient norm seperate", torch.norm(cache))
              return cache, loss
          else:
              cache = all_reps.grad
@@ -173,11 +173,11 @@ class gradient_cache():
              """
                           
          surrogate.backward()
-         norms = 0
-         for p in self.model.parameters():
+         #norms = 0
+         #for p in self.model.parameters():
              #print(p.grad.norm())
-             norms += p.grad.norm()
-         print("model gradients norms", norms)
+         #    norms += p.grad.norm()
+         #print("model gradients norms", norms)
              
          return
      
