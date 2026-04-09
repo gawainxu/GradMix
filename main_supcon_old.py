@@ -519,12 +519,6 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
         scalar.scale(loss).backward(retain_graph=False)
         optimizer.step()
 
-        norms = 0
-        for p in model.parameters():
-            # print(p.grad.norm())
-            norms += p.grad.norm()
-        print("model gradients norms", norms)
-
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
