@@ -31,14 +31,14 @@ from util import  feature_stats
 def parse_option():
 
     parser = argparse.ArgumentParser('argument for visulization')
-    parser.add_argument("--inlier_features_path", type=str, default="/features/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_256_600_train")
-    parser.add_argument("--outlier_features_path", type=str, default="/features/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_256_600_test_unknown")
+    parser.add_argument("--inlier_features_path", type=str, default="/features/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_128_600_train")
+    parser.add_argument("--outlier_features_path", type=str, default="/features/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_128_600_test_unknown")
     parser.add_argument("--inlier_features_path1", type=str, default=None)
     parser.add_argument("--outlier_features_path1", type=str, default=None) 
     parser.add_argument("--inlier_features_path2", type=str, default=None)
     parser.add_argument("--outlier_features_path2", type=str, default=None)
     parser.add_argument("--num_classes", type=int, default=3)
-    parser.add_argument("--save_path", type=str, default="/plots/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_256_600_test_unknown_tsne.pdf")
+    parser.add_argument("--save_path", type=str, default="/plots/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_128_600_test_unknown_tsne.pdf")
     parser.add_argument("--reduced_len", type=int, default=30)
     parser.add_argument("--ensemble_features", type=bool, default=False)
     parser.add_argument("--downsample_ratio", type=int, default=None)

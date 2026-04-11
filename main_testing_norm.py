@@ -56,11 +56,11 @@ def parse_option():
     parser.add_argument("--feat_dim", type=int, default=128)
 
     parser.add_argument("--exemplar_features_path", type=str,
-                        default="/features/FUB_simCNN_vanilia__SimCLR_1.0_1.0_0.1_trail_0_128_256_600_train")
+                        default="/features/FUB_simCNN_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_3_SimCLR_1.0_1.0_0.05_trail_0_128_128_old_augmented_600_train")
     parser.add_argument("--testing_known_features_path", type=str,
-                        default="/features/FUB_simCNN_vanilia__SimCLR_1.0_1.0_0.1_trail_0_128_256_600_test_known")
+                        default="/features/FUB_simCNN_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_3_SimCLR_1.0_1.0_0.05_trail_0_128_128_old_augmented_600_test_known")
     parser.add_argument("--testing_unknown_features_path", type=str,
-                        default="/features/FUB_simCNN_vanilia__SimCLR_1.0_1.0_0.1_trail_0_128_256_600_test_unknown")
+                        default="/features/FUB_simCNN_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_3_SimCLR_1.0_1.0_0.05_trail_0_128_128_old_augmented_600_test_unknown")
 
     parser.add_argument("--exemplar_features_path1", type=str, default=None)
     parser.add_argument("--testing_known_features_path1", type=str, default=None)
