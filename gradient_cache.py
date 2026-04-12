@@ -41,9 +41,9 @@ class gradient_cache():
          self.lam = lam
          self.opt = opt
          
-     def __call__(self, model_inputs, labels, model_inputs_mix=None):
+     def __call__(self, model_inputs, labels, model_inputs_mix=None, lam=None):
         
-        return self.cache_step(model_inputs, labels, model_inputs_mix)
+        return self.cache_step(model_inputs, labels, model_inputs_mix, lam)
     
     
      def split_inputs(self, inputs, splits):
@@ -93,7 +93,7 @@ class gradient_cache():
          return loss
      
         
-     def build_cache(self, all_reps, labels, mix_reps=None):
+     def build_cache(self, all_reps, labels, mix_reps=None, lam=None):
          
          """
          compute and store the gradients of the loss_fun over the representations
@@ -111,10 +111,8 @@ class gradient_cache():
          else:
              mix_reps1, mix_reps2 = torch.split(mix_reps, [bsz, bsz], dim=0)
              mix_reps = torch.cat([mix_reps1.unsqueeze(1), mix_reps2.unsqueeze(1)], dim=1)
-             mix_reps.requires_grad_().retain_grad()
-             loss1 = self.compute_loss(all_reps, labels)
-             loss2 = self.compute_loss(reps=all_reps, labels=labels)
-             loss = loss1 + self.lam * loss2
+             mix_reps.requires_grad_()    # mix_reps.requires_grad_().retain_grad()
+             loss = self.compute_loss(reps=all_reps, labels=labels, reps_mix=mix_reps, lam=lam)
               
          if self.fp16:
             self.grad_scalar.scale(loss).backward()
@@ -134,7 +132,7 @@ class gradient_cache():
         
      def forward_backward(self, model_inputs, reps_gradient_cache, model_inputs_mix=None, reps_grad_mix=None):
 
-         surrogate = 0
+         #surrogate = 0
          for idx, (one_split_inputs, one_split_rep_grad) in enumerate(zip(model_inputs, reps_gradient_cache)):
              
              if model_inputs_mix is None:
@@ -144,7 +142,7 @@ class gradient_cache():
                  bsz = int(one_split_reps.shape[0] / 2)
                  one_split_reps1, one_split_reps2 = torch.split(one_split_reps, [bsz, bsz], dim=0)
                  one_split_reps = torch.cat([one_split_reps1.unsqueeze(1), one_split_reps2.unsqueeze(1)], dim=1)   
-                 surrogate += torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
+                 surrogate = torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
              else:
                  one_split_inputs = torch.cat([one_split_inputs[0], one_split_inputs[1]], dim=0)  
                  one_split_reps = self.model_call(self.model, one_split_inputs)
@@ -161,7 +159,7 @@ class gradient_cache():
                  one_split_reps_mix = torch.cat([one_split_reps_mix1.unsqueeze(1), one_split_reps_mix2.unsqueeze(1)], dim=1)
                  one_split_reps_mix.requires_grad_()
                     
-                 surrogate += torch.sum(one_split_reps_mix.flatten() * one_split_reps_grad_mix.flatten()) + torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
+                 surrogate = torch.sum(one_split_reps_mix.flatten() * one_split_reps_grad_mix.flatten()) + torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
 
              """
              bsz = int(one_split_reps.shape[0] / 2)
@@ -175,8 +173,7 @@ class gradient_cache():
              print("feature gradient norm full", grad_norm)
              self.reps_norm.append(grad_norm)
              """
-                          
-         surrogate.backward()
+             surrogate.backward()
          #norms = 0
          #for p in self.model.parameters():
              #print(p.grad.norm())
@@ -224,7 +221,7 @@ class gradient_cache():
          return loss
     
 
-     def cache_step(self, model_inputs, labels, model_inputs_mix=None):
+     def cache_step(self, model_inputs, labels, model_inputs_mix=None, lam=None):
          
          # read features for all data without gradients
          all_reps = self.forward_no_grad(model_inputs)
@@ -233,7 +230,7 @@ class gradient_cache():
              
          # build cache
          if model_inputs_mix is not None:
-             reps_grad_ori, reps_grad_mix, loss = self.build_cache(all_reps, labels=labels, mix_reps=mix_reps)
+             reps_grad_ori, reps_grad_mix, loss = self.build_cache(all_reps, labels=labels, mix_reps=mix_reps, lam=lam)
              reps_grad_ori = reps_grad_ori.split(self.splits, dim=0)
              reps_grad_mix = reps_grad_mix.split(self.splits, dim=0)
          else:
@@ -272,8 +269,8 @@ class gradient_cache_activations():
         self.loss_fcn = loss_fcn
         self.opt = opt
         self.hooks = []
-        self.activations = []
-        self.gradients = []
+        self.activations = dict()
+        self.gradients = dict()
         
         if torch.cuda.device_count() > 1:
             if opt.method =="MoCo":
@@ -295,14 +292,16 @@ class gradient_cache_activations():
                                    self.model.bn8, self.model.bn7]
             self.encoder_layer_names = ["bn7", "bn8", "bn9", "bn10"]
         elif "vgg" in self.opt.model:
-            # TODO Layers in VGG
-            self.encoder_layers = [self.model.vgg_base.features]
-            self.encoder_layer_names = ["vgg_base.features"]
+            self.encoder_layers = [self.model.vgg_base.features[21], self.model.vgg_base.features[24],
+                                   self.model.vgg_base.features[26], self.model.vgg_base.features[29]]
+            self.encoder_layer_names = ["vgg_base.features.21", "vgg_base.features.24",
+                                        "vgg_base.features.26", "vgg_base.features.29"]
                 
     
     def compute_loss(self, reps, mixed_reps=None, labels=None):
-          
-        loss = self.loss_fcn(features=reps, features_positive=mixed_reps, labels=labels)  # TODO check the format of loss_fcn
+
+        # Here the loss is the self-supervised loss
+        loss = self.loss_fcn(features=reps)
         return loss
       
         
@@ -350,7 +349,7 @@ class gradient_cache_activations():
         all_reps = torch.cat([all_reps1.unsqueeze(1), all_reps2.unsqueeze(1)], dim=1)    
         all_reps.requires_grad_().retain_grad()
 
-        loss = self.compute_loss(all_reps, labels=labels)
+        loss = self.compute_loss(all_reps)
         loss.backward()
         
         cache = all_reps.grad
@@ -375,40 +374,42 @@ class gradient_cache_activations():
             
         surrogate.backward()
         return
-    
-    
-    def save_activation_hook(self, _, input, output):
-        # TODO check how forward hook is saved 
 
-        print("forward hook")
-        self.activations.append(output.detach())
+    def _get_hook(self, name):
+        # This wrapper creates the actual hook functions
+        def forward_hook(module, input, output):
+            if name not in self.activations.keys():
+                self.activations[name] = dict()
+            device_name = output[0].get_device() if isinstance(output, tuple) else str(output.get_device())
+            self.activations[name][device_name] = output[0].detach().cpu() if isinstance(output, tuple) else output.detach().cpu()
 
+        def backward_hook(module, grad_input, grad_output):
+            if name not in self.gradients.keys():
+                self.gradients[name] = dict()
+            device_name = grad_output[0].get_device() if isinstance(grad_output, tuple) else str(grad_output.get_device())
+            self.gradients[name][device_name] = grad_output[0].detach().cpu() if isinstance(grad_output, tuple) else grad_output.detach().cpu()
 
-    def save_backward_hook(self, _, input, output):
-        
-        print("backward hook")
-        self.gradients.append(output[0].detach())
-        
+        return forward_hook, backward_hook
+
     
-    def cache_step(self, model_inputs, labels):
-        
+    def cache_step(self, model_inputs, labels=None):
+
+        # d L / d F(X)
         all_reps = self.forward_no_grad(model_inputs)
         reps_gradient_cache, loss = self.build_cache(all_reps, labels=labels)
         reps_gradient_cache = reps_gradient_cache.split(self.splits, dim=0)
-        model_inputs = self.split_inputs(model_inputs, self.splits)
 
+        model_inputs = self.split_inputs(model_inputs, self.splits)
         # register hook
-        for i in self.opt.grad_layers:
-            self.hooks.append(self.encoder_layers[i].register_forward_hook(hook=self.save_activation_hook))
-            self.hooks.append(self.encoder_layers[i].register_full_backward_hook(hook=self.save_backward_hook))
+        for name, i in zip(self.encoder_layer_names, self.opt.grad_layers):
+            f_hook, b_hook = self._get_hook(name)
+            self.hooks.append(self.encoder_layers[i].register_forward_hook(f_hook))
+            self.hooks.append(self.encoder_layers[i].register_full_backward_hook(b_hook))
 
         self.forward_backward(model_inputs, reps_gradient_cache)
         
         for h in self.hooks:
             h.remove()
-            
-        self.activations = torch.cat(self.activations, dim=0)
-        self.gradients = torch.cat(self.gradients, dim=0)
             
         return self.activations, self.gradients
         

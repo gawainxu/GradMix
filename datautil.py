@@ -1282,7 +1282,8 @@ def layer_salient_maps(batch_data1, batch_data2, model, opt):
        batch_data = torch.cat([batch_data1, batch_data2], dim=0)
        gca = gradient_cache_activations(model=model, splits=opt.grad_splits, loss_fcn=criterion, opt=opt)
        activations, gradients = gca(batch_data)
-       activations_list, gradients_list = [activations.cpu()], [gradients.cpu()]      # TODO temperal for align the formats
+       # TODO temperal for align the formats
+       activations_list, gradients_list = sort_hooks(activations, gradients)
         
     with torch.no_grad():
         

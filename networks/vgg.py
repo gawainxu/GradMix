@@ -110,9 +110,9 @@ def make_layers(cfg, batch_norm=False):
         else:
             conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
             if batch_norm:
-                layers += [conv2d, nn.BatchNorm2d(v), nn.ReLU(inplace=True)]
+                layers += [conv2d, nn.BatchNorm2d(v), nn.ReLU(inplace=False)]
             else:
-                layers += [conv2d, nn.ReLU(inplace=True)]
+                layers += [conv2d, nn.ReLU(inplace=False)]
             in_channels = v
     return nn.Sequential(*layers)
 
@@ -267,7 +267,7 @@ class SupConVGG(nn.Module):
         elif head == 'mlp':
             self.head = nn.Sequential(
                 nn.Linear(dim_in, dim_in),
-                nn.ReLU(inplace=True),
+                nn.ReLU(inplace=False),
                 nn.Linear(dim_in, feat_dim)
             )
         else:
@@ -297,8 +297,8 @@ class LinearClassifier_VGG(nn.Module):
 if __name__ == "__main__":
     vgg = SupConVGG(pretrained=False)
 
-    for name, layer in vgg.named_modules():
-        print(name)
+    for layer in vgg.children():
+        print(layer)
 
     param_size = 0
     for param in vgg.parameters():

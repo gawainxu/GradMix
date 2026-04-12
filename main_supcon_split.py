@@ -80,9 +80,9 @@ def parse_option():
     parser.add_argument("--argmentation_m", type=int, default=6)
 
     # method
-    parser.add_argument('--method', type=str, default='SupCon',
+    parser.add_argument('--method', type=str, default='SimCLR',
                         choices=['SupCon', 'SimCLR', "SimCLR_CE", "Joint", "MoCo"], help='choose method')
-    parser.add_argument("--method_gama", type=float, default=0.0)
+    parser.add_argument("--method_gama", type=float, default=1.0)
     parser.add_argument("--method_lam", type=float, default=1.0)
     parser.add_argument("--trail", type=int, default=0, choices=[0,1,2,3,4,5], help="index of repeating training")
     parser.add_argument("--action", type=str, default="training_supcon",
@@ -111,7 +111,7 @@ def parse_option():
     parser.add_argument("--architecture", type=str, default="single", choices=["single", "multi"])
     parser.add_argument("--ensemble_num", type=int, default=1)
     parser.add_argument("--feat_dim", type=int, default=128)
-    parser.add_argument("--grad_layers", type=str, default="3")
+    parser.add_argument("--grad_layers", type=str, default="0,1,2,3")
     parser.add_argument("--old_augmented", type=bool, default=False)
 
     # upsampling parameters
@@ -138,7 +138,8 @@ def parse_option():
     parser.add_argument("--mixup_vanilla_features", type=bool, default=False)
     parser.add_argument("--positive_p", type=float, default=0.5)
     parser.add_argument("--alfa", type=float, default=1)
-    parser.add_argument("--positive_method", type=str, default="random", choices=["max_similarity", "min_similarity", "random", "prob_similarity", "reverse", "saliencymix", "layersaliencymix", "cutmix", "cv2saliency"])
+    parser.add_argument("--positive_method", type=str, default="layersaliencymix",
+                        choices=["max_similarity", "min_similarity", "random", "prob_similarity", "reverse", "saliencymix", "layersaliencymix", "cutmix", "cv2saliency"])
     parser.add_argument("--negative_method", type=str, default="no", choices=["max_similarity", "random", "even", "no"])
     parser.add_argument("--hybrid_method", type=str, default="no", choices=["min_similarity", "random", "no"])
     parser.add_argument("--vanilla_method", type=str, default="no", choices=["reverse", "random", "no"])
@@ -378,9 +379,13 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                 optimizer.zero_grad()   # for removing gradients in gradmix
             elif opt.positive_method == "cv2saliency":
                 mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model, opt)
-            else:
+            elif opt.positive_method == "random":
                 mixed_positive_samples1, mixed_positive_samples2, labels_new, lam = vanilla_mixup(images1, images2, labels, alpha=opt.alpha_vanilla, 
                                                                                                  beta=opt.beta_vanilla, mode=opt.positive_method, encoder=model)
+            else:
+                mixed_positive_samples1 = None
+                mixed_positive_samples2 = None
+                lam = None
                 
             if opt.method == "SimCLR":
                 mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
@@ -397,7 +402,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                 mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1,
                                      loss_fcn2=criterion2, grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam, opt=opt)
-                loss = gc2(model_inputs=images, labels=labels, model_inputs_mix=mixed_positive_samples)
+                loss = gc2(model_inputs=images, labels=labels, model_inputs_mix=mixed_positive_samples, lam=lam)
                 losses.update(loss.cpu().item())
             elif opt.method == "MoCo":
                 if idx == 0:
@@ -458,13 +463,8 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
             norms += p.grad.norm()
         print("model gradients norms", norms)
         """
-        if opt.method == "SimCLR":
-            optimizer.step()
-            optimizer.zero_grad()
-        else:
-            if (idx + 1) % opt.moco_step == 0:
-                optimizer.step()
-                optimizer.zero_grad()
+        optimizer.step()
+        optimizer.zero_grad()
         
         # measure elapsed time
         batch_time.update(time.time() - end)
