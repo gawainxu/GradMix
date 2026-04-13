@@ -115,7 +115,7 @@ class gradient_cache():
          else:
              mix_reps1, mix_reps2 = torch.split(mix_reps, [bsz, bsz], dim=0)
              mix_reps = torch.cat([mix_reps1.unsqueeze(1), mix_reps2.unsqueeze(1)], dim=1)
-             mix_reps.requires_grad_()    # mix_reps.requires_grad_().retain_grad()
+             mix_reps.requires_grad_().retain_grad()           # mix_reps.requires_grad_()
              loss = self.compute_loss(reps=all_reps, labels=labels, reps_mix=mix_reps, lam=lam)
               
          if self.fp16:
@@ -161,7 +161,7 @@ class gradient_cache():
                  one_split_reps_mix = torch.cat([one_split_reps_mix1.unsqueeze(1), one_split_reps_mix2.unsqueeze(1)], dim=1)
                  one_split_reps_mix.requires_grad_()
                     
-                 surrogate = torch.sum(one_split_reps_mix.flatten() * one_split_reps_grad_mix.flatten()) + lam * torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
+                 surrogate = torch.sum(torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten() + lam * one_split_reps_mix.flatten() * one_split_reps_grad_mix.flatten()))
                  surrogate.backward()
 
              """
