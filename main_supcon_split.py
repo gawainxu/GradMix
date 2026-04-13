@@ -131,7 +131,7 @@ def parse_option():
     parser.add_argument("--intra_inter_mix_positive", type=bool, default=True, help="intra=True, inter=False")
     parser.add_argument("--intra_inter_mix_negative", type=bool, default=True, help="intra=True, inter=False")
     parser.add_argument("--intra_inter_mix_hybrid", type=bool, default=True, help="intra=True, inter=False")
-    parser.add_argument("--mixup_positive", type=bool, default=False)
+    parser.add_argument("--mixup_positive", type=bool, default=True)
     parser.add_argument("--mixup_negative", type=bool, default=False)
     parser.add_argument("--mixup_hybrid", type=bool, default=False)
     parser.add_argument("--mixup_vanilla", type=bool, default=False)
@@ -391,7 +391,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                 mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion1,
                                      grad_scalar=scaler, optimizer=optimizer, if_normal=True, lam=lam, opt=opt)
-                loss = gc2(model_inputs=images,  labels=labels, model_inputs_mix=mixed_positive_samples)
+                loss = gc2(model_inputs=images,  labels=labels, model_inputs_mix=mixed_positive_samples, lam=lam)
                 losses.update(loss.cpu().item())
             elif opt.method == "SupCon":
                 gc2 = gradient_cache(model=model, splits=opt.grad_splits, fp16=False, loss_fcn=criterion2,

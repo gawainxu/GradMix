@@ -70,7 +70,7 @@ def parse_option():
     parser.add_argument("--feat_dim", type=int, default=128)
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', 'imagenet100', 'imagenet100_m', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft"], help='dataset')
-    parser.add_argument("--backbone_model_direct", type=str, default="/save/SupCon/cifar10_models/cifar10_vgg16_original_data__vanilia_Joint_trail_0_128_256_split_128/")
+    parser.add_argument("--backbone_model_direct", type=str, default="/save/SupCon/cifar10_models/cifar10_vgg16_original_data__vanilia__SimCLR_trail_0_128_256_split_128/")
     parser.add_argument("--backbone_model_name", type=str, default="last.pth")
     parser.add_argument("--trail", type=int, default=0)
     parser.add_argument("--temp_list", type=str, default="")

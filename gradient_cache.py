@@ -11,6 +11,7 @@ from torch.cuda.amp import GradScaler, autocast
 from contextlib import nullcontext
 import torch.nn as nn
 from networks.resnet_big import model_dict, resnet18
+import copy
 
 
 class gradient_cache():
@@ -61,9 +62,9 @@ class gradient_cache():
          return inputs
      
         
-     def model_call(self, model, x):
+     def model_call(self, x):
          
-         return  model(x)
+         return  self.model(x)
          
         
      def forward_no_grad(self, model_inputs):
@@ -72,7 +73,7 @@ class gradient_cache():
          # model_inputs is concatenated of two views
          
          with torch.no_grad():
-              reps = self.model_call(self.model, model_inputs)
+              reps = self.model_call(model_inputs)
 
          return reps
      
@@ -80,7 +81,10 @@ class gradient_cache():
      def compute_loss(self, reps, labels=None, reps_mix=None, lam=None):
 
          if "SimCLR" in self.opt.method:
-             loss = self.loss_fcn(features=reps)
+             if reps_mix is None:
+                 loss = self.loss_fcn(features=reps)
+             else:
+                 loss = self.loss_fcn(features=reps) + lam * self.loss_fcn(features=reps, features_positive=reps_mix)
          elif "SupCon" in self.opt.method:
              loss = self.loss_fcn(features=reps, labels=labels)
          elif "Joint" in self.opt.method:
@@ -130,36 +134,35 @@ class gradient_cache():
              return cache, cache_mix, loss
      
         
-     def forward_backward(self, model_inputs, reps_gradient_cache, model_inputs_mix=None, reps_grad_mix=None):
+     def forward_backward(self, model_inputs, reps_grad_ori, model_inputs_mix=None, reps_grad_mix=None, lam=None):
 
-         #surrogate = 0
-         for idx, (one_split_inputs, one_split_rep_grad) in enumerate(zip(model_inputs, reps_gradient_cache)):
-             
-             if model_inputs_mix is None:
+         if model_inputs_mix is None:
+             for idx, (one_split_inputs, one_split_rep_grad) in enumerate(zip(model_inputs, reps_grad_ori)):
                  one_split_inputs = torch.cat([one_split_inputs[0], one_split_inputs[1]], dim=0)  
-                 one_split_reps = self.model_call(self.model, one_split_inputs)
+                 one_split_reps = self.model_call(one_split_inputs)
                  one_split_reps.requires_grad_()
                  bsz = int(one_split_reps.shape[0] / 2)
                  one_split_reps1, one_split_reps2 = torch.split(one_split_reps, [bsz, bsz], dim=0)
                  one_split_reps = torch.cat([one_split_reps1.unsqueeze(1), one_split_reps2.unsqueeze(1)], dim=1)   
                  surrogate = torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
-             else:
+                 surrogate.backward()
+         else:
+             for idx, (one_split_inputs, one_split_rep_grad, one_split_inputs_mix, one_split_reps_grad_mix) in enumerate(zip(model_inputs, reps_grad_ori, model_inputs_mix, reps_grad_mix)):
                  one_split_inputs = torch.cat([one_split_inputs[0], one_split_inputs[1]], dim=0)  
-                 one_split_reps = self.model_call(self.model, one_split_inputs)
+                 one_split_reps = self.model_call(one_split_inputs)
                  bsz = int(one_split_reps.shape[0] / 2)
                  one_split_reps1, one_split_reps2 = torch.split(one_split_reps, [bsz, bsz], dim=0)
                  one_split_reps = torch.cat([one_split_reps1.unsqueeze(1), one_split_reps2.unsqueeze(1)], dim=1)
                  one_split_reps.requires_grad_()
-                
-                 one_split_reps_grad_mix = reps_grad_mix[idx]
-                 one_split_inputs_mix = model_inputs_mix[idx]
+
                  one_split_inputs_mix = torch.cat([one_split_inputs_mix[0], one_split_inputs_mix[1]], dim=0)
-                 one_split_reps_mix = self.model_call(self.model, one_split_inputs_mix)         
+                 one_split_reps_mix = self.model_call(one_split_inputs_mix)
                  one_split_reps_mix1, one_split_reps_mix2 = torch.split(one_split_reps_mix, [bsz, bsz], dim=0)
                  one_split_reps_mix = torch.cat([one_split_reps_mix1.unsqueeze(1), one_split_reps_mix2.unsqueeze(1)], dim=1)
                  one_split_reps_mix.requires_grad_()
                     
-                 surrogate = torch.sum(one_split_reps_mix.flatten() * one_split_reps_grad_mix.flatten()) + torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
+                 surrogate = torch.sum(one_split_reps_mix.flatten() * one_split_reps_grad_mix.flatten()) + lam * torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
+                 surrogate.backward()
 
              """
              bsz = int(one_split_reps.shape[0] / 2)
@@ -173,7 +176,6 @@ class gradient_cache():
              print("feature gradient norm full", grad_norm)
              self.reps_norm.append(grad_norm)
              """
-             surrogate.backward()
          #norms = 0
          #for p in self.model.parameters():
              #print(p.grad.norm())
@@ -248,7 +250,7 @@ class gradient_cache():
  
          # sub-batch gradient accumulation
          #self.optimizer.zero_grad()
-         self.forward_backward(model_inputs, reps_grad_ori, model_inputs_mix=model_inputs_mix)           #!!!!!
+         self.forward_backward(model_inputs, reps_grad_ori=reps_grad_ori, model_inputs_mix=model_inputs_mix, reps_grad_mix=reps_grad_mix, lam=lam)
          
          
          """
@@ -271,6 +273,8 @@ class gradient_cache_activations():
         self.hooks = []
         self.activations = dict()
         self.gradients = dict()
+        self.activations_list = []
+        self.gradients_list = []
         
         if torch.cuda.device_count() > 1:
             if opt.method =="MoCo":
@@ -359,7 +363,6 @@ class gradient_cache_activations():
     
     def forward_backward(self, model_inputs, reps_gradient_cache):
 
-        surrogate = 0
         for idx, (one_split_inputs, one_split_rep_grad) in enumerate(zip(model_inputs, reps_gradient_cache)):
             one_split_inputs = torch.cat([one_split_inputs[0], one_split_inputs[1]], dim=0)
             one_split_reps = self.model_call(self.model, one_split_inputs)
@@ -370,10 +373,14 @@ class gradient_cache_activations():
             bsz = int(one_split_reps.shape[0] / 2)
             one_split_reps1, one_split_reps2 = torch.split(one_split_reps, [bsz, bsz], dim=0)
             one_split_reps = torch.cat([one_split_reps1.unsqueeze(1), one_split_reps2.unsqueeze(1)], dim=1)   
-            surrogate += torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
+            surrogate = torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
             
-        surrogate.backward()
-        return
+            surrogate.backward()
+            self.activations_list.append(copy.deepcopy(self.activations))
+            self.gradients_list.append(copy.deepcopy(self.gradients))
+
+        self.merge_dicts_()
+
 
     def _get_hook(self, name):
         # This wrapper creates the actual hook functions
@@ -412,6 +419,19 @@ class gradient_cache_activations():
             h.remove()
             
         return self.activations, self.gradients
+
+
+    def merge_dicts_(self):
+
+        for i, activations in enumerate(self.activations_list):
+            for k in activations.keys():
+                self.activations[k][str(i)] = activations[k]["0"]
+
+        for i, gradients in enumerate(self.gradients_list):
+            for k in gradients.keys():
+                self.gradients[k][i] = gradients[k][0]
+
+
         
     
 """
