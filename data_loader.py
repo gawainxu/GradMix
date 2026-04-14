@@ -500,7 +500,7 @@ class TinyImagenet(Dataset):
         if hasattr(self, 'logits'):
             return img, target, original_img, self.logits[index]
 
-        return img, target, torch.tensor([0,0,0,0])
+        return img, target
     
     def get_image_class(self, label):
 
