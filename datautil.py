@@ -97,6 +97,8 @@ osr_splits_inliers = {
     
     "imagenet100": [list(range(100))],
 
+    "imagenet100_small": [list(range(10))],
+
     "imagenet100_m": [list(range(100))],
 
     'tinyimgnet': [
@@ -235,7 +237,7 @@ def pickClass(classIdx):
 import cv2
 import random
 from data_loader import iCIFAR10, iCIFAR100, TinyImagenet, customSVHN, mnist, CUB, Aircraft, ImageNet100_M
-from data_loader import tinyimgnet_c, cifar10_c, cifar100_c, ImageNet100, FUB
+from data_loader import tinyimgnet_c, cifar10_c, cifar100_c, ImageNet100, ImageNet100_small, FUB
 import torchvision
 import torch
 from util import TwoCropTransform
@@ -259,17 +261,17 @@ from sklearn.cluster import KMeans
 
 
 num_inlier_classes_mapping = {"cifar10": 6, "cifar-10-100-10": 4, "cifar-10-100-50": 4, "cifar100_marco": 6, "imagenet100": 100,
-                              "imagenet100_m": 100, "cifar100": 100, "tinyimgnet": 20, "mnist": 6, "svhn": 6, "cub": 100, "aircraft": 50,
-                              "FUB": 3}                         # !!!!!!!!!!!!!!!!!!!
+                               "imagenet100_small": 10, "imagenet100_m": 100, "cifar100": 100, "tinyimgnet": 20, "mnist": 6, "svhn": 6,
+                              "cub": 100, "aircraft": 50, "FUB": 3}
 
 
 data_function_mapping = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR10, "cifar-10-100-50": iCIFAR10, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100,
-                         "imagenet100_m": ImageNet100_M, "cifar100": iCIFAR100, "tinyimgnet": TinyImagenet, "mnist": mnist, "svhn": customSVHN, "cub": CUB,
-                         "aircraft": Aircraft, "FUB": FUB}
+                         "imagenet100_small": ImageNet100_small, "imagenet100_m": ImageNet100_M, "cifar100": iCIFAR100, "tinyimgnet": TinyImagenet, "mnist": mnist,
+                         "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "FUB": FUB}
 
 data_function_mapping_testing = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR100, "cifar-10-100-50": iCIFAR100, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100,
-                                 "imagenet100_m": ImageNet100_M, "cifar100": iCIFAR100, "tinyimgnet": TinyImagenet, "mnist": mnist, "svhn": customSVHN, "cub": CUB,
-                                 "aircraft": Aircraft, "FUB": FUB}
+                                 "imagenet100_small": ImageNet100_small, "imagenet100_m": ImageNet100_M, "cifar100": iCIFAR100, "tinyimgnet": TinyImagenet, "mnist": mnist,
+                                 "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "FUB": FUB}
 
 data_function_mapping_curruption = {"cifar10": cifar10_c, "cifar100": cifar100_c, "tinyimgnet": tinyimgnet_c,}
 
@@ -282,6 +284,7 @@ mean_mapping = {"mnist":  (0.1307,),
                 "cifar-10-100-10": (0.4914, 0.4822, 0.4465),
                 "cifar-10-100-50": (0.4914, 0.4822, 0.4465),
                 "imagenet100": (0.485, 0.456, 0.406),
+                "imagenet100_small": (0.485, 0.456, 0.406),
                 "imagenet100_m": (0.485, 0.456, 0.406),
                 "tinyimgnet": (0.485, 0.456, 0.406),
                 "aircraft": (0.485, 0.456, 0.406), 
@@ -296,11 +299,12 @@ std_mapping = {"mnist": (0.3081,),
                "cifar-10-100-10": (0.2023, 0.1994, 0.2010),
                "cifar-10-100-50": (0.2023, 0.1994, 0.2010),
                "imagenet100": (0.229, 0.224, 0.225),
+               "imagenet100_small": (0.229, 0.224, 0.225),
                "imagenet100_m": (0.229, 0.224, 0.225),
                "tinyimgnet": (0.229, 0.224, 0.225),
                "aircraft": (0.229, 0.224, 0.225),
                "cub": (0.229, 0.224, 0.225),
-               "FUB": (0.229, 0.224, 0.225)}               # 1., 1., 1.
+               "FUB": (0.229, 0.224, 0.225)}
 
 image_size_mapping = {"mnist": 32,
                       "svhn": 32,
@@ -311,6 +315,7 @@ image_size_mapping = {"mnist": 32,
                       "cifar-10-100-50": 32,
                       "tinyimgnet": 64, 
                       "imagenet100": 224,
+                      "imagenet100_small": 224,
                       "imagenet100_m": 224,
                       "aircraft": 224,
                       "cub": 224,
@@ -347,7 +352,7 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
                                     transforms.RandomHorizontalFlip(), transforms.RandomRotation(15),
                                     transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
                                     transforms.RandomGrayscale(p=0.2),])
-        elif opt.datasets == "imagenet100":
+        elif opt.datasets in ["imagenet100", "imagenet100_small"]:
             train_transform = transforms.Compose(
                 [transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
                  transforms.Resize((size, size)),
@@ -427,7 +432,7 @@ def get_test_datasets(opt, class_idx = None):
     elif opt.datasets == "FUB":
         test_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
                                               transforms.CenterCrop((size, size)),])
-    elif opt.datasets == "imagenet100" or opt.datasets == "cub":
+    elif opt.datasets in ["imagenet100", "cub", "imagenet100_small"]:
         test_transform = transforms.Compose([transforms.ToTensor(), transforms.Resize((224, 224)), normalize])
     else:
         test_transform = transforms.Compose([transforms.ToTensor(), normalize])
