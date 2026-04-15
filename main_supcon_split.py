@@ -69,7 +69,7 @@ def parse_option():
 
     # model dataset
     parser.add_argument('--model', type=str, default='vgg16', choices=["resnet18", "resnet34", "vgg16", "simCNN", "MLP"])
-    parser.add_argument('--datasets', type=str, default='cifar10',
+    parser.add_argument('--datasets', type=str, default='imagenet100',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
                                  "imagenet100_small", "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
     parser.add_argument('--mean', type=str, help='mean of dataset in path in form of str tuple')
@@ -91,7 +91,7 @@ def parse_option():
     # temperature
     parser.add_argument('--temp', type=float, default=0.05, help='temperature for loss')
     parser.add_argument("--clip", type=float, default=None, help="for gradient clipping")
-    parser.add_argument("--grad_splits", type=int, default=128)
+    parser.add_argument("--grad_splits", type=int, default=64)
     
     # moco parameters
     parser.add_argument("--K", type=int, default=4096, help="buffer size in moco")
@@ -132,7 +132,7 @@ def parse_option():
     parser.add_argument("--intra_inter_mix_positive", type=bool, default=True, help="intra=True, inter=False")
     parser.add_argument("--intra_inter_mix_negative", type=bool, default=True, help="intra=True, inter=False")
     parser.add_argument("--intra_inter_mix_hybrid", type=bool, default=True, help="intra=True, inter=False")
-    parser.add_argument("--mixup_positive", type=bool, default=True)
+    parser.add_argument("--mixup_positive", type=bool, default=False)
     parser.add_argument("--mixup_negative", type=bool, default=False)
     parser.add_argument("--mixup_hybrid", type=bool, default=False)
     parser.add_argument("--mixup_vanilla", type=bool, default=False)
@@ -147,7 +147,7 @@ def parse_option():
     parser.add_argument("--randaug", type=int, default=0)
     parser.add_argument("--apool", type=bool, default=False)
     parser.add_argument("--augmix", type=bool, default=False) 
-    parser.add_argument("--use_cuda", type=bool, default=True)
+    parser.add_argument("--use_cuda", type=bool, default=False)
 
     opt = parser.parse_args()
 
@@ -361,7 +361,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
         
         images = torch.cat([images1, images2], dim=0)
 
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and opt.use_cuda is True:
             images = images.cuda(non_blocking=True)
             images1 = images1.cuda(non_blocking=True)
             images2 = images2.cuda(non_blocking=True)
