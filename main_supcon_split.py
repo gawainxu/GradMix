@@ -147,7 +147,7 @@ def parse_option():
     parser.add_argument("--randaug", type=int, default=0)
     parser.add_argument("--apool", type=bool, default=False)
     parser.add_argument("--augmix", type=bool, default=False) 
-    parser.add_argument("--use_cuda", type=bool, default=False)
+    parser.add_argument("--use_cuda", type=bool, default=True)
 
     opt = parser.parse_args()
 
