@@ -335,13 +335,14 @@ def load_model(opt, model=None):
 
     state_dict = new_state_dict
     model.load_state_dict(state_dict)
-    model.cuda()
+    if torch.cuda.is_available() and opt.use_cuda is True:
+        model.cuda()
     model.eval()
 
     return model
 
 
-def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt, scalar=None):
+def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt):
     """one epoch training"""
     model.train()
 
@@ -372,7 +373,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
             
         images = torch.cat([images1, images2], dim=0)
 
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and opt.use_cuda is True:
             images = images.cuda(non_blocking=True)
             images1 = images1.cuda(non_blocking=True)
             images2 = images2.cuda(non_blocking=True)
@@ -385,45 +386,41 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
 
         if linear is not None:
             labels_linear = labels #torch.cat([labels, labels], dim=0)
-            image3 = image3.cuda(non_blocking=True)
+            if torch.cuda.is_available() and opt.use_cuda is True:
+                image3 = image3.cuda(non_blocking=True)
             #labels_linear = labels_linear.cuda(non_blocking=True)
             logits = linear(model.encoder(image3))
             
         if opt.method == 'SupCon':
-            with torch.cuda.amp.autocast(dtype=torch.float32):
-                features = model(images)
-                features1, features2 = torch.split(features, [bsz, bsz], dim=0)
-                features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
-                loss1 = criterion1(features, labels)
-                loss = loss2 = loss1
-                loss_sup = loss
-                loss_ssl = torch.tensor([0])
+            features = model(images)
+            features1, features2 = torch.split(features, [bsz, bsz], dim=0)
+            features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
+            loss1 = criterion1(features, labels)
+            loss = loss2 = loss1
+            loss_sup = loss
+            loss_ssl = torch.tensor([0])
 
         elif opt.method == 'SimCLR':
-            with torch.cuda.amp.autocast(dtype=torch.float32):
-                features = model(images)
-                features1, features2 = torch.split(features, [bsz, bsz], dim=0)
-                features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
+            features = model(images)
+            features1, features2 = torch.split(features, [bsz, bsz], dim=0)
+            features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
 
-                loss_sup = loss1 = criterion2(features, labels)
-                loss_ssl = loss2 = criterion1(features)
+            loss_sup = loss1 = criterion2(features, labels)
+            loss_ssl = loss2 = criterion1(features)
 
-                if opt.mixup_positive:
-                    if opt.positive_method == "cutmix" or opt.positive_method == "snapmix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = vanilla_cutmix(images1, images2, opt)
-                    elif opt.positive_method == "saliencymix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
-                                                                                               opt)
-                    elif opt.positive_method == "layersaliencymix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
-                                                                                               opt)
-                    elif opt.positive_method == "attentive_mix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = attentive_cutmix(images1, images2, opt)
-                    elif opt.positive_method == "cv2saliency":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
-                                                                                               opt)
-                    else:
-                        mixed_positive_samples1, mixed_positive_samples2, labels_new, lam = vanilla_mixup(images1,
+            if opt.mixup_positive:
+                if opt.positive_method == "cutmix" or opt.positive_method == "snapmix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = vanilla_cutmix(images1, images2, opt)
+                elif opt.positive_method == "saliencymix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model, opt)
+                elif opt.positive_method == "layersaliencymix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model, opt)
+                elif opt.positive_method == "attentive_mix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = attentive_cutmix(images1, images2, opt)
+                elif opt.positive_method == "cv2saliency":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model, opt)
+                else:
+                    mixed_positive_samples1, mixed_positive_samples2, labels_new, lam = vanilla_mixup(images1,
                                                                                                           images2,
                                                                                                           labels,
                                                                                                           alpha=opt.alpha_vanilla,
@@ -431,26 +428,25 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                                                                                                           mode=opt.positive_method,
                                                                                                           encoder=model)
 
-                    mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
-                    mixed_positive_features = model(mixed_positive_samples)
-                    mixed_positive_features1, mixed_positive_features2 = torch.split(mixed_positive_features,
+                mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
+                mixed_positive_features = model(mixed_positive_samples)
+                mixed_positive_features1, mixed_positive_features2 = torch.split(mixed_positive_features,
                                                                                      [bsz, bsz], dim=0)
-                    mixed_positive_features = torch.cat(
+                mixed_positive_features = torch.cat(
                         [mixed_positive_features1.unsqueeze(1), mixed_positive_features2.unsqueeze(1)], dim=1)
-                    loss_ssl_mix = criterion1(features,
-                                              features_positive=mixed_positive_features)  # criterion1(mixed_positive_features) #  !!!!!!!!!! TODO
-                    if opt.old_augmented:
-                        loss_ssl = loss_ssl + lam * loss_ssl_mix
-                    else:
-                        loss_ssl = loss2 = loss_ssl_mix
-                    losses_ssl_mix.update(loss_ssl_mix.detach().cpu().item())
+                loss_ssl_mix = criterion1(features,
+                                            features_positive=mixed_positive_features)  # criterion1(mixed_positive_features) #  !!!!!!!!!! TODO
+                if opt.old_augmented:
+                    loss_ssl = loss_ssl + lam * loss_ssl_mix
+                else:
+                    loss_ssl = loss2 = loss_ssl_mix
+                losses_ssl_mix.update(loss_ssl_mix.detach().cpu().item())
 
-                loss = opt.method_gama * loss_sup + opt.method_lam * loss_ssl
-                losses_ssl.update(loss_ssl.detach().cpu().item())
-                losses_sup.update(loss_sup.detach().cpu().item())
-                #ious_epoch.append(ious)
+            loss = opt.method_gama * loss_sup + opt.method_lam * loss_ssl
+            losses_ssl.update(loss_ssl.detach().cpu().item())
+            losses_sup.update(loss_sup.detach().cpu().item())
 
-                if opt.record_grad:
+            if opt.record_grad:
                     # Here the model parameters can be other intermdiate parameters
                     g_ssl = torch.autograd.grad(loss_ssl, [model.head[0].weight, model.head[2].weight],
                                                 retain_graph=True)  # model.encoder.layer4[-1].conv2.weight,
@@ -466,46 +462,39 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                     # loss_sl_hessian.append([x.detach().cpu() for x in hessian_sl])
 
         elif opt.method == 'SimCLR_CE':
-            with torch.cuda.amp.autocast(dtype=torch.float32):
-                features = model(images)
-                features1, features2 = torch.split(features, [bsz, bsz], dim=0)
-                features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
-                loss_ce = loss1 = criterion2(logits, labels_linear)
-                loss_ssl = loss2 = criterion1(features)
-                loss = opt.method_gama * loss_ce + opt.method_lam * loss_ssl
+            features = model(images)
+            features1, features2 = torch.split(features, [bsz, bsz], dim=0)
+            features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
+            loss_ce = loss1 = criterion2(logits, labels_linear)
+            loss_ssl = loss2 = criterion1(features)
+            loss = opt.method_gama * loss_ce + opt.method_lam * loss_ssl
 
-                losses_ssl.update(loss_ssl.detach().cpu().item())
-                losses_sup.update(loss_ce.detach().cpu().item())
+            losses_ssl.update(loss_ssl.detach().cpu().item())
+            losses_sup.update(loss_ce.detach().cpu().item())
              
         elif opt.method == "MoCo":
-            with torch.cuda.amp.autocast(dtype=torch.float32):
-                logits, labels_moco = model(images1, images2, mode="moco")
-                loss_moco = loss2 = criterion1(logits, labels_moco)
+            logits, labels_moco = model(images1, images2, mode="moco")
+            loss_moco = loss2 = criterion1(logits, labels_moco)
 
-                if opt.mixup_positive:
-
-                    if opt.positive_method == "cutmix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = vanilla_cutmix(images1, images2, opt)
-                    elif opt.positive_method == "saliencymix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
-                                                                                               opt)
-                    elif opt.positive_method == "layersaliencymix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
-                                                                                               opt)
-                    else:
-                        mixed_positive_samples1, mixed_positive_samples2, labels_new, lam = vanilla_mixup(images1,
-                                                                                                          images2,
-                                                                                                          labels,
-                                                                                                          alpha=opt.alpha_vanilla,
-                                                                                                          beta=opt.beta_vanilla,
-                                                                                                          mode=opt.positive_method,
-                                                                                                          encoder=model)
-                    logits_mix, labels_moco_mix = model(mixed_positive_samples1, mixed_positive_samples2, mode="moco")
-                    loss_moco_mix = criterion1(logits_mix, labels_moco_mix)
-                    loss_moco = loss2 = loss_moco + lam * loss_moco_mix
+            if opt.mixup_positive:
+                if opt.positive_method == "cutmix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = vanilla_cutmix(images1, images2, opt)
+                elif opt.positive_method == "saliencymix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model, opt)
+                elif opt.positive_method == "layersaliencymix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model, opt)
+                else:
+                    mixed_positive_samples1, mixed_positive_samples2, labels_new, lam = vanilla_mixup(images1, images2,
+                                                                                                      labels, alpha=opt.alpha_vanilla,
+                                                                                                      beta=opt.beta_vanilla,
+                                                                                                      mode=opt.positive_method,
+                                                                                                      encoder=model)
+                logits_mix, labels_moco_mix = model(mixed_positive_samples1, mixed_positive_samples2, mode="moco")
+                loss_moco_mix = criterion1(logits_mix, labels_moco_mix)
+                loss_moco = loss2 = loss_moco + lam * loss_moco_mix
                 
-                loss1 = loss2
-                loss = opt.method_lam * loss_moco    #opt.method_gama * loss_sup +
+            loss1 = loss2
+            loss = opt.method_lam * loss_moco    #opt.method_gama * loss_sup +
         
         else:
             raise ValueError('contrastive method not supported: {}'.
@@ -518,7 +507,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
 
         # SGD
         optimizer.zero_grad()
-        scalar.scale(loss).backward(retain_graph=False)
+        loss.backward()
         optimizer.step()
 
         # measure elapsed time
@@ -551,7 +540,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
     return (losses.avg, losses1.avg, losses2.avg), ious_epoch, (loss_ssl_grad, loss_sl_grad)  #, (loss_ssl_hessian, loss_sl_hessian)
 
 
-def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt, scaler=None):
+def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt):
     """one epoch training"""
 
     model.eval()
@@ -574,7 +563,7 @@ def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoc
 
         images = torch.cat([images1, images2], dim=0)
 
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and opt.use_cuda is True:
             images = images.cuda(non_blocking=True)
             images1 = images1.cuda(non_blocking=True)
             images2 = images2.cuda(non_blocking=True)
@@ -584,44 +573,44 @@ def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoc
 
         if linear is not None:
             labels_linear = labels  # torch.cat([labels, labels], dim=0)
-            image3 = image3.cuda(non_blocking=True)
+            if torch.cuda.is_available() and opt.use_cuda is True:
+                image3 = image3.cuda(non_blocking=True)
             # labels_linear = labels_linear.cuda(non_blocking=True)
             logits = linear(model.encoder(image3))
 
         if opt.method == 'SupCon':
-            with torch.cuda.amp.autocast(dtype=torch.float32):
-                features = model(images)
-                features1, features2 = torch.split(features, [bsz, bsz], dim=0)
-                features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
-                loss1 = criterion1(features, labels)
-                loss = loss2 = loss1
+
+            features = model(images)
+            features1, features2 = torch.split(features, [bsz, bsz], dim=0)
+            features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
+            loss1 = criterion1(features, labels)
+            loss = loss2 = loss1
 
         elif opt.method == 'SimCLR':
-            with torch.cuda.amp.autocast(dtype=torch.float32):
-                features = model(images)
-                features1, features2 = torch.split(features, [bsz, bsz], dim=0)
-                features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
+            features = model(images)
+            features1, features2 = torch.split(features, [bsz, bsz], dim=0)
+            features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
 
-                loss_sup = loss1 = criterion2(features, labels)
-                loss_ssl = loss2 = criterion1(features)
+            loss_sup = loss1 = criterion2(features, labels)
+            loss_ssl = loss2 = criterion1(features)
 
-                if opt.mixup_positive:
-                    losses_ssl_mix = AverageMeter()
-                    if opt.positive_method == "cutmix" or opt.positive_method == "snapmix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = vanilla_cutmix(images1, images2, opt)
-                    elif opt.positive_method == "saliencymix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
+            if opt.mixup_positive:
+                losses_ssl_mix = AverageMeter()
+                if opt.positive_method == "cutmix" or opt.positive_method == "snapmix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = vanilla_cutmix(images1, images2, opt)
+                elif opt.positive_method == "saliencymix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
                                                                                                opt)
-                    elif opt.positive_method == "layersaliencymix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam, ious = salient_cutmix(images1, images2,
+                elif opt.positive_method == "layersaliencymix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam, ious = salient_cutmix(images1, images2,
                                                                                                      model, opt)
-                    elif opt.positive_method == "attentive_mix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = attentive_cutmix(images1, images2, opt)
-                    elif opt.positive_method == "cv2saliency":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
+                elif opt.positive_method == "attentive_mix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = attentive_cutmix(images1, images2, opt)
+                elif opt.positive_method == "cv2saliency":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
                                                                                                opt)
-                    else:
-                        mixed_positive_samples1, mixed_positive_samples2, labels_new, lam = vanilla_mixup(images1,
+                else:
+                    mixed_positive_samples1, mixed_positive_samples2, labels_new, lam = vanilla_mixup(images1,
                                                                                                           images2,
                                                                                                           labels,
                                                                                                           alpha=opt.alpha_vanilla,
@@ -629,68 +618,65 @@ def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoc
                                                                                                           mode=opt.positive_method,
                                                                                                           encoder=model)
 
-                    mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
-                    mixed_positive_features = model(mixed_positive_samples)
-                    mixed_positive_features1, mixed_positive_features2 = torch.split(mixed_positive_features,
+                mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
+                mixed_positive_features = model(mixed_positive_samples)
+                mixed_positive_features1, mixed_positive_features2 = torch.split(mixed_positive_features,
                                                                                      [bsz, bsz],
                                                                                      dim=0)
-                    mixed_positive_features = torch.cat(
+                mixed_positive_features = torch.cat(
                         [mixed_positive_features1.unsqueeze(1), mixed_positive_features2.unsqueeze(1)], dim=1)
-                    loss_ssl_mix = criterion1(features,
+                loss_ssl_mix = criterion1(features,
                                               features_positive=mixed_positive_features)  # no criterion1(mixed_positive_features) since the patched areas are still the same
-                    if opt.old_augmented:
-                        loss_ssl = loss_ssl + lam * loss_ssl_mix
-                    else:
-                        loss_ssl = loss2 = loss_ssl_mix
-                    losses_ssl_mix.update(loss_ssl_mix.detach().cpu().item())
+                if opt.old_augmented:
+                    loss_ssl = loss_ssl + lam * loss_ssl_mix
+                else:
+                    loss_ssl = loss2 = loss_ssl_mix
+                losses_ssl_mix.update(loss_ssl_mix.detach().cpu().item())
 
-                loss = opt.method_gama * loss_sup + opt.method_lam * loss_ssl
-                losses_ssl.update(loss_ssl.detach().cpu().item())
-                losses_sup.update(loss_sup.detach().cpu().item())
-                ious_epoch.append(ious)
-
+            loss = opt.method_gama * loss_sup + opt.method_lam * loss_ssl
+            losses_ssl.update(loss_ssl.detach().cpu().item())
+            losses_sup.update(loss_sup.detach().cpu().item())
+            ious_epoch.append(ious)
 
         elif opt.method == 'SimCLR_CE':
-            with torch.cuda.amp.autocast(dtype=torch.float32):
-                features = model(images)
-                features1, features2 = torch.split(features, [bsz, bsz], dim=0)
-                features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
-                loss_ce = loss1 = criterion2(logits, labels_linear)
-                loss_ssl = loss2 = criterion1(features)
-                loss = opt.method_gama * loss_ce + opt.method_lam * loss_ssl
+            features = model(images)
+            features1, features2 = torch.split(features, [bsz, bsz], dim=0)
+            features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
+            loss_ce = loss1 = criterion2(logits, labels_linear)
+            loss_ssl = loss2 = criterion1(features)
+            loss = opt.method_gama * loss_ce + opt.method_lam * loss_ssl
 
-                losses_ssl.update(loss_ssl.detach().cpu().item())
-                losses_sup.update(loss_ce.detach().cpu().item())
+            losses_ssl.update(loss_ssl.detach().cpu().item())
+            losses_sup.update(loss_ce.detach().cpu().item())
 
         elif opt.method == "MoCo":
-            with torch.cuda.amp.autocast(dtype=torch.float32):
-                logits, labels_moco = model(images1, images2, mode="moco")
-                loss_moco = loss2 = criterion1(logits, labels_moco)
+            logits, labels_moco = model(images1, images2, mode="moco")
+            loss_moco = loss2 = criterion1(logits, labels_moco)
 
-                if opt.mixup_positive:
+            if opt.mixup_positive:
 
-                    if opt.positive_method == "cutmix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = vanilla_cutmix(images1, images2, opt)
-                    elif opt.positive_method == "saliencymix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
+                if opt.positive_method == "cutmix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = vanilla_cutmix(images1, images2, opt)
+                elif opt.positive_method == "saliencymix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
                                                                                                opt)
-                    elif opt.positive_method == "layersaliencymix":
-                        mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
+                elif opt.positive_method == "layersaliencymix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
                                                                                                opt)
-                    else:
-                        mixed_positive_samples1, mixed_positive_samples2, labels_new, lam = vanilla_mixup(images1,
+                else:
+                    mixed_positive_samples1, mixed_positive_samples2, labels_new, lam = vanilla_mixup(images1,
                                                                                                           images2,
                                                                                                           labels,
                                                                                                           alpha=opt.alpha_vanilla,
                                                                                                           beta=opt.beta_vanilla,
                                                                                                           mode=opt.positive_method,
                                                                                                           encoder=model)
-                    logits_mix, labels_moco_mix = model(mixed_positive_samples1, mixed_positive_samples2, mode="moco")
-                    loss_moco_mix = criterion1(logits_mix, labels_moco_mix)
-                    loss_moco = loss2 = loss_moco + lam * loss_moco_mix
+                logits_mix, labels_moco_mix = model(mixed_positive_samples1, mixed_positive_samples2, mode="moco")
+                loss_moco_mix = criterion1(logits_mix, labels_moco_mix)
+                loss_moco = loss2 = loss_moco + lam * loss_moco_mix
 
-                loss1 = loss2
-                loss = opt.method_lam * loss_moco  # opt.method_gama * loss_sup +
+            loss1 = loss2
+            loss = opt.method_lam * loss_moco  # opt.method_gama * loss_sup +
 
         else:
             raise ValueError('contrastive method not supported: {}'.
@@ -737,7 +723,6 @@ def main():
 
     # build optimizer
     optimizer = set_optimizer(opt, model)
-    scalar = torch.cuda.amp.GradScaler()
 
     losses = []
     all_ious = []
@@ -750,7 +735,7 @@ def main():
 
         # train for one epoch
         time1 = time.time()
-        loss, ious_epoch, grads = train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt, scalar=scalar)
+        loss, ious_epoch, grads = train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
         #loss_vali, ious_epoch_vali = validate(test_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
         time2 = time.time()
         print('epoch {}, total time {:.2f}'.format(epoch, time2 - time1))
