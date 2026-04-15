@@ -65,10 +65,11 @@ def parse_option():
     parser.add_argument("--pretrained", type=int, default=1)
 
     # model dataset
-    parser.add_argument('--model', type=str, default='vgg16', choices=["resnet18", "resnet34", "resnet50", "vgg16", "vgg11", "vgg_s_bn", "simCNN", "MLP"])
+    parser.add_argument('--model', type=str, default='vgg16',
+                        choices=["resnet18", "resnet34", "resnet50", "vgg16", "vgg11", "vgg_s_bn", "simCNN", "MLP"])
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
-                                 "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
+                                 "imagenet100_small", "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
     parser.add_argument('--mean', type=str, help='mean of dataset in path in form of str tuple')
     parser.add_argument('--std', type=str, help='std of dataset in path in form of str tuple')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
@@ -134,7 +135,8 @@ def parse_option():
     parser.add_argument("--mixup_vanilla_features", type=bool, default=False)
     parser.add_argument("--positive_p", type=float, default=0.5)
     parser.add_argument("--alfa", type=float, default=1)
-    parser.add_argument("--positive_method", type=str, default="layersaliencymix", choices=["max_similarity", "min_similarity", "random", "prob_similarity", "reverse", "saliencymix", "layersaliencymix", "cutmix", "cv2saliency"])
+    parser.add_argument("--positive_method", type=str, default="layersaliencymix",
+                        choices=["max_similarity", "min_similarity", "random", "prob_similarity", "reverse", "saliencymix", "layersaliencymix", "cutmix", "cv2saliency"])
     parser.add_argument("--negative_method", type=str, default="no", choices=["max_similarity", "random", "even", "no"])
     parser.add_argument("--hybrid_method", type=str, default="no", choices=["min_similarity", "random", "no"])
     parser.add_argument("--vanilla_method", type=str, default="no", choices=["reverse", "random", "no"])
