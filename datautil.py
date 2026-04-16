@@ -1321,12 +1321,16 @@ def salient_cutmix(batch_data1, batch_data2, model, opt):
     bsz, h, w = batch_data1.shape[0], batch_data1.shape[2], batch_data1.shape[3]
     if torch.cuda.is_available() and opt.use_cuda is True:
         indices = torch.randperm(bsz).cuda()
+    else:
+        indices = torch.randperm(bsz)
     lam = np.random.beta(opt.alpha_vanilla, opt.beta_vanilla)
     lam = lam * (0.9 - 0.5) + 0.5
     #while lam > 0.9 or lam < 0.1:
     #    lam = np.random.beta(opt.alpha_vanilla, opt.beta_vanilla)
     if torch.cuda.is_available() and opt.use_cuda is True:
         lam = torch.tensor(lam).cuda()
+    else:
+        lam = torch.tensor(lam)
     
     if opt.positive_method == "saliencymix":
         activations = salient_maps(batch_data1, batch_data2, model, opt)
@@ -1361,6 +1365,8 @@ def salient_cutmix(batch_data1, batch_data2, model, opt):
 
     if torch.cuda.is_available() and opt.use_cuda is True:
         new_lam = torch.tensor(1. - bbox_area / h / w).cuda()
+    else:
+        new_lam = torch.tensor(1. - bbox_area / h / w)
     batch_data1_new = torch.stack(batch_data1_new)
     batch_data2_new = torch.stack(batch_data2_new)
 
