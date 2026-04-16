@@ -125,7 +125,7 @@ class gradient_cache():
          
          if mix_reps is None:
              cache = all_reps.grad   # [bsz, 2, f] !!!!!  torch.ones_like(all_reps)  # 
-             print("feature gradient norm ", torch.norm(cache), "loss", loss)
+             #print("feature gradient norm ", torch.norm(cache), "loss", loss)
              return cache, loss
          else:
              cache = all_reps.grad
@@ -145,7 +145,7 @@ class gradient_cache():
                  one_split_reps1, one_split_reps2 = torch.split(one_split_reps, [bsz, bsz], dim=0)
                  one_split_reps = torch.cat([one_split_reps1.unsqueeze(1), one_split_reps2.unsqueeze(1)], dim=1)   
                  surrogate = torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten())
-                 print(idx, "surrogate", surrogate)
+                 #print(idx, "surrogate", surrogate)
                  surrogate.backward()
          else:
              for idx, (one_split_inputs, one_split_rep_grad, one_split_inputs_mix, one_split_reps_grad_mix) in enumerate(zip(model_inputs, reps_grad_ori, model_inputs_mix, reps_grad_mix)):
@@ -532,7 +532,7 @@ class MoCoResNet(nn.Module):
 
         batch_size = feat_k.size(0)
         ptr = int(self.queue_ptr)
-        print(batch_size, feat_k.size())
+        #print(batch_size, feat_k.size())
 
         # replace the keys at ptr (dequeue and enqueue)
         self.queue[ptr:ptr+batch_size, :] = feat_k      # TODO attention the dimensions here !!!!
