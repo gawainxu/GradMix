@@ -86,7 +86,10 @@ class gradient_cache():
              else:
                  loss = self.loss_fcn(features=reps) + lam * self.loss_fcn(features=reps, features_positive=reps_mix)
          elif "SupCon" in self.opt.method:
-             loss = self.loss_fcn(features=reps, labels=labels)
+             if reps_mix is None:
+                 loss = self.loss_fcn(features=reps, labels=labels)
+             else:
+                 loss = self.loss_fcn(features=reps) + lam * self.loss_fcn(features=reps, features_positive=reps_mix)
          elif "Joint" in self.opt.method:
              if reps_mix is None:
                  loss = self.opt.method_gama * self.loss_fcn(features=reps) + self.opt.method_lam * self.loss_fcn2(features=reps, labels=labels)
@@ -202,7 +205,7 @@ class gradient_cache():
              
              reps_grad = one_split_reps.grad
              grad_norm = torch.norm(reps_grad)
-             #print("feature gradient norm full", grad_norm)
+             #("feature gradient norm full", grad_norm)
              
              self.optimizer.zero_grad()         #!!!!!!
              
