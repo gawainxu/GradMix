@@ -187,13 +187,13 @@ def train(train_loader, model, classifier, criterion, optimizer, epoch, opt):
         with torch.no_grad():
             if "resnet" in opt.model:
                 if opt.method == "MoCo":
-                    features = model.encoder_q(images)
+                    features = model(images) #model.encoder_q(images)
                 else:
-                    features = model.encoder(images)
+                    features = model(images) # model.encoder(images)
             elif "vgg" in opt.model:
                 features = model(images)
             elif "simCNN" in opt.model:
-                features = model.encoder(images)
+                features = model.encoder(images) #model.encoder(images)
             features = features.cuda(non_blocking=True)
         
         output = classifier(features)
