@@ -566,7 +566,7 @@ class cifar100_c(Dataset):
         return img, label
 
 
-
+"""
 def ImageNet100(root, classes=range(100), train=True, opt=None, transform=None,
                 target_transform=None, download=False, label_dict = None, last_features_list=None, 
                 last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
@@ -578,9 +578,38 @@ def ImageNet100(root, classes=range(100), train=True, opt=None, transform=None,
         data_path = root + "/imagenet100_test"
         
     dataset = ImageFolder(data_path, transform=transform)
-    #data_loader = torch.utils.data.DataLoader(dataset, batch_size=256, shuffle=True,
-    #                                          num_workers=0, pin_memory=True)
+
     return dataset
+"""
+
+
+class ImageNet100(Dataset):
+
+    def __init__(self, root, classes=range(100), train=True, opt=None, transform=None,
+                target_transform=None, download=False, label_dict = None, last_features_list=None,
+                last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
+
+        if train:
+            data_path = root + "/imagenet100_train"
+        else:
+            data_path = root + "/imagenet100_test"
+
+        dataset = ImageFolder(data_path, transform=transform)
+        self.images = []
+        self.labels = []
+
+        for img, l in dataset:
+            self.images.append(img)
+            self.labels.append(l)
+
+    def __getitem__(self, idx):
+
+        return self.images[idx], self.labels[idx]
+
+    def __len__(self):
+
+        return len(self.images)
+
 
 
 def ImageNet100_small(root, classes=range(10), train=True, opt=None, transform=None,
@@ -1138,6 +1167,9 @@ if __name__ == "__main__":
                                           transforms.RandomGrayscale(p=0.2),
                                           transforms.ToTensor(),])
 
-    imagenet100 = ImageNet100(root=root_path, train=True, transform=transform)
+    imagenet100 = ImageNet100(root=root_path, train=False, transform=transform)
+    for idx in range(100):
+        print(imagenet100[idx][0].shape, imagenet100[idx][1])
+
 
    
