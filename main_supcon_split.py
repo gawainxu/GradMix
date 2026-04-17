@@ -178,7 +178,7 @@ def parse_option():
     elif opt.augmentation_method == "mixup_hybrid":
         opt.model_name += "_mixup_hybrid_" + str(opt.hybrid_method) + "_intra_" + str(opt.intra_inter_mix_hybrid) +  "_alpha_" + str(opt.alpha_hybrid) + "_beta_" + str(opt.beta_hybrid) + "_alfa_" + str(opt.alfa)             
     elif opt.augmentation_method == "mixup_positive":
-        opt.model_name += "_mixup_positive_" + str(opt.positive_method) + "_intra_" + str(opt.intra_inter_mix_positive) + "_alpha_" + str(opt.alpha_positive) + "_p_" + str(opt.positive_p)
+        opt.model_name += "_mixup_positive_" + "alpha_" + str(opt.alpha_vanilla) + "_beta_" + str(opt.beta_vanilla) + "_" + opt.positive_method + "_" + opt.grad_layers
     elif opt.augmentation_method == "mixup_vanilla":
         opt.model_name += "_mixup_vanilla_" +  opt.vanilla_method + "_alpha_" + str(opt.alpha_vanilla) + "_beta_" + str(opt.beta_vanilla) + "_alfa_" + str(opt.alfa)
     elif opt.augmentation_method == "mixup_vanilla_features":
