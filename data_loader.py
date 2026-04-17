@@ -1167,9 +1167,20 @@ if __name__ == "__main__":
                                           transforms.RandomGrayscale(p=0.2),
                                           transforms.ToTensor(),])
 
+    """
     imagenet100 = ImageNet100(root=root_path, train=False, transform=transform)
     for idx in range(100):
         print(imagenet100[idx][0].shape, imagenet100[idx][1])
+    """
+
+    cub = CUB(root_path)
+    print("CUB", len(cub))
+
+    cars = Cars(root_path)
+    print("Cars", len(cars))
+
+    aircraft = Aircraft(root_path)
+    print("Aircraft", len(aircraft))
 
 
    
