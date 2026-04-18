@@ -17,8 +17,9 @@ from util import TwoCropTransform, AverageMeter
 from util import adjust_learning_rate, warmup_learning_rate
 from util import set_optimizer, save_model, label_convert
 from datautil import vanilla_mixup, salient_cutmix, vanilla_cutmix
-from datautil import num_inlier_classes_mapping, mixup_hybrid_features
+from datautil import num_inlier_classes_mapping
 from networks.resnet_big import SupConResNet, LinearClassifier
+from networks.resnet_big import pretrained_resnet50
 from networks.resnet_big import MoCoResNet
 from networks.maskcon import MaskCon
 from networks.simCNN import simCNN_contrastive
@@ -68,7 +69,7 @@ def parse_option():
     parser.add_argument("--pretrained", type=int, default=1)
 
     # model dataset
-    parser.add_argument('--model', type=str, default='vgg16', choices=["resnet18", "resnet34", "vgg16", "simCNN", "MLP"])
+    parser.add_argument('--model', type=str, default='vgg16', choices=["resnet18", "resnet34", "resnet50_pretrain", "vgg16", "simCNN", "MLP"])
     parser.add_argument('--datasets', type=str, default='imagenet100',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
                                  "imagenet100_small", "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
@@ -276,6 +277,11 @@ def set_model(opt):
         model = MaskCon(arch="resnet18", T1=opt.method_T1, T2=opt.method_T2)
         criterion1 = None
         criterion2 = None
+        linear = None
+    elif opt.method == "resnet50_pretrain":
+        model = pretrained_resnet50(feat_dim=opt.feat_dim)
+        criterion1 = SupConLoss(temperature=opt.temp)
+        criterion2 = SupConLoss(temperature=opt.temp)
         linear = None
     else:
         if opt.model in ["resnet18", "resnet34", "resnet50"]:

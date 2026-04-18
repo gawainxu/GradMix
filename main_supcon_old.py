@@ -17,6 +17,7 @@ from util import set_optimizer, save_model
 from datautil import vanilla_mixup, salient_cutmix, vanilla_cutmix
 from datautil import num_inlier_classes_mapping
 from networks.resnet_big import SupConResNet, LinearClassifier
+from networks.resnet_big import pretrained_resnet50
 from networks.resnet_big import MoCoResNet
 from networks.maskcon import MaskCon
 from networks.simCNN import simCNN_contrastive

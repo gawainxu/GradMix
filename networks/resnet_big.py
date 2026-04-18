@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision import models
 
 
 class BasicBlock(nn.Module):
@@ -154,6 +155,36 @@ model_dict = {
     "simCNN": [None, 128],
     "MLP": [None, 128]
 }
+
+
+class pretrained_resnet50(nn.Module):
+
+    def __init__(self, name='resnet50', head='mlp', feat_dim=128, in_channels=3):
+        super(pretrained_resnet50, self).__init__()
+        checkpoint_url = "http://places2.csail.mit.edu/models_places365/resnet50_places365.pth.tar"
+        self.encoder = models.resnet50(num_classes=365)
+        state_dict = torch.hub.load_state_dict_from_url(checkpoint_url, map_location='cpu')['state_dict']
+        new_state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
+        self.encoder.load_state_dict(new_state_dict)
+
+        model_fun, dim_in = model_dict[name]
+        if head == 'linear':
+            self.head = nn.Linear(dim_in, feat_dim)
+        elif head == 'mlp':
+            self.head = nn.Sequential(
+                nn.Linear(dim_in, dim_in),
+                nn.ReLU(inplace=True),
+                nn.Linear(dim_in, feat_dim)
+            )
+        else:
+            raise NotImplementedError(
+                'head not supported: {}'.format(head))
+
+    def forward(self, x):
+
+        feat = self.encoder(x)
+        feat = F.normalize(self.head(feat), dim=1)
+        return feat
 
 
 class remove_fc(nn.Module):
