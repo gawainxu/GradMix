@@ -600,15 +600,15 @@ class ImageNet100(Dataset):
         self.transform = transform
 
         for img, l in dataset:
-            if self.transform is not None:
-                self.images.append(self.transform(img))
-            else:
-                self.images.append(img)
+            self.images.append(self.transform(img))
             self.labels.append(l)
 
     def __getitem__(self, idx):
 
-        return self.images[idx], self.labels[idx]
+        if self.transform is not None:
+            return self.transform(self.dataset[idx]), self.labels[idx]
+        else:
+            return self.dataset[idx], self.labels[idx]
 
     def __len__(self):
 
@@ -1067,20 +1067,6 @@ class Aircraft(VisionDataset):
             images.append(image)
             labels.append(targets[i])
         return images, labels
-
-
-def Cars(root, train=True, opt=None, limit=0, transform=None, metas=None):
-    """
-        Cars Dataset
-    """
-    if train:
-        data_dir = os.path.join(root, "Cars/train")
-    else:
-        data_dir = os.path.join(root, "Cars/test")
-           
-    dataset = ImageFolder(data_dir, transform=transform)
-
-    return dataset
 
 
 class Cars(Dataset):
