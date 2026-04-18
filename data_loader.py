@@ -605,9 +605,9 @@ class ImageNet100(Dataset):
 
     def __getitem__(self, idx):
         if self.transform is not None:
-            return self.images[idx], self.labels[idx]
-        else:
             return self.transform(self.images[idx]), self.labels[idx]
+        else:
+            return self.images[idx], self.labels[idx]
 
     def __len__(self):
 
@@ -1088,13 +1088,14 @@ class Cars(Dataset):
             if l in classes:
                 self.images.append(img)
                 self.labels.append(l)
+        print(len(self.images))
 
     def __getitem__(self, idx):
 
         if self.transform is not None:
-            return self.images[idx], self.labels[idx]
-        else:
             return self.transform(self.images[idx]), self.labels[idx]
+        else:
+            return self.images[idx], self.labels[idx]
 
     def __len__(self):
 
