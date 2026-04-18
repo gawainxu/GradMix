@@ -594,12 +594,16 @@ class ImageNet100(Dataset):
         else:
             data_path = root + "/imagenet100_test"
 
-        dataset = ImageFolder(data_path, transform=transform)
+        dataset = ImageFolder(data_path)
         self.images = []
         self.labels = []
+        self.transform = transform
 
         for img, l in dataset:
-            self.images.append(img)
+            if self.transform is not None:
+                self.images.append(self.transform(img))
+            else:
+                self.images.append(img)
             self.labels.append(l)
 
     def __getitem__(self, idx):
@@ -1068,7 +1072,6 @@ class Aircraft(VisionDataset):
 def Cars(root, train=True, opt=None, limit=0, transform=None, metas=None):
     """
         Cars Dataset
-        TODO check the classes!!!!!
     """
     if train:
         data_dir = os.path.join(root, "Cars/train")
@@ -1079,6 +1082,38 @@ def Cars(root, train=True, opt=None, limit=0, transform=None, metas=None):
 
     return dataset
 
+
+class Cars(Dataset):
+
+    def __init__(self, root, classes=range(100), train=True, opt=None, transform=None,
+                target_transform=None, download=False, label_dict = None, last_features_list=None,
+                last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
+
+        if train:
+            data_dir = os.path.join(root, "Cars/train")
+        else:
+            data_dir = os.path.join(root, "Cars/test")
+
+        self.dataset = ImageFolder(data_dir)
+        self.images = []
+        self.labels = []
+        self.transform = transform
+
+        for img, l in self.dataset:
+            if l in classes:
+                self.images.append(img)
+                self.labels.append(l)
+
+    def __getitem__(self, idx):
+
+        if self.transform is not None:
+            return self.transform(self.dataset[idx]), self.labels[idx]
+        else:
+            return self.dataset[idx], self.labels[idx]
+
+    def __len__(self):
+
+        return len(self.dataset)
 
 
 class FUB(Dataset):

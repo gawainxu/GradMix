@@ -121,7 +121,7 @@ osr_splits_inliers = {
                   36, 37, 38, 39, 41, 43, 44, 45, 46, 47, 48, 52, 53, 56, 57, 58, 63, 64, 65,
                   66, 67, 71, 73, 76, 77, 79, 92, 95, 99]],
 
-    "stanfordcars": [[1, 11, 25, 38, 46, 50, 53, 75, 84, 100, 105, 117, 123, 129, 133, 134, 135, 136,
+    "cars": [[1, 11, 25, 38, 46, 50, 53, 75, 84, 100, 105, 117, 123, 129, 133, 134, 135, 136,
                       137, 138, 140, 144, 145, 146, 147, 149, 150, 151, 153, 160, 161, 162, 163, 164,
                       167, 168, 169, 174, 175, 180, 185, 186, 187, 192, 193, 0, 81, 97, 104, 122, 139,
                       141, 142, 143, 148, 152, 154, 155, 156, 157, 158, 159, 165, 166, 170, 171, 172,
@@ -210,7 +210,7 @@ osr_splits_outliers = {
                  [78, 82, 51, 49, 50, 54, 55, 59, 60, 61, 68, 69, 70, 85, 86, 87, 88], 
                  [80, 81, 42, 84, 40, 90, 74, 75, 97, 98, 34, 35, 93, 94, 96, 72, 91, 83, 62, 89]],
     
-    "stanfordcars": [[23, 42, 83, 94,],
+    "cars": [[23, 42, 83, 94,],
                      [3, 8, 10, 17, 21, 27, 29, 45, 55, 96, 99, 103, 128, 179, 183],
                      [4, 5, 6, 12, 13, 14, 15, 18, 19, 24, 30, 31, 32, 33, 34, 35, 36,
                       37, 39, 40, 43, 47, 48, 49, 51, 52, 56, 57, 58, 59, 60, 61, 62,
@@ -236,7 +236,7 @@ def pickClass(classIdx):
 
 import cv2
 import random
-from data_loader import iCIFAR10, iCIFAR100, TinyImagenet, customSVHN, mnist, CUB, Aircraft, ImageNet100_M
+from data_loader import iCIFAR10, iCIFAR100, TinyImagenet, customSVHN, mnist, CUB, Aircraft, Cars, ImageNet100_M
 from data_loader import tinyimgnet_c, cifar10_c, cifar100_c, ImageNet100, ImageNet100_small, FUB
 import torchvision
 import torch
@@ -262,16 +262,16 @@ from sklearn.cluster import KMeans
 
 num_inlier_classes_mapping = {"cifar10": 6, "cifar-10-100-10": 4, "cifar-10-100-50": 4, "cifar100_marco": 6, "imagenet100": 100,
                                "imagenet100_small": 10, "imagenet100_m": 100, "cifar100": 100, "tinyimgnet": 20, "mnist": 6, "svhn": 6,
-                              "cub": 100, "aircraft": 50, "FUB": 3}
+                              "cub": 100, "aircraft": 50, "cars": 98, "FUB": 3}
 
 
 data_function_mapping = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR10, "cifar-10-100-50": iCIFAR10, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100,
                          "imagenet100_small": ImageNet100_small, "imagenet100_m": ImageNet100_M, "cifar100": iCIFAR100, "tinyimgnet": TinyImagenet, "mnist": mnist,
-                         "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "FUB": FUB}
+                         "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "cars": Cars, "FUB": FUB}
 
 data_function_mapping_testing = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR100, "cifar-10-100-50": iCIFAR100, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100,
                                  "imagenet100_small": ImageNet100_small, "imagenet100_m": ImageNet100_M, "cifar100": iCIFAR100, "tinyimgnet": TinyImagenet, "mnist": mnist,
-                                 "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "FUB": FUB}
+                                 "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "cars": Cars, "FUB": FUB}
 
 data_function_mapping_curruption = {"cifar10": cifar10_c, "cifar100": cifar100_c, "tinyimgnet": tinyimgnet_c,}
 
@@ -289,6 +289,7 @@ mean_mapping = {"mnist":  (0.1307,),
                 "tinyimgnet": (0.485, 0.456, 0.406),
                 "aircraft": (0.485, 0.456, 0.406), 
                 "cub": (0.485, 0.456, 0.406),
+                "cars": (0.485, 0.456, 0.406),
                 "FUB": (0.485, 0.456, 0.406),}       # 0.408, 0.459, 0.502, 123., 117., 104.
 
 std_mapping = {"mnist": (0.3081,),
@@ -304,6 +305,7 @@ std_mapping = {"mnist": (0.3081,),
                "tinyimgnet": (0.229, 0.224, 0.225),
                "aircraft": (0.229, 0.224, 0.225),
                "cub": (0.229, 0.224, 0.225),
+               "cars": (0.229, 0.224, 0.225),
                "FUB": (0.229, 0.224, 0.225)}
 
 image_size_mapping = {"mnist": 32,
@@ -319,6 +321,7 @@ image_size_mapping = {"mnist": 32,
                       "imagenet100_m": 224,
                       "aircraft": 224,
                       "cub": 224,
+                      "cars": 224,
                       "FUB": 128}
 
 
@@ -1649,7 +1652,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser('argument for training')
     parser.add_argument('--dataset', type=str, default=10)
-    parser.add_argument('--datasets', type=str, default='cifar10',
+    parser.add_argument('--datasets', type=str, default='aircraft',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
                                  "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "FUB"],
                         help='dataset')

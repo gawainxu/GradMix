@@ -66,11 +66,11 @@ def parse_option():
     parser.add_argument("--pretrained", type=int, default=1)
 
     # model dataset
-    parser.add_argument('--model', type=str, default='vgg16',
-                        choices=["resnet18", "resnet34", "resnet50", "vgg16", "vgg11", "vgg_s_bn", "simCNN", "MLP"])
-    parser.add_argument('--datasets', type=str, default='cifar10',
-                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
-                                 "imagenet100_small", "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
+    parser.add_argument('--model', type=str, default='resnet50_pretrain',
+                        choices=["resnet18", "resnet34", "resnet50_pretrain", "vgg16", "vgg11", "vgg_s_bn", "simCNN", "MLP"])
+    parser.add_argument('--datasets', type=str, default='cars',
+                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet", "imagenet100_small",
+                                 "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "cars", "FUB"], help='dataset')
     parser.add_argument('--mean', type=str, help='mean of dataset in path in form of str tuple')
     parser.add_argument('--std', type=str, help='std of dataset in path in form of str tuple')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
@@ -276,6 +276,11 @@ def set_model(opt):
         model = MaskCon(arch="resnet18", T1=opt.method_T1, T2=opt.method_T2)
         criterion1 = None
         criterion2 = None
+        linear = None
+    elif opt.method == "resnet50_pretrain":
+        model = pretrained_resnet50(feat_dim=opt.feat_dim)
+        criterion1 = SupConLoss(temperature=opt.temp)
+        criterion2 = SupConLoss(temperature=opt.temp)
         linear = None
     elif opt.method == "SimCLR" or opt.method == "SupCon":
         if opt.model in ["preactresnet18", "preactresnet34"]:
