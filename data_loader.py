@@ -1099,7 +1099,7 @@ class Cars(Dataset):
 
     def __len__(self):
 
-        return len(self.dataset)
+        return len(self.images)
 
 
 class FUB(Dataset):
