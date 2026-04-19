@@ -173,7 +173,7 @@ class pretrained_resnet50(nn.Module):
             self.head = nn.Linear(dim_in, feat_dim)
         elif head == 'mlp':
             self.head = nn.Sequential(
-                nn.Linear(dim_in, dim_in),
+                nn.Linear(dim_in, dim_in/2),
                 nn.ReLU(inplace=True),
                 nn.Linear(dim_in, feat_dim)
             )
