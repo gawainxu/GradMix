@@ -175,7 +175,7 @@ class pretrained_resnet50(nn.Module):
             self.head = nn.Sequential(
                 nn.Linear(dim_in, int(dim_in/2)),
                 nn.ReLU(inplace=True),
-                nn.Linear(dim_in, feat_dim)
+                nn.Linear(int(dim_in/2), feat_dim)
             )
         else:
             raise NotImplementedError(
