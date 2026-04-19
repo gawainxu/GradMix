@@ -69,10 +69,10 @@ def parse_option():
     parser.add_argument("--pretrained", type=int, default=1)
 
     # model dataset
-    parser.add_argument('--model', type=str, default='vgg16', choices=["resnet18", "resnet34", "resnet50_pretrain", "vgg16", "simCNN", "MLP"])
+    parser.add_argument('--model', type=str, default='resnet50_pretrain', choices=["resnet18", "resnet34", "resnet50_pretrain", "vgg16", "simCNN", "MLP"])
     parser.add_argument('--datasets', type=str, default='imagenet100',
-                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
-                                 "imagenet100_small", "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
+                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet", "imagenet100_small",
+                                 "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "cars", "FUB"], help='dataset')
     parser.add_argument('--mean', type=str, help='mean of dataset in path in form of str tuple')
     parser.add_argument('--std', type=str, help='std of dataset in path in form of str tuple')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
@@ -82,10 +82,10 @@ def parse_option():
     parser.add_argument("--argmentation_m", type=int, default=6)
 
     # method
-    parser.add_argument('--method', type=str, default='SimCLR',
+    parser.add_argument('--method', type=str, default='Joint',
                         choices=['SupCon', 'SimCLR', "SimCLR_CE", "Joint", "MoCo"], help='choose method')
-    parser.add_argument("--method_gama", type=float, default=1.0)
-    parser.add_argument("--method_lam", type=float, default=1.0)
+    parser.add_argument("--method_gama", type=float, default=0.5)
+    parser.add_argument("--method_lam", type=float, default=0.5)
     parser.add_argument("--trail", type=int, default=0, choices=[0,1,2,3,4,5], help="index of repeating training")
     parser.add_argument("--action", type=str, default="training_supcon",
                         choices=["training_supcon", "trainging_linear", "testing_known", "testing_unknown", "feature_reading"])

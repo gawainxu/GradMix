@@ -295,6 +295,10 @@ class gradient_cache_activations():
             self.encoder_layers = [self.encoder.layer1[-1], self.encoder.layer2[-1],
                                    self.encoder.layer3[-1], self.encoder.layer4[-1]]
             self.encoder_layer_names = ["encoder.layer1", "encoder.layer2", "encoder.layer3", "encoder.layer4"]
+        elif self.opt.model == "resnet50_pretrain":
+            self.encoder_layers = [self.encoder.layer1[-1], self.encoder.layer2[-1],
+                                   self.encoder.layer3[-1], self.encoder.layer4[-1]]
+            self.encoder_layer_names = ["encoder.layer1", "encoder.layer2", "encoder.layer3", "encoder.layer4"]
         elif self.opt.model == "simCNN":
             self.encoder_layers = [self.model.bn10, self.model.bn9,
                                    self.model.bn8, self.model.bn7]

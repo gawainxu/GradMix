@@ -410,16 +410,11 @@ if __name__ == "__main__":
     parser.add_argument('--num_classes', type=int, default=10)
     opt = parser.parse_args()
 
-    resnet18 = SupConResNet()
-    for name, layer in resnet18.named_modules():
-        print(name)
+    resnet50 = pretrained_resnet50()
+    #for idx, layer in enumerate(resnet50.modules()):
+    #    print(f"Index: {idx} | Module: {type(layer).__name__}")
 
-    param_size = 0
-    for param in resnet18.parameters():
-        param_size += param.nelement() * param.element_size()
-    buffer_size = 0
-    for buffer in resnet18.buffers():
-        buffer_size += buffer.nelement() * buffer.element_size()
+    #for name, layer in resnet50.named_modules():
+    #    print(f"Name: {name} | Layer: {layer}")
 
-    size_all_mb = (param_size + buffer_size) / 1024 ** 2
-    print('model size: {:.3f}MB'.format(size_all_mb))
+    print(resnet50.encoder.layer4[0])
