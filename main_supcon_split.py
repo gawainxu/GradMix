@@ -283,7 +283,7 @@ def set_model(opt):
             model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model in ["preactresnet18", "preactresnet34"]:
             model = SupConpPreactResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
-        elif opt.method == "resnet50_pretrain":
+        elif opt.model == "resnet50_pretrain":
             model = pretrained_resnet50(feat_dim=opt.feat_dim)
         elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
             model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
