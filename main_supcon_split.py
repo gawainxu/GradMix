@@ -70,7 +70,7 @@ def parse_option():
 
     # model dataset
     parser.add_argument('--model', type=str, default='resnet50_pretrain', choices=["resnet18", "resnet34", "resnet50_pretrain", "vgg16", "simCNN", "MLP"])
-    parser.add_argument('--datasets', type=str, default='imagenet100',
+    parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet", "imagenet100_small",
                                  "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft", "cars", "FUB"], help='dataset')
     parser.add_argument('--mean', type=str, help='mean of dataset in path in form of str tuple')
@@ -133,7 +133,7 @@ def parse_option():
     parser.add_argument("--intra_inter_mix_positive", type=bool, default=True, help="intra=True, inter=False")
     parser.add_argument("--intra_inter_mix_negative", type=bool, default=True, help="intra=True, inter=False")
     parser.add_argument("--intra_inter_mix_hybrid", type=bool, default=True, help="intra=True, inter=False")
-    parser.add_argument("--mixup_positive", type=bool, default=False)
+    parser.add_argument("--mixup_positive", type=bool, default=True)
     parser.add_argument("--mixup_negative", type=bool, default=False)
     parser.add_argument("--mixup_hybrid", type=bool, default=False)
     parser.add_argument("--mixup_vanilla", type=bool, default=False)
@@ -278,16 +278,13 @@ def set_model(opt):
         criterion1 = None
         criterion2 = None
         linear = None
-    elif opt.method == "resnet50_pretrain":
-        model = pretrained_resnet50(feat_dim=opt.feat_dim)
-        criterion1 = SupConLoss(temperature=opt.temp)
-        criterion2 = SupConLoss(temperature=opt.temp)
-        linear = None
     else:
         if opt.model in ["resnet18", "resnet34", "resnet50"]:
             model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model in ["preactresnet18", "preactresnet34"]:
             model = SupConpPreactResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
+        elif opt.method == "resnet50_pretrain":
+            model = pretrained_resnet50(feat_dim=opt.feat_dim)
         elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
             model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "MLP":

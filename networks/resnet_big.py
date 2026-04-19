@@ -410,11 +410,9 @@ if __name__ == "__main__":
     parser.add_argument('--num_classes', type=int, default=10)
     opt = parser.parse_args()
 
-    resnet50 = pretrained_resnet50()
-    #for idx, layer in enumerate(resnet50.modules()):
+    model = pretrained_resnet50()
+    #for idx, layer in enumerate(model.modules()):
     #    print(f"Index: {idx} | Module: {type(layer).__name__}")
 
-    #for name, layer in resnet50.named_modules():
-    #    print(f"Name: {name} | Layer: {layer}")
-
-    print(resnet50.encoder.layer4[0])
+    for name, layer in model.named_modules():
+        print(f"Name: {name} | Layer: {layer}")
