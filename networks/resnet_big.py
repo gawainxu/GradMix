@@ -166,6 +166,7 @@ class pretrained_resnet50(nn.Module):
         state_dict = torch.hub.load_state_dict_from_url(checkpoint_url, map_location='cpu')['state_dict']
         new_state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
         self.encoder.load_state_dict(new_state_dict)
+        self.encoder.fc = nn.Identity()
 
         model_fun, dim_in = model_dict[name]
         if head == 'linear':
