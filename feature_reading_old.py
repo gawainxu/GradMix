@@ -25,6 +25,7 @@ from networks.resnet_big import SupConResNet, LinearClassifier
 from networks.resnet_preact import SupConpPreactResNet
 from networks.simCNN import simCNN_contrastive
 from networks.mlp import SupConMLP
+from networks.resnet_big import pretrained_resnet50
 from featureMerge import featureMerge
 from datautil import num_inlier_classes_mapping
 
@@ -42,17 +43,21 @@ breaks = {"cifar-10-100-10": {"train": 5000, "test_known":500, "test_unknown": 5
            'mnist':{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000}, 
            "svhn":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
            "cub":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
+           "cars":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
+           "aircraft":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
            "FUB": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},}
 
 def parse_option():
 
     parser = argparse.ArgumentParser('argument for feature reading')
 
-    parser.add_argument('--datasets', type=str, default='FUB',
-                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft", "FUB"], help='dataset')
+    parser.add_argument('--datasets', type=str, default='cars',
+                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft", "cars", "FUB"],
+                        help='dataset')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
-    parser.add_argument('--model', type=str, default="simCNN", choices=["resnet18", "resnet34", "preactresnet18", "preactresnet34", "simCNN", "MLP"])
-    parser.add_argument("--model_path", type=str, default="/save/SupCon/FUB_models/FUB_simCNN_vanilia__SimCLR_1.0_0.0_0.1_trail_0_128_256/last.pth")
+    parser.add_argument('--model', type=str, default="resnet50_pretrain", choices=["resnet18", "resnet34", "resnet50_pretrain", "simCNN", "MLP"])
+    parser.add_argument("--model_path", type=str,
+                        default="/save/SupCon/cars_models/cars_resnet50_pretrain_original_data__mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_0,1,2,3_Joint_0.5_0.5_trail_0_128_256_split_128/last.pth")
     parser.add_argument("--linear_model_path", type=str, default=None)
     parser.add_argument("--trail", type=int, default=0)
     parser.add_argument("--split_train_val", type=bool, default=True)
@@ -78,7 +83,7 @@ def parse_option():
 
     parser.add_argument("--lr", type=str, default=0.01)
     parser.add_argument("--training_bz", type=int, default=600)
-    parser.add_argument("--if_train", type=str, default="test_unknown", choices=['train', 'val', 'test_known', 'test_unknown', "full"])
+    parser.add_argument("--if_train", type=str, default="test_known", choices=['train', 'val', 'test_known', 'test_unknown', "full"])
     parser.add_argument('--batch_size', type=int, default=1, help='batch_size')
     parser.add_argument('--num_workers', type=int, default=4, help='num of workers to use')
 
@@ -135,10 +140,10 @@ def load_model(opt):
 
     if opt.model == "resnet18" or opt.model == "resnet34":
         model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
-    elif opt.model == "preactresnet18" or opt.model == "preactresnet34":
-        model = SupConpPreactResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
     elif opt.model == "MLP":
         model = SupConMLP(feat_dim=opt.feat_dim)
+    elif opt.model == "resnet50_pretrain":
+        model = pretrained_resnet50(feat_dim=opt.feat_dim)
     else:
         model = simCNN_contrastive(opt,  feature_dim=opt.feat_dim, in_channels=in_channels)
     ckpt = torch.load(opt.model_path, map_location='cpu')
@@ -196,10 +201,7 @@ def normalFeatureReading(data_loader, model, linear_model, opt):
         if i > opt.break_idx:
             break
 
-        if opt.method == "SupCon":
-            output, output_encoder = model(img)[0], model.encoder(img)
-        else:
-            output = model.encoder(img)
+        output, output_encoder = model(img)[0], model.encoder(img)
 
         if linear_model is not None:
             linear_output = linear_model(model.encoder(img))

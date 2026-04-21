@@ -48,9 +48,11 @@ def parse_option():
     parser = argparse.ArgumentParser('argument for feature reading')
 
     parser.add_argument('--datasets', type=str, default='tinyimgnet',
-                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet", 'mnist', "svhn"], help='dataset')
+                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet", 'mnist', "svhn", "cub", "aircraft", "cars"],
+                        help='dataset')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
-    parser.add_argument('--model', type=str, default="resnet18", choices=["resnet18", "resnet34", "resnet50", "preactresnet18", "preactresnet34", "simCNN", "MLP", "MaskCon"])
+    parser.add_argument('--model', type=str, default="resnet18",
+                        choices=["resnet18", "resnet34", "resnet50", "resnet50_pretrain", "simCNN", "MLP", "MaskCon"])
     parser.add_argument("--resnet_wide", type=int, default=1, help="factor for expanding channels in wide resnet")
     parser.add_argument("--model_path", type=str, default="/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_original_data__mixup_positive_alpha_1.0_beta_1.0_saliencymix_no_SimCLR_1.0_1.0_0.05_trail_2_128_256/ckpt_epoch_600.pth")
     parser.add_argument("--linear_model_path", type=str, default=None)

@@ -277,11 +277,6 @@ def set_model(opt):
         criterion1 = None
         criterion2 = None
         linear = None
-    elif opt.method == "resnet50_pretrain":
-        model = pretrained_resnet50(feat_dim=opt.feat_dim)
-        criterion1 = SupConLoss(temperature=opt.temp)
-        criterion2 = SupConLoss(temperature=opt.temp)
-        linear = None
     elif opt.method == "SimCLR" or opt.method == "SupCon":
         if opt.model in ["preactresnet18", "preactresnet34"]:
             model = SupConpPreactResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
@@ -291,6 +286,8 @@ def set_model(opt):
             model = SupConMLP(feat_dim=opt.feat_dim)
         elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
             model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
+        elif opt.model == "resnet50_pretrain":
+            model = pretrained_resnet50(feat_dim=opt.feat_dim)
         else:
             model = simCNN_contrastive(opt, feature_dim=opt.feat_dim, in_channels=in_channels)
             
