@@ -355,7 +355,7 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
                                     transforms.RandomHorizontalFlip(), transforms.RandomRotation(15),
                                     transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
                                     transforms.RandomGrayscale(p=0.2),])
-        elif opt.datasets in ["imagenet100", "imagenet100_small"]:
+        elif opt.datasets in ["imagenet100", "imagenet100_small", "cub", "cars", "aircraft"]:
             train_transform = transforms.Compose(
                 [transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
                  transforms.Resize((size, size)),
@@ -374,19 +374,22 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
                                                   #cutout(mask_size=4, p=0.5, cutout_inside=False),
                                                   transforms.ToTensor(),
                                                   normalize,])   # normalize,
-            if opt.randaug == 1:
-                train_transform.transforms.insert(0, RandAugment(args=opt))    
+        if opt.randaug == 1:
+            train_transform.transforms.insert(0, RandAugment(args=opt))
             
-            if opt.augmix:
-                # all are default settings
-                train_transform.transforms.insert(0, transforms.AugMix())
+        if opt.augmix:
+            # all are default settings
+            train_transform.transforms.insert(0, transforms.AugMix())
                 
     else:
         if opt.datasets == "mnist":
             train_transform = transforms.Compose([transforms.ToTensor()])
         elif opt.datasets == "FUB":
             train_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
-                                                  transforms.CenterCrop((size, size)),])
+                                                  transforms.Resize((size, size)), normalize])
+        elif opt.datasets in ["imagenet100", "imagenet100_small", "cub", "cars", "aircraft"]:
+            train_transform = transforms.Compose([transforms.ToTensor(),
+                                                  transforms.Resize((size, size)),])
         else:
             train_transform = transforms.Compose([transforms.ToTensor(), normalize])
 
