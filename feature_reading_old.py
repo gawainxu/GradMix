@@ -253,7 +253,7 @@ if __name__ == "__main__":
             opt.save_path = opt.feature_save + "/temp" + str(r)
             featurePaths.append(opt.save_path)
             datasets = set_data(opt, class_idx=r)
-            dataloader = DataLoader(datasets, batch_size=128, shuffle=False, sampler=None,
+            dataloader = DataLoader(datasets, batch_size=1, shuffle=False, sampler=None,
                                     num_workers=1)
             normalFeatureReading(dataloader, model, linear_model, opt)
 
