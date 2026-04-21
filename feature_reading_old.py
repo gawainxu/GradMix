@@ -155,7 +155,7 @@ def load_model(opt):
         new_state_dict[k] = v
 
     state_dict = new_state_dict
-    model = model.cpu()
+    model = model.cuda()
     model.load_state_dict(state_dict)
     model.eval()
 
@@ -201,6 +201,7 @@ def normalFeatureReading(data_loader, model, linear_model, opt):
         if i > opt.break_idx:
             break
 
+        img = img.cuda()
         output, output_encoder = model(img)[0], model.encoder(img)
 
         if linear_model is not None:
@@ -209,8 +210,8 @@ def normalFeatureReading(data_loader, model, linear_model, opt):
             outputs_backbone.append(output_encoder[-1].detach().numpy())
             outputs_linear.append(linear_output.detach().numpy())
         else:
-            outputs.append(output.detach().numpy())
-            outputs_backbone.append(output_encoder[-1].detach().numpy())
+            outputs.append(output.cpu().detach().numpy())
+            outputs_backbone.append(output_encoder[-1].cpu().detach().numpy())
 
         labels.append(label.numpy())
 
