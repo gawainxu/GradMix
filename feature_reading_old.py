@@ -22,7 +22,7 @@ import pickle
 from itertools import chain
 
 from networks.resnet_big import SupConResNet, LinearClassifier
-from networks.resnet_preact import SupConpPreactResNet
+from networks.vgg import SupConVGG
 from networks.simCNN import simCNN_contrastive
 from networks.mlp import SupConMLP
 from networks.resnet_big import pretrained_resnet50
@@ -52,10 +52,10 @@ def parse_option():
     parser = argparse.ArgumentParser('argument for feature reading')
 
     parser.add_argument('--datasets', type=str, default='cars',
-                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft", "cars", "FUB"],
-                        help='dataset')
+                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', "tinyimgnet",
+                                 'mnist', "svhn", "cub", "aircraft", "cars", "FUB", "imagenet100"], help='dataset')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
-    parser.add_argument('--model', type=str, default="resnet50_pretrain", choices=["resnet18", "resnet34", "resnet50_pretrain", "simCNN", "MLP"])
+    parser.add_argument('--model', type=str, default="resnet50_pretrain", choices=["resnet18", "vgg16", "resnet50_pretrain", "simCNN", "MLP"])
     parser.add_argument("--model_path", type=str,
                         default="/save/SupCon/cars_models/cars_resnet50_pretrain_original_data__mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_0,1,2,3_Joint_0.5_0.5_trail_0_128_256_split_128/last.pth")
     parser.add_argument("--linear_model_path", type=str, default=None)
@@ -146,8 +146,10 @@ def load_model(opt):
         model = SupConMLP(feat_dim=opt.feat_dim)
     elif opt.model == "resnet50_pretrain":
         model = pretrained_resnet50(feat_dim=opt.feat_dim)
+    elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
+        model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
     else:
-        model = simCNN_contrastive(opt,  feature_dim=opt.feat_dim, in_channels=in_channels)
+        model = simCNN_contrastive(opt, feature_dim=opt.feat_dim, in_channels=in_channels)
     ckpt = torch.load(opt.model_path, map_location='cpu')
     state_dict = ckpt['model']
 
