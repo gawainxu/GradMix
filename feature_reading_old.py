@@ -60,6 +60,7 @@ def parse_option():
                         default="/save/SupCon/cars_models/cars_resnet50_pretrain_original_data__mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_0,1,2,3_Joint_0.5_0.5_trail_0_128_256_split_128/last.pth")
     parser.add_argument("--linear_model_path", type=str, default=None)
     parser.add_argument("--trail", type=int, default=0)
+    parser.add_argument("--trail_outliers", type=int, default=0)
     parser.add_argument("--split_train_val", type=bool, default=True)
     parser.add_argument("--action", type=str, default="feature_reading",
                         choices=["training_supcon", "trainging_linear", "testing_known", "testing_unknown", "feature_reading"])
@@ -115,14 +116,15 @@ def parse_option():
         opt.linear_model_path = opt.main_dir + opt.linear_model_path
 
     opt.n_cls = len(osr_splits_inliers[opt.datasets][opt.trail])
-    opt.n_outs = len(osr_splits_outliers[opt.datasets][opt.trail])
+    opt.n_outs = len(osr_splits_outliers[opt.datasets][opt.trail_outliers])
 
     opt.break_idx = breaks[opt.datasets][opt.if_train]
     if platform.system() == 'Windows':
         opt.model_name = opt.model_path.split("\\")[-2]
     elif platform.system() == 'Linux':
         opt.model_name = opt.model_path.split("/")[-2]
-    opt.save_path_all = opt.feature_save + opt.model_name + "_" + str(opt.epoch) + "_" + opt.if_train
+    opt.save_path_all = (opt.feature_save + opt.model_name + "_" + str(opt.epoch)
+                         + "_outliers_" + str(opt.trail_outliers) + "_" + opt.if_train)
 
     opt.num_classes = num_inlier_classes_mapping[opt.datasets]
 
