@@ -371,7 +371,6 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
                                                   transforms.RandomHorizontalFlip(),
                                                   transforms.RandomGrayscale(p=0.2),
                                                   #transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 2.0)),    # !!!!!!!!!!!
-                                                  #cutout(mask_size=4, p=0.5, cutout_inside=False),
                                                   transforms.ToTensor(),
                                                   normalize,])   # normalize,
         if opt.randaug == 1:
@@ -386,10 +385,10 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
             train_transform = transforms.Compose([transforms.ToTensor()])
         elif opt.datasets == "FUB":
             train_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
-                                                  transforms.Resize((size, size)), normalize])
+                                                  transforms.Resize((size, size))])
         elif opt.datasets in ["imagenet100", "imagenet100_small", "cub", "cars", "aircraft"]:
             train_transform = transforms.Compose([transforms.ToTensor(),
-                                                  transforms.Resize((size, size)),])
+                                                  transforms.Resize((size, size)), normalize])
         else:
             train_transform = transforms.Compose([transforms.ToTensor(), normalize])
 
@@ -438,7 +437,7 @@ def get_test_datasets(opt, class_idx = None):
     elif opt.datasets == "FUB":
         test_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
                                               transforms.CenterCrop((size, size)),])
-    elif opt.datasets in ["imagenet100", "cub", "imagenet100_small"]:
+    elif opt.datasets in ["imagenet100", "imagenet100_small", "cub", "cars", "aircraft"]:
         test_transform = transforms.Compose([transforms.ToTensor(), transforms.Resize((224, 224)), normalize])
     else:
         test_transform = transforms.Compose([transforms.ToTensor(), normalize])
@@ -513,6 +512,9 @@ def get_outlier_datasets(opt, class_idx=None):
         elif opt.datasets == "FUB":
             test_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
                                                  transforms.CenterCrop((size, size)), ])
+        elif opt.datasets in ["imagenet100", "imagenet100_small", "cub", "cars", "aircraft"]:
+            test_transform = transforms.Compose([transforms.ToTensor(), transforms.Resize((224, 224)),
+                                                 normalize])
         else:
             test_transform = transforms.Compose([transforms.ToTensor(), normalize])
 
