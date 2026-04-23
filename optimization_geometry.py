@@ -113,7 +113,7 @@ def set_loader(opt):
 
     dataset = get_train_datasets(opt)
 
-    if opt.dataset != "imagenet100":
+    if opt.datasets != "imagenet100":
         data_loader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=False,
                                                    num_workers=1, pin_memory=True, sampler=None,
                                                    drop_last=True,
@@ -125,10 +125,10 @@ def set_loader(opt):
 
 
 def get_datasets(opt):
-    mean = mean_mapping[opt.dataset]
-    std = std_mapping[opt.dataset]
+    mean = mean_mapping[opt.datasets]
+    std = std_mapping[opt.datasets]
     normalize = transforms.Normalize(mean=mean, std=std)
-    size = image_size_mapping[opt.dataset]
+    size = image_size_mapping[opt.datasets]
 
     transform = transforms.Compose(
                 [transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
@@ -138,10 +138,10 @@ def get_datasets(opt):
                  transforms.ToTensor(),
                  normalize, ])
 
-    data_fun = data_function_mapping[opt.dataset]
-    label_dict = label_to_dict(osr_splits_inliers[opt.dataset][opt.trail])
+    data_fun = data_function_mapping[opt.datasets]
+    label_dict = label_to_dict(osr_splits_inliers[opt.datasets][opt.trail])
     transform = TwoCropTransform(transform)
-    classes = osr_splits_inliers[opt.dataset][opt.trail]
+    classes = osr_splits_inliers[opt.datasets][opt.trail]
 
     if opt.train_or_test == "train":
         train = True
