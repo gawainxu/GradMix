@@ -38,6 +38,7 @@ def parse_options():
                         help="index of repeating training")
     parser.add_argument("--save_path", type=str, default="./")
     parser.add_argument("--num_epochs", type=int, default=1)
+    parser.add_argument("--epoch_step", type=int, type=10)
     parser.add_argument("--train_or_test", type=str, default="train",
                         help="which data to use, train or test")
     parser.add_argument("--batch_size", type=int, default=256)
@@ -126,7 +127,7 @@ def get_datasets(opt):
 
     transform = transforms.Compose(
                 [transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
-                 transforms.RandomResizedCrop(size=size, scale=(0.2, 1.)),
+                 transforms.Resize((size, size)),
                  transforms.RandomHorizontalFlip(),
                  transforms.RandomGrayscale(p=0.2),
                  transforms.ToTensor(),
@@ -174,7 +175,7 @@ def hessian_single_layer(model, x, labels, bsz, criterion1, criterion2):
         return loss_sup
 
     inpt = compute_inpt(x, model)
-    #h_sup = hessian(custome_forward, inpt)
+    h_sup = hessian(custome_forward, inpt)
     loss_sup = custome_forward(inpt)
     g_sup = torch.autograd.grad(loss_sup, weight_matrix,
                                 retain_graph=True)[0]
@@ -197,7 +198,7 @@ def main(opt):
     h_sup_all = []
     h_ssl_all = []
 
-    for epoch in range(opt.num_epochs):
+    for epoch in range(0, opt.num_epochs, opt.epoch_step):
 
         print("epoch", epoch)
         opt.model_path = os.path.join(opt.models_path, "ckpt_epoch_{}.pth".format(epoch))
