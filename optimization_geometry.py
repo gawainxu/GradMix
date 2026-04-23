@@ -7,6 +7,7 @@ import torch.backends.cudnn as cudnn
 from torchvision import transforms
 import torch.nn.functional as F
 from torch.autograd.functional import hessian
+from torch.utils.data import Subset
 
 import numpy as np
 try:
@@ -45,6 +46,10 @@ def parse_options():
     parser.add_argument("--use_cuda", type=bool, default=False)
     parser.add_argument('--syncBN', action='store_true',
                         help='using synchronized batch normalization')
+    parser.add_argument("--action", type=str, default="training_supcon",
+                       choices=["training_supcon", "trainging_linear", "testing_known", "testing_unknown", "feature_reading"])
+    parser.add_argument("--augmix", type=bool, default=False) 
+    parser.add_argument("--randaug", type=int, default=0)
 
     opt = parser.parse_args()
 
