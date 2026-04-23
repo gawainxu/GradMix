@@ -212,7 +212,7 @@ def main(opt):
         h_sup_epoch = []
         h_ssl_epoch = []
 
-        for idx, (images, labels, _) in enumerate(data_loader):
+        for idx, (images, labels) in enumerate(data_loader):
             images1 = images[0]
             images2 = images[1]
             bsz = labels.shape[0]
