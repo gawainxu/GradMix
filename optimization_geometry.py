@@ -58,10 +58,6 @@ def parse_options():
     else:
         opt.device = "cpu"
 
-    opt.main_dir = os.getcwd()
-    opt.model_main_dir = os.path.join(opt.main_dir, "/save/SupCon/")
-    opt.model_path = os.path.join(opt.model_main_dir, opt.models_path)
-
     return opt
 
 
