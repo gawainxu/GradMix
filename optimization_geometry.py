@@ -21,7 +21,7 @@ from losses import SupConLoss
 from datautil import mean_mapping, std_mapping, image_size_mapping, data_function_mapping
 from datautil import label_to_dict, osr_splits_inliers
 from util import TwoCropTransform
-
+from datautil import get_train_datasets
 
 
 def parse_options():
@@ -33,7 +33,7 @@ def parse_options():
                                  "MLP"])
     parser.add_argument('--temp', type=float, default=0.05, help='temperature for loss')
     parser.add_argument("--feat_dim", type=int, default=128)
-    parser.add_argument("--dataset", type=str, default="cifar100")
+    parser.add_argument("--datasets", type=str, default="imagenet100_m")
     parser.add_argument("--data_root", type=str, default="../datasets")
     parser.add_argument("--trail", type=int, default=0, choices=[0, 1, 2, 3, 4, 5, 6],
                         help="index of repeating training")
@@ -111,7 +111,7 @@ def load_model(opt, model):
 
 def set_loader(opt):
 
-    dataset = get_datasets(opt)
+    dataset = get_train_datasets(opt)
 
     if opt.dataset != "imagenet100":
         data_loader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=False,
