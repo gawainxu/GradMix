@@ -38,7 +38,7 @@ def parse_options():
                         help="index of repeating training")
     parser.add_argument("--save_path", type=str, default="./")
     parser.add_argument("--num_epochs", type=int, default=1)
-    parser.add_argument("--epoch_step", type=int, type=10)
+    parser.add_argument("--epoch_step", type=int, default=10)
     parser.add_argument("--train_or_test", type=str, default="train",
                         help="which data to use, train or test")
     parser.add_argument("--batch_size", type=int, default=256)
