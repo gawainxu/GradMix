@@ -4,10 +4,10 @@ import argparse
 import torch
 import numpy as np
 
-from main_linear import load_model
 from networks.resnet_big import SupConResNet
 from losses import SupConLoss
 from masked_datasets import ImageNet100_masked
+from datautil import get_train_datasets
 
 
 def parse_option():
@@ -16,23 +16,27 @@ def parse_option():
     parser.add_argument('--model', type=str, default='resnet18', choices=["resnet18"])
     parser.add_argument('--temp', type=float, default=0.05, help='temperature for loss')
     parser.add_argument("--feat_dim", type=int, default=128)
-    parser.add_argument("--backbone_model_dir", type=str,
-                        default="/home/zhi/projects/comprehensive_OSR/save/SupCon/tinyimgnet_models")
-    parser.add_argument("--backbone_model_name", type=str,
-                        default="tinyimgnet_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_5_128_256_old_augmented")
-    parser.add_argument('--datasets', type=str, default='tinyimgnet',
+    parser.add_argument("--model_dir", type=str,
+                        default="./save/imagenet100_m_models/")
+    parser.add_argument("--model_name", type=str,
+                        default="imagenet100_m_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_0_128_256/ckpt_epoch_0.pth")
+    parser.add_argument('--datasets', type=str, default='imagenet100',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
                                  "imagenet100", "imagenet100_m", 'mnist', "svhn", "cub", "aircraft"], help='dataset')
-    parser.add_argument("--trail", type=int, default=5, choices=[0, 1, 2, 3, 4, 5, 6],
+    parser.add_argument("--trail", type=int, default=0, choices=[0, 1, 2, 3, 4, 5, 6],
                         help="index of repeating training")
-    parser.add_argument("--num_classes", type=int, default=200)
+    parser.add_argument("--num_classes", type=int, default=100)
     parser.add_argument("--alpha", type=float, default=1.0)
     parser.add_argument("--data_mode", type=str, default="unmasked")
+    parser.add_argument("--device", type=str, default="cuda")
+    parser.add_argument("--action", type=str, default="training_supcon",
+                       choices=["training_supcon", "trainging_linear", "testing_known", "testing_unknown", "feature_reading"])
+    parser.add_argument("--augmix", type=bool, default=False) 
+    parser.add_argument("--randaug", type=int, default=0)
 
     opt = parser.parse_args()
 
-    opt.backbone_model_dir = os.path.join(opt.backbone_model_dir, opt.backbone_model_name)
-    opt.backbone_model_path = os.path.join(opt.backbone_model_dir, "last.pth")
+    opt.model_path = os.path.join(opt.model_dir, opt.model_name)
 
     return opt
 
@@ -41,7 +45,7 @@ def set_model(opt):
 
     in_channels = 3
     model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
-    model = load_model(model, opt.backbone_model_path)
+    model = load_model(opt, model)
     criterion1 = SupConLoss(temperature=opt.temp)
     criterion2 = SupConLoss(temperature=opt.temp)
 
@@ -73,13 +77,9 @@ def read_gradients(model, data_loader, criterions, opt):
     grad_sup = []
     grad_all = []
 
-    for idx, (images, images_masked, labels, _) in enumerate(data_loader):
-        if "unmasked" in opt.data_mode:
-            images1 = images[0]
-            images2 = images[1]
-        else:
-            images1 = images_masked[0]
-            images2 = images_masked[1]
+    for idx, (images, labels) in enumerate(data_loader):
+        images1 = images[0]
+        images2 = images[1]
         bsz = labels.shape[0]
 
         if opt.device == "cuda":
@@ -110,7 +110,7 @@ def read_gradients(model, data_loader, criterions, opt):
 def set_loader(opt):
     # construct data loader
 
-    datasets = ImageNet100_masked(root=opt.data_root)
+    datasets  =  get_train_datasets(opt)
     data_sampler = None
     data_loader = torch.utils.data.DataLoader(datasets, batch_size=opt.batch_size, shuffle=True,
                                               num_workers=opt.num_workers, pin_memory=True, sampler=data_sampler,
@@ -130,12 +130,13 @@ def grad_projection(grad1, grad2):
 
 if __name__ == "__main__":
 
-    opt = argparse()
+    opt = parse_option()
     model, criterion1, criterion2 = set_model(opt)
     model = load_model(opt, model)
     data_loader = set_loader(opt)
     grad_sup, grad_ssl, grad_all = read_gradients(model, data_loader,
                                         (criterion1, criterion2), opt)
+    print("grad_sup, grad_ssl, grad_all", grad_sup, grad_ssl, grad_all)
 
 
 
