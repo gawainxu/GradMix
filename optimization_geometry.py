@@ -193,6 +193,7 @@ def grad_projection(grad1, grad2):
     # to project g1 to g2
     prod = np.inner(grad1, grad2)
     prod = prod / np.linalg.norm(grad2, axis=1) / np.linalg.norm(grad2, axis=1)
+    prod = np.average(prod)
     #proj = prod * grad2
 
     return prod
