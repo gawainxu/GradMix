@@ -187,6 +187,18 @@ def hessian_single_layer(model, x, labels, bsz, criterion1, criterion2):
     return h_sup
 
 
+
+def grad_projection(grad1, grad2):
+
+    # to project g1 to g2
+    prod = np.inner(grad1, grad2)
+    prod = prod / np.linalg.norm(grad2) / np.linalg.norm(grad2)
+    proj = prod * grad2
+
+    return proj
+
+
+
 def main(opt):
 
     data_loader = set_loader(opt)
@@ -211,7 +223,8 @@ def main(opt):
         g_ssl_epoch = []
         h_sup_epoch = []
         h_ssl_epoch = []
-
+        angles = []
+        
         for idx, (images, labels) in enumerate(data_loader):
             images1 = images[0]
             images2 = images[1]
@@ -252,10 +265,13 @@ def main(opt):
             losses_ssl_epoch.append(loss_ssl.detach().cpu().numpy())
             g_sup = g_sup.detach().cpu().numpy()
             g_ssl = g_ssl.detach().cpu().numpy()
+            angle = grad_projection(g_sup, g_ssl)
             g_sup_epoch.append(g_sup)
             g_ssl_epoch.append(g_ssl)
+            angles.append(angle)
             print("g_sup", np.sum(np.abs(g_sup)))
             print("g_ssl", np.sum(np.abs(g_ssl)))
+            print("angle", angle)
             #h_sup_epoch.append(h_sup.detach().cpu().numpy())
             #h_ssl_epoch.append(h_ssl.detach().cpu().numpy())
 
@@ -267,6 +283,7 @@ def main(opt):
         losses_ssl_all.append(losses_ssl_epoch)
         g_sup_all.append(g_sup_epoch)
         g_ssl_all.append(g_ssl_epoch)
+        print("Average Angle", sum(angles)/len(angles))
         #h_sup_all.append(h_sup_epoch)
         #h_ssl_all.append(h_ssl_epoch)
 
