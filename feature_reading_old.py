@@ -63,6 +63,7 @@ def parse_option():
     parser.add_argument("--trail", type=int, default=0)
     parser.add_argument("--trail_outliers", type=int, default=0)
     parser.add_argument("--split_train_val", type=bool, default=True)
+    parser.add_argument("--start_class", type=int, default=0)
     parser.add_argument("--action", type=str, default="feature_reading",
                         choices=["training_supcon", "trainging_linear", "testing_known", "testing_unknown", "feature_reading"])
     parser.add_argument('--method', type=str, default='SupCon',
@@ -254,9 +255,11 @@ if __name__ == "__main__":
     featurePaths= []
 
     if opt.if_train == "train" or opt.if_train == "test_known" or opt.if_train == "full":
-        for r in range(0, opt.n_cls):                 
+        for r in range(0, opt.n_cls):
             opt.save_path = opt.feature_save + "/temp" + str(r)
             featurePaths.append(opt.save_path)
+            if r < opt.start_class:
+                continue
             datasets = set_data(opt, class_idx=r)
             dataloader = DataLoader(datasets, batch_size=1, shuffle=False, sampler=None,
                                     num_workers=1)
