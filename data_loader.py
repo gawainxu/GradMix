@@ -1018,6 +1018,7 @@ class Aircraft(VisionDataset):
         self.targets = targets
         self.total_classes = total_classes
         self.class_to_idx = class_to_idx
+        self.label_dict = label_dict
 
 
     def __getitem__(self, index):
@@ -1026,8 +1027,8 @@ class Aircraft(VisionDataset):
             sample = self.transform(sample)
         if self.target_transform is not None:
             target = self.target_transform(target)
-        if self.target_transform is not None:
-            target = self.target_transform(target)
+        if self.label_dict is not None:
+            target = self.label_dict[str(target)]
         return sample, target
 
     def __len__(self):
@@ -1080,26 +1081,33 @@ class Cars(Dataset):
             data_dir = os.path.join(root, "Cars/test")
 
         self.dataset = ImageFolder(data_dir)
-        self.images = []
-        self.labels = []
+        self.samples = []
+        self.targets = []
         self.transform = transform
+        self.target_transform = target_transform
+        self.label_dict = label_dict
 
         for img, l in self.dataset:
             if l in classes:
-                self.images.append(img)
-                self.labels.append(l)
-        print(len(self.images))
+                self.samples.append(img)
+                self.targets.append(l)
+        print(len(self.samples))
 
-    def __getitem__(self, idx):
 
+    def __getitem__(self, index):
+        sample, target = self.samples[index], self.targets[index]
         if self.transform is not None:
-            return self.transform(self.images[idx]), self.labels[idx]
-        else:
-            return self.images[idx], self.labels[idx]
+            sample = self.transform(sample)
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+        if self.label_dict is not None:
+            target = self.label_dict[str(target)]
+        return sample, target
+
 
     def __len__(self):
 
-        return len(self.images)
+        return len(self.samples)
 
 
 class FUB(Dataset):
