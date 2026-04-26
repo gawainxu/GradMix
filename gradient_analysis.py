@@ -104,6 +104,10 @@ def read_gradients(model, data_loader, criterions, opt):
         grad_ssl.append(g_ssl.detach.cpu().numpy())
         grad_all.append(g_all.detach.cpu().numpy())
 
+    grad_sup = sum(grad_sup) / len(grad_sup)
+    grad_ssl = sum(grad_ssl) / len(grad_ssl)
+    grad_all = sum(grad_all) / len(grad_all)
+
     return grad_sup, grad_ssl, grad_all
 
 
@@ -137,6 +141,7 @@ if __name__ == "__main__":
     grad_sup, grad_ssl, grad_all = read_gradients(model, data_loader,
                                         (criterion1, criterion2), opt)
     print("grad_sup, grad_ssl, grad_all", grad_sup, grad_ssl, grad_all)
+
 
 
 
