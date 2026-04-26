@@ -45,7 +45,7 @@ breaks = {"cifar-10-100-10": {"train": 5000, "test_known":500, "test_unknown": 5
            "cub":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
            "cars":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
            "aircraft":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
-           "imagenet100":{"train": 3000, "test_known": 1000, "test_unknown": 1000, "full": 100000},
+           "imagenet100":{"train": 5000, "test_known": 1000, "test_unknown": 1000, "full": 100000},
            "FUB": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},}
 
 def parse_option():
