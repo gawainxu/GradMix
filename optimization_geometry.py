@@ -227,6 +227,10 @@ def main(opt):
         angles = []
         
         for idx, (images, labels) in enumerate(data_loader):
+
+            if idx > 20:
+                break
+
             images1 = images[0]
             images2 = images[1]
             bsz = labels.shape[0]
@@ -276,9 +280,9 @@ def main(opt):
             #h_sup_epoch.append(h_sup.detach().cpu().numpy())
             #h_ssl_epoch.append(h_ssl.detach().cpu().numpy())
 
-            opt.save_path = os.path.join(opt.models_path, "gradients_{}".format(epoch))
-            with open(opt.save_path, "wb") as f:
-                pickle.dump((losses_sup_epoch, losses_ssl_epoch, g_sup_epoch, g_ssl_epoch), f)
+        opt.save_path = os.path.join(opt.models_path, "gradients_{}".format(epoch))
+        with open(opt.save_path, "wb") as f:
+            pickle.dump((losses_sup_epoch, losses_ssl_epoch, g_sup_epoch, g_ssl_epoch), f)
 
         losses_sup_all.append(losses_sup_epoch)
         losses_ssl_all.append(losses_ssl_epoch)
