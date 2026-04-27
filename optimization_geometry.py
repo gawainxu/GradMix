@@ -212,7 +212,7 @@ def main(opt):
     h_sup_all = []
     h_ssl_all = []
 
-    for epoch in range(0, opt.num_epochs, opt.epoch_step):
+    for epoch in range(10, opt.num_epochs, opt.epoch_step):
 
         print("epoch", epoch)
         opt.model_path = os.path.join(opt.models_path, "ckpt_epoch_{}.pth".format(epoch))
