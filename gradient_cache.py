@@ -165,7 +165,7 @@ class gradient_cache():
                  one_split_reps_mix = torch.cat([one_split_reps_mix1.unsqueeze(1), one_split_reps_mix2.unsqueeze(1)], dim=1)
                  one_split_reps_mix.requires_grad_()
                     
-                 surrogate = torch.sum(torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten() + lam * one_split_reps_mix.flatten() * one_split_reps_grad_mix.flatten()))
+                 surrogate = torch.sum(one_split_reps.flatten() * one_split_rep_grad.flatten()) + torch.sum(one_split_reps_mix.flatten() * one_split_reps_grad_mix.flatten())   # lam *
                  surrogate.backward()
 
              """
