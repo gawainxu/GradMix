@@ -566,10 +566,10 @@ class cifar100_c(Dataset):
         return img, label
 
 
-"""
-def ImageNet100(root, classes=range(100), train=True, opt=None, transform=None,
-                target_transform=None, download=False, label_dict = None, last_features_list=None, 
-                last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
+
+def ImageNet100_Folder(root, classes=range(100), train=True, opt=None, transform=None,
+                       target_transform=None, download=False, label_dict = None, last_features_list=None,
+                       last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
     
     # put the data in the same directory with the project 
     if train:
@@ -580,7 +580,7 @@ def ImageNet100(root, classes=range(100), train=True, opt=None, transform=None,
     dataset = ImageFolder(data_path, transform=transform)
 
     return dataset
-"""
+
 
 
 class ImageNet100(Dataset):
