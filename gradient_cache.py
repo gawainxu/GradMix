@@ -304,8 +304,8 @@ class gradient_cache_activations():
                                    self.model.bn8, self.model.bn7]
             self.encoder_layer_names = ["bn7", "bn8", "bn9", "bn10"]
         elif "vgg" in self.opt.model:
-            self.encoder_layers = [self.model.vgg_base.features[21], self.model.vgg_base.features[24],
-                                   self.model.vgg_base.features[26], self.model.vgg_base.features[29]]
+            self.encoder_layers = [self.model.vgg_base.features[8], self.model.vgg_base.features[15],
+                                   self.model.vgg_base.features[22], self.model.vgg_base.features[29]]
             self.encoder_layer_names = ["vgg_base.features.21", "vgg_base.features.24",
                                         "vgg_base.features.26", "vgg_base.features.29"]
                 
@@ -416,7 +416,8 @@ class gradient_cache_activations():
 
         model_inputs = self.split_inputs(model_inputs, self.splits)
         # register hook
-        for name, i in zip(self.encoder_layer_names, self.opt.grad_layers):
+        for i in self.opt.grad_layers:
+            name = self.encoder_layer_names[i]
             f_hook, b_hook = self._get_hook(name)
             self.hooks.append(self.encoder_layers[i].register_forward_hook(f_hook))
             self.hooks.append(self.encoder_layers[i].register_full_backward_hook(b_hook))

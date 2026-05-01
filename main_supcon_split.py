@@ -106,15 +106,15 @@ def parse_option():
                         help='using synchronized batch normalization')
     parser.add_argument('--warm', action='store_true',
                         help='warm-up for large batch training')
-    parser.add_argument("--augmentation_method", type=str, default="vanilia", 
+    parser.add_argument("--augmentation_method", type=str, default="mixup_positive",
                         choices=["vanilia", "mixup_negative", "mixup_positive", "mixup_hybrid", "mixup_vanilla", "mixup_vanilla_features"])
     parser.add_argument("--data_method", type=str, default="original", 
                         choices=["original", "upsampling"])
     parser.add_argument("--architecture", type=str, default="single", choices=["single", "multi"])
     parser.add_argument("--ensemble_num", type=int, default=1)
     parser.add_argument("--feat_dim", type=int, default=128)
-    parser.add_argument("--grad_layers", type=str, default="0,1,2,3")
-    parser.add_argument("--old_augmented", type=bool, default=False)
+    parser.add_argument("--grad_layers", type=str, default="3")
+    parser.add_argument("--old_augmented", type=bool, default=True)
 
     # upsampling parameters
     parser.add_argument("--upsample", type=bool, default=False)
