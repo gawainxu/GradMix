@@ -263,8 +263,8 @@ from sklearn.cluster import KMeans
 
 
 num_inlier_classes_mapping = {"cifar10": 6, "cifar-10-100-10": 4, "cifar-10-100-50": 4, "cifar100_marco": 6, "imagenet100": 100,
-                               "imagenet100_small": 10, "imagenet100_m": 100, "cifar100": 100, "tinyimgnet": 20, "mnist": 6, "svhn": 6,
-                              "cub": 100, "aircraft": 50, "cars": 98, "FUB": 3}
+                               "imagenet100_small": 10, "imagenet100_m": 100, "ImageNet100_Folder": 100, "cifar100": 100, "tinyimgnet": 20,
+                              "mnist": 6, "svhn": 6, "cub": 100, "aircraft": 50, "cars": 98, "FUB": 3}
 
 
 data_function_mapping = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR10, "cifar-10-100-50": iCIFAR10, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100,
