@@ -20,7 +20,7 @@ class gradient_cache():
      A reimplementation of gradient_cache in https://github.com/luyug/GradCache/
      """
      
-     def __init__(self, model, splits, fp16, loss_fcn, loss_fcn2=None, grad_scalar=None, optimizer=None, if_normal=False, lam=1, opt=None):
+     def __init__(self, model, splits, fp16, loss_fcn, loss_fcn2=None, optimizer=None, if_normal=False, lam=1, opt=None):
          
          """
          model: the model that to be trained
@@ -35,7 +35,6 @@ class gradient_cache():
          self.loss_fcn = loss_fcn
          self.loss_fcn2 = loss_fcn2
          self.fp16 = fp16
-         self.grad_scalar = grad_scalar
          self.if_normal = if_normal
          self.optimizer = optimizer
          self.reps_norm = []
@@ -120,11 +119,8 @@ class gradient_cache():
              mix_reps = torch.cat([mix_reps1.unsqueeze(1), mix_reps2.unsqueeze(1)], dim=1)
              mix_reps.requires_grad_().retain_grad()           # mix_reps.requires_grad_()
              loss = self.compute_loss(reps=all_reps, labels=labels, reps_mix=mix_reps, lam=lam)
-              
-         if self.fp16:
-            self.grad_scalar.scale(loss).backward()
-         else:
-            loss.backward()
+
+         loss.backward()
          
          if mix_reps is None:
              cache = all_reps.grad   # [bsz, 2, f] !!!!!  torch.ones_like(all_reps)  # 
