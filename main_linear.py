@@ -250,9 +250,9 @@ def validate(val_loader, model, classifier, criterion, opt):
             # forward
             if "resnet" in opt.model:
                 if opt.method == "MoCo":
-                    features = model.encoder_q(images)
+                    features = model(images)
                 else:
-                    features = model.encoder(images)
+                    features = model(images)
             elif "vgg" in opt.model:
                 features = model(images)
             elif "simCNN" in opt.model:
