@@ -29,30 +29,28 @@
 #python3 main_supcon_old.py --epochs 100 --save_freq 10 --batch_size 256 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "imagenet100_m" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 1.0 --method_lam 1.0 --randaug 0 --mixup_positive True --positive_method "layersaliencymix" --augmentation_method "mixup_positive" --alpha_vanilla 1.0 --beta_vanilla 1.0 --grad_layers "4" --old_augmented true
 
 
-python3 main_supcon_old.py --epochs 100 --save_freq 10 --batch_size 230 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "imagenet100_m" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 1.0 --method_lam 0.5 --randaug 0 --mixup_positive True --positive_method "layersaliencymix" --augmentation_method "mixup_positive" --alpha_vanilla 1.0 --beta_vanilla 1.0 --grad_layers "4" --old_augmented true  
+#python3 main_supcon_old.py --epochs 100 --save_freq 10 --batch_size 230 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "imagenet100_m" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 1.0 --method_lam 0.5 --randaug 0 --mixup_positive True --positive_method "layersaliencymix" --augmentation_method "mixup_positive" --alpha_vanilla 1.0 --beta_vanilla 1.0 --grad_layers "4" --old_augmented true  
 
 
-
-python3 main_supcon_old.py --epochs 100 --save_freq 10 --batch_size 200 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "imagenet100_m" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 1.0 --method_lam 0.0 --mixup_positive True --positive_method False
-
-
-python3 main_supcon_old.py --epochs 100 --save_freq 10 --batch_size 200 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "imagenet100_m" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 1.0 --method_lam 1.0 --mixup_positive False
+#python3 main_supcon_old.py --epochs 100 --save_freq 10 --batch_size 200 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "imagenet100_m" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 1.0 --method_lam 0.0 --mixup_positive True --positive_method False
 
 
-
-python3 main_supcon_old.py --epochs 100 --save_freq 10 --batch_size 230 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "imagenet100_m" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 1.0 --method_lam 0.0 --mixup_positive True --positive_method False
-
-
-python3 main_supcon_old.py --epochs 100 --save_freq 10 --batch_size 230 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "imagenet100_m" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 1.0 --method_lam 1.0 --mixup_positive False
+echo "0.8, 0.2"
+python3 main_supcon_old.py --epochs 100 --save_freq 10 --print_freq 50 --batch_size 256 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "ImageNet100_Folder" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 0.8 --method_lam 0.2 --randaug 0 --mixup_positive False
 
 
-
-###
-python3 main_supcon_old.py --epochs 100 --save_freq 10 --batch_size 200 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "imagenet100_m" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 1.0 --method_lam 1.0 --randaug 0 --mixup_positive True --positive_method "layersaliencymix" --augmentation_method "mixup_positive" --alpha_vanilla 1.0 --beta_vanilla 1.0 --grad_layers "2,3,4" --old_augmented true
-
-
-python3 main_supcon_old.py --epochs 100 --save_freq 10 --batch_size 200 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "imagenet100_m" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 1.0 --method_lam 1.0 --mixup_positive True --positive_method "random" --augmentation_method "mixup_positive" --alpha_vanilla 1.0 --beta_vanilla 1.0
+echo "0.6, 0.4"
+python3 main_supcon_old.py --epochs 100 --save_freq 10 --print_freq 50 --batch_size 256 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "ImageNet100_Folder" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 0.6 --method_lam 0.4 --randaug 0 --mixup_positive False
 
 
-python3 main_supcon_old.py --epochs 100 --save_freq 10 --batch_size 200 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "tinyimgnet" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 1.0 --method_lam 1.0 --mixup_positive True --positive_method "random" --augmentation_method "mixup_positive" --alpha_vanilla 1.0 --beta_vanilla 1.0
+echo "0.4, 0.6"
+python3 main_supcon_old.py --epochs 100 --save_freq 10 --print_freq 50 --batch_size 256 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "ImageNet100_Folder" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 0.4 --method_lam 0.6 --randaug 0 --mixup_positive False
+
+
+echo "0.8, 0.2"
+python3 main_supcon_old.py --epochs 100 --save_freq 10 --print_freq 50 --batch_size 256 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "ImageNet100_Folder" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 0.8 --method_lam 0.2 --randaug 0 --mixup_positive False
+
+
+echo "0.5, 0.5"
+python3 main_supcon_old.py --epochs 100 --save_freq 10 --print_freq 50 --batch_size 256 --learning_rate 0.001 --cosine True --lr_decay_rate 0.8 --model "resnet18" --datasets "ImageNet100_Folder" --trail 0 --temp 0.05 --method "SimCLR" --method_gama 0.5 --method_lam 0.5 --randaug 0 --mixup_positive False
 
