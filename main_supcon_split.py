@@ -106,7 +106,7 @@ def parse_option():
                         help='using synchronized batch normalization')
     parser.add_argument('--warm', action='store_true',
                         help='warm-up for large batch training')
-    parser.add_argument("--augmentation_method", type=str, default="mixup_positive",
+    parser.add_argument("--augmentation_method", type=str, default="vanilia",
                         choices=["vanilia", "mixup_negative", "mixup_positive", "mixup_hybrid", "mixup_vanilla", "mixup_vanilla_features"])
     parser.add_argument("--data_method", type=str, default="original", 
                         choices=["original", "upsampling"])
@@ -140,7 +140,7 @@ def parse_option():
     parser.add_argument("--mixup_vanilla_features", type=bool, default=False)
     parser.add_argument("--positive_p", type=float, default=0.5)
     parser.add_argument("--alfa", type=float, default=1)
-    parser.add_argument("--positive_method", type=str, default="layersaliencymix",
+    parser.add_argument("--positive_method", type=str, default="random",
                         choices=["max_similarity", "min_similarity", "random", "prob_similarity", "reverse", "saliencymix", "layersaliencymix", "cutmix", "cv2saliency"])
     parser.add_argument("--negative_method", type=str, default="no", choices=["max_similarity", "random", "even", "no"])
     parser.add_argument("--hybrid_method", type=str, default="no", choices=["min_similarity", "random", "no"])

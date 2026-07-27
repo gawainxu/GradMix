@@ -107,6 +107,7 @@ def parse_option():
     parser.add_argument("--feat_dim", type=int, default=128)
     parser.add_argument("--grad_layers", type=str, default="0")
     parser.add_argument("--old_augmented", type=bool, default=True)
+    parser.add_argument("--supcon_aug", type=int, default=0)
     
     # moco parameters
     parser.add_argument("--K", type=int, default=4096, help="buffer size in moco")
@@ -194,6 +195,9 @@ def parse_option():
     if opt.old_augmented:
         opt.model_name += "_old_augmented"
 
+    if opt.supcon_aug:
+        opt.model_name += "_supcon_aug"
+
     # warm-up for large-batch training,
     if opt.batch_size > 256:
         opt.warm = True
@@ -236,9 +240,9 @@ def set_loader(opt):
             last_feature_labels_list.append(last_feature_labels)
 
         last_model = load_model(opt)
-        train_dataset =  get_train_datasets(opt, last_features_list=last_features_list, last_feature_labels_list=last_feature_labels_list, last_model=last_model)
+        train_dataset = get_train_datasets(opt, last_features_list=last_features_list, last_feature_labels_list=last_feature_labels_list, last_model=last_model)
     else:
-        train_dataset =  get_train_datasets(opt)
+        train_dataset = get_train_datasets(opt)
         test_dataset = get_test_datasets(opt)
 
     train_sampler = None
@@ -357,6 +361,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
     losses1 = AverageMeter()
     losses2 = AverageMeter()
     losses_ssl_mix = AverageMeter()
+    losses_supcon_mix = AverageMeter()
 
     end = time.time()
     ious_epoch = []
@@ -403,6 +408,38 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
             loss_sup = loss
             loss_ssl = torch.tensor([0])
 
+            if opt.mixup_positive:
+                if opt.positive_method == "cutmix" or opt.positive_method == "snapmix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = vanilla_cutmix(images1, images2, opt)
+                elif opt.positive_method == "saliencymix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model, opt)
+                elif opt.positive_method == "layersaliencymix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model, opt)
+                elif opt.positive_method == "attentive_mix":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = attentive_cutmix(images1, images2, opt)
+                elif opt.positive_method == "cv2saliency":
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model, opt)
+                else:
+                    mixed_positive_samples1, mixed_positive_samples2, labels_new, lam = vanilla_mixup(images1, images2, labels, alpha=opt.alpha_vanilla,
+                                                                                                      beta=opt.beta_vanilla, mode=opt.positive_method,
+                                                                                                      encoder=model)
+
+                mixed_positive_samples = torch.cat([mixed_positive_samples1, mixed_positive_samples2], dim=0)
+                mixed_positive_features = model(mixed_positive_samples)
+                mixed_positive_features1, mixed_positive_features2 = torch.split(mixed_positive_features,
+                                                                                     [bsz, bsz], dim=0)
+                mixed_positive_features = torch.cat(
+                        [mixed_positive_features1.unsqueeze(1), mixed_positive_features2.unsqueeze(1)], dim=1)
+                loss_supcon_mix = criterion1(features, labels=labels,
+                                             features_positive=mixed_positive_features)  # criterion1(mixed_positive_features) #  !!!!!!!!!! TODO
+
+                if opt.old_augmented:
+                    loss_supcon = loss_supcon + lam * loss_supcon_mix
+                else:
+                    loss_supcon_mix = loss_supcon_mix
+                losses_supcon_mix.update(loss_supcon_mix.detach().cpu().item())
+
+
         elif opt.method == 'SimCLR':
             features = model(images)
             features1, features2 = torch.split(features, [bsz, bsz], dim=0)
@@ -439,6 +476,10 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                         [mixed_positive_features1.unsqueeze(1), mixed_positive_features2.unsqueeze(1)], dim=1)
                 loss_ssl_mix = criterion1(features,
                                             features_positive=mixed_positive_features)  # criterion1(mixed_positive_features) #  !!!!!!!!!! TODO
+
+                if opt.supcon_aug:
+                    loss_sup = loss_sup + lam * criterion2(features, labels, features_positive=mixed_positive_features)
+
                 if opt.old_augmented:
                     loss_ssl = loss_ssl + lam * loss_ssl_mix
                 else:
