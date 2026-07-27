@@ -435,10 +435,7 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
 
                 if opt.old_augmented:
                     loss_supcon = loss_supcon + lam * loss_supcon_mix
-                else:
-                    loss_supcon_mix = loss_supcon_mix
-                losses_supcon_mix.update(loss_supcon_mix.detach().cpu().item())
-
+                    losses_supcon_mix.update(loss_supcon_mix.detach().cpu().item())
 
         elif opt.method == 'SimCLR':
             features = model(images)
@@ -478,7 +475,9 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
                                             features_positive=mixed_positive_features)  # criterion1(mixed_positive_features) #  !!!!!!!!!! TODO
 
                 if opt.supcon_aug:
-                    loss_sup = loss_sup + lam * criterion2(features, labels, features_positive=mixed_positive_features)
+                    loss_supcon_mix = criterion2(features, labels, features_positive=mixed_positive_features)
+                    loss_sup = loss1 = loss_sup + lam * loss_supcon_mix
+                    losses_supcon_mix.update(loss_supcon_mix.detach().cpu().item())
 
                 if opt.old_augmented:
                     loss_ssl = loss_ssl + lam * loss_ssl_mix
