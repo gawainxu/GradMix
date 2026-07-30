@@ -71,7 +71,7 @@ if __name__ == "__main__":
         sorted_features_head = sortFeatures(features_head1, labels1, opt.num_classes)
         sorted_features_backbone = sortFeatures(features_backbone1, labels1, opt.num_classes)
 
-    if opt.feature_path2 is None:
+    if opt.feature_path2 is not None:
         with open(opt.feature_path2, "rb") as f:
             features_head2, features_backbone2, _, labels2 = pickle.load(f)
             sorted_features_head = sortFeatures(features_head2, labels2, opt.num_classes)
