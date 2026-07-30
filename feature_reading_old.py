@@ -68,8 +68,8 @@ def parse_option():
                         choices=["training_supcon", "trainging_linear", "testing_known", "testing_unknown", "feature_reading"])
     parser.add_argument('--method', type=str, default='SupCon',
                         choices=['SupCon', 'SimCLR'], help='choose method')
-    parser.add_argument("--feature_save/", type=str, default="/features/")
-    parser.add_argument("--if_merge", )
+    parser.add_argument("--feature_save", type=str, default="/features/")
+    parser.add_argument("--if_merge", type=bool, default=False)
 
     # temperature
     parser.add_argument('--temp', type=float, default=0.05, help='temperature for loss')
