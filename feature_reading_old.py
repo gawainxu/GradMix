@@ -68,7 +68,7 @@ def parse_option():
                         choices=["training_supcon", "trainging_linear", "testing_known", "testing_unknown", "feature_reading"])
     parser.add_argument('--method', type=str, default='SupCon',
                         choices=['SupCon', 'SimCLR'], help='choose method')
-    parser.add_argument("--feature_save", type=str, default="/features/")
+    parser.add_argument("--feature_save/", type=str, default="/features/")
     parser.add_argument("--if_merge", )
 
     # temperature
@@ -257,7 +257,7 @@ if __name__ == "__main__":
 
     if opt.if_train == "train" or opt.if_train == "test_known" or opt.if_train == "full":
         for r in range(0, opt.n_cls):
-            opt.save_path = opt.feature_save + "/temp" + str(r)
+            opt.save_path = opt.feature_save + "temp" + str(r)
             featurePaths.append(opt.save_path)
             if r < opt.start_class:
                 continue
@@ -270,7 +270,7 @@ if __name__ == "__main__":
 
     else:
          for r in range(0, opt.n_outs):                            
-            opt.save_path = opt.feature_save + "/temp" + str(r)
+            opt.save_path = opt.feature_save + "temp" + str(r)
             featurePaths.append(opt.save_path)
             datasets = set_data(opt, class_idx=r)
             dataloader = DataLoader(datasets, batch_size=1, shuffle=False, sampler=None, 
