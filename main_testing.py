@@ -318,7 +318,7 @@ def LoF(testing_features, sorted_exemplar_features, opt):
     return scores
 
 
-def distances(stats, test_features, mode="mahalanobis"):
+def distances(stats, test_features, mode="others"):
 
     dis_logits_out = []
     dis_logits_in = []
