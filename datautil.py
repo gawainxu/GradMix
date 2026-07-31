@@ -240,7 +240,7 @@ def pickClass(classIdx):
 
 import cv2
 import random
-from data_loader import iCIFAR10, iCIFAR100, TinyImagenet, customSVHN, mnist, CUB, Aircraft, Cars, ImageNet100_M
+from data_loader import iCIFAR10, iCIFAR100, TinyImagenet, customSVHN, mnist, CUB, Aircraft, Cars, ImageNet100_M, ImageNet900_outliers
 from data_loader import tinyimgnet_c, cifar10_c, cifar100_c, ImageNet100, ImageNet100_small, ImageNet100_Folder, FUB
 import torchvision
 import torch
@@ -275,6 +275,10 @@ data_function_mapping = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR10, "cifa
 
 data_function_mapping_testing = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR100, "cifar-10-100-50": iCIFAR100, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100,
                                  "imagenet100_small": ImageNet100_small, "imagenet100_m": ImageNet100_M, "ImageNet100_Folder": ImageNet100_Folder, "cifar100": iCIFAR100,
+                                 "tinyimgnet": TinyImagenet, "mnist": mnist, "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "cars": Cars, "FUB": FUB}
+
+data_function_mapping_outliers = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR100, "cifar-10-100-50": iCIFAR100, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet900_outliers,
+                                 "imagenet100_small": ImageNet100_small, "imagenet100_m": ImageNet900_outliers, "ImageNet100_Folder": ImageNet900_outliers, "cifar100": iCIFAR100,
                                  "tinyimgnet": TinyImagenet, "mnist": mnist, "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "cars": Cars, "FUB": FUB}
 
 data_function_mapping_curruption = {"cifar10": cifar10_c, "cifar100": cifar100_c, "tinyimgnet": tinyimgnet_c,}
@@ -525,7 +529,7 @@ def get_outlier_datasets(opt, class_idx=None):
         else:
             test_transform = transforms.Compose([transforms.ToTensor(), normalize])
 
-    data_fun = data_function_mapping_testing[opt.datasets]
+    data_fun = data_function_mapping_outliers[opt.datasets]
     label_dict = label_to_dict(osr_splits_outliers[opt.datasets][opt.trail], outliers=True)
     if class_idx is not None:
         classes = [osr_splits_outliers[opt.datasets][opt.trail][class_idx]]

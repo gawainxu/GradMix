@@ -614,6 +614,33 @@ class ImageNet100(Dataset):
         return len(self.images)
 
 
+class ImageNet900_outliers(Dataset):
+
+    def __init__(self, root, classes=range(100), train=True, opt=None, transform=None,
+                target_transform=None, download=False, label_dict = None, last_features_list=None,
+                last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
+
+        data_path = root + "/imagenet900_test"
+
+        dataset = ImageFolder(data_path)
+        self.images = []
+        self.labels = []
+        self.transform = transform
+
+        for img, l in dataset:
+            self.images.append(img)
+            self.labels.append(1000)
+
+    def __getitem__(self, idx):
+        if self.transform is not None:
+            return self.transform(self.images[idx]), self.labels[idx]
+        else:
+            return self.images[idx], self.labels[idx]
+
+    def __len__(self):
+
+        return len(self.images)
+
 
 def ImageNet100_small(root, classes=range(10), train=True, opt=None, transform=None,
                       target_transform=None, download=False, label_dict=None, last_features_list=None,
