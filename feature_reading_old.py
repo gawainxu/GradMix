@@ -269,6 +269,7 @@ if __name__ == "__main__":
         featureMerge(featurePaths, opt)
 
     else:
+        """
          for r in range(0, opt.n_outs):                            
             opt.save_path = opt.feature_save + "temp" + str(r)
             featurePaths.append(opt.save_path)
@@ -278,3 +279,9 @@ if __name__ == "__main__":
             normalFeatureReading(dataloader, model, linear_model, opt)
 
          featureMerge(featurePaths, opt)
+         """
+        datasets = set_data(opt)
+        dataloader = DataLoader(datasets, batch_size=1, shuffle=False, sampler=None,
+                                num_workers=1)
+        opt.save_path = opt.save_path_all
+        normalFeatureReading(dataloader, model, linear_model, opt)
