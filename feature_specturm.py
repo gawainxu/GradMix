@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
     cka_head = linear_cka_gpt(features_head1, features_head2)
     print("cka is", cka_head)
-    cka_backbone = linear_cka_gpt(features_head1, features_head2)
+    cka_backbone = linear_cka_gpt(features_backbone1, features_backbone2)
     print("cka is", cka_backbone)
 
     """
