@@ -78,9 +78,9 @@ if __name__ == "__main__":
             sorted_features_backbone = sortFeatures(features_backbone2, labels2, opt.num_classes)
 
     cka_head = linear_cka_gpt(features_head1, features_head2)
-    print("cka is", cka_head)
+    print("cka head is", cka_head)
     cka_backbone = linear_cka_gpt(features_backbone1, features_backbone2)
-    print("cka is", cka_backbone)
+    print("cka backbone is", cka_backbone)
 
     """
     if opt.mode == "intra":
