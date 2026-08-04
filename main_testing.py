@@ -375,9 +375,9 @@ def feature_classifier(opt):
 
     with open(opt.exemplar_features_path, "rb") as f:
         features_exemplar_head, features_exemplar_backbone, _, labels_examplar = pickle.load(f)
-        print("features_exemplar_head", features_exemplar_head.shape)
         features_exemplar_head = np.squeeze(np.array(features_exemplar_head))    
         features_exemplar_backbone = np.squeeze(np.array(features_exemplar_backbone))
+        print("features_exemplar_head", features_exemplar_head.shape)
 
     if opt.exemplar_features_path1 is not None:
         with open(opt.exemplar_features_path1, "rb") as f:       
