@@ -590,7 +590,7 @@ class ImageNet100(Dataset):
                 last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
 
         if train:
-            data_path = root + "/imagenet100_train"
+            data_path = root + "/imagenet100_test"
         else:
             data_path = root + "/imagenet100_test"
 
