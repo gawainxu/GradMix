@@ -265,9 +265,9 @@ def KNN_logits(testing_features, sorted_exemplar_features):
         for training_features_c in sorted_exemplar_features:
             
             training_features_c = np.array(training_features_c, dtype=float)
+            print("training_features_c", training_features_c.shape)
             #training_features_c = training_features_c[::2]                                                          # TODO
 
-            
             similarities = np.matmul(training_features_c, testing_feature) / np.linalg.norm(training_features_c, axis=1) / np.linalg.norm(testing_feature)
             ind = np.argsort(similarities)[-opt.K:]
             top_k_similarities = similarities[ind]
