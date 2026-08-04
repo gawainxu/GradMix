@@ -273,7 +273,7 @@ data_function_mapping = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR10, "cifa
                          "imagenet100_small": ImageNet100_small, "imagenet100_m": ImageNet100_M, "ImageNet100_Folder": ImageNet100_Folder, "cifar100": iCIFAR100,
                          "tinyimgnet": TinyImagenet, "mnist": mnist, "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "cars": Cars, "FUB": FUB}
 
-data_function_mapping_testing = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR100, "cifar-10-100-50": iCIFAR100, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100_Folder,
+data_function_mapping_testing = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR100, "cifar-10-100-50": iCIFAR100, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100,
                                  "imagenet100_small": ImageNet100_small, "imagenet100_m": ImageNet100_M, "ImageNet100_Folder": ImageNet100_Folder, "cifar100": iCIFAR100,
                                  "tinyimgnet": TinyImagenet, "mnist": mnist, "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "cars": Cars, "FUB": FUB}
 
