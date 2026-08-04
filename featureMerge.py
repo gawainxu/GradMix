@@ -11,13 +11,13 @@ import pickle
 import numpy as np
 
 
-def featureMerge(featureList, opt):
+def featureMerge(featureList, save_path_all):
     
     featureMaps = []
     featureMaps_backbone = []
     featureMaps_linear = []
     labels = []
-    print(opt.save_path_all)
+    print(save_path_all)
 
     for featurePath in featureList:
         
@@ -39,6 +39,20 @@ def featureMerge(featureList, opt):
     featureMaps_linear = np.squeeze(np.array(featureMaps_linear))
     labels = np.squeeze(np.array(labels))
     
-    with open(opt.save_path_all, 'wb') as f:
+    with open(save_path_all, 'wb') as f:
         pickle.dump((featureMaps, featureMaps_backbone, featureMaps_linear, labels), f)
+
+
+if __name__ == '__main__':
+
+    import os
+
+    features_folder = "./features/imagenet100_vgg16_original_data__vanilia__Joint_0.4_0.6_trail_0_128_256_split_128_train"
+    save_path_all = "./features/imagenet100_vgg16_original_data__vanilia__Joint_0.4_0.6_trail_0_128_256_split_128_train"
+    features_list = ["temp" + str(i) for i in range(100)]
+    feature_list = [os.path.join(features_folder, fl) for fl in features_list]
+
+    featureMerge(feature_list, save_path_all)
+
+
         

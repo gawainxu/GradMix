@@ -266,7 +266,7 @@ if __name__ == "__main__":
                                     num_workers=1)
             normalFeatureReading(dataloader, model, linear_model, opt)
 
-        featureMerge(featurePaths, opt)
+        featureMerge(featurePaths, opt.save_path_all)
 
     else:
         """
@@ -284,4 +284,4 @@ if __name__ == "__main__":
         dataloader = DataLoader(datasets, batch_size=1, shuffle=False, sampler=None,
                                 num_workers=1)
         opt.save_path = opt.save_path_all
-        normalFeatureReading(dataloader, model, linear_model, opt)
+        normalFeatureReading(dataloader, model, linear_model, opt.save_path_all)

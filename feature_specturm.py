@@ -17,8 +17,8 @@ def parse_option():
 
     parser = argparse.ArgumentParser('argument for feature analysis')
     
-    parser.add_argument("--feature_path1", type=str, default=None)
-    parser.add_argument("--feature_path2", type=str, default=None)
+    parser.add_argument("--feature_path1", type=str, default="./features/cifar10_resnet18_mixup_positive_alpha_1.0_beta_1.0_random_0_SimCLR_1.0_1.0_0.05_trail_5_128_256_old_augmented_600_outliers_0_train")
+    parser.add_argument("--feature_path2", type=str, default="./features/cifar10_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_5_128_256_old_augmented_600_outliers_0_train")
     parser.add_argument("--num_classes", type=int, default=10)
     parser.add_argument("--mode", type=str, default="intra")
 
@@ -68,14 +68,14 @@ if __name__ == "__main__":
     
     with open(opt.feature_path1, "rb") as f:
         features_head1, features_backbone1, _, labels1 = pickle.load(f)
-        sorted_features_head = sortFeatures(features_head1, labels1, opt.num_classes)
-        sorted_features_backbone = sortFeatures(features_backbone1, labels1, opt.num_classes)
+        #sorted_features_head = sortFeatures(features_head1, labels1, opt.num_classes)
+        #sorted_features_backbone = sortFeatures(features_backbone1, labels1, opt.num_classes)
 
     if opt.feature_path2 is not None:
         with open(opt.feature_path2, "rb") as f:
             features_head2, features_backbone2, _, labels2 = pickle.load(f)
-            sorted_features_head = sortFeatures(features_head2, labels2, opt.num_classes)
-            sorted_features_backbone = sortFeatures(features_backbone2, labels2, opt.num_classes)
+            #sorted_features_head = sortFeatures(features_head2, labels2, opt.num_classes)
+            #sorted_features_backbone = sortFeatures(features_backbone2, labels2, opt.num_classes)
 
     cka_head = linear_cka_gpt(features_head1, features_head2)
     print("cka head is", cka_head)
