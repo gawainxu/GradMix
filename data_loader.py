@@ -600,8 +600,6 @@ class ImageNet100(Dataset):
         self.transform = transform
 
         for img, l in dataset:
-            if l not in classes:
-                continue
             self.images.append(img)
             self.labels.append(l)
 

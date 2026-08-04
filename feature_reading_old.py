@@ -29,7 +29,7 @@ from networks.resnet_big import pretrained_resnet50
 from featureMerge import featureMerge
 from datautil import num_inlier_classes_mapping
 
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 from datautil import get_train_datasets, get_test_datasets, get_outlier_datasets, osr_splits_inliers, osr_splits_outliers
 
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -262,6 +262,12 @@ if __name__ == "__main__":
             if r < opt.start_class:
                 continue
             datasets = set_data(opt, class_idx=r)
+            fraction = 0.3  # Keep 10% of the dataset
+            num_samples = int(len(datasets) * fraction)
+            # Randomly select indices
+            indices = torch.randperm(len(datasets))[:num_samples]
+            downsampled_dataset = Subset(datasets, indices)
+
             dataloader = DataLoader(datasets, batch_size=1, shuffle=False, sampler=None,
                                     num_workers=1)
             normalFeatureReading(dataloader, model, linear_model, opt)
