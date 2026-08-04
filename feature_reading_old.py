@@ -272,7 +272,7 @@ if __name__ == "__main__":
                                     num_workers=1)
             normalFeatureReading(dataloader, model, linear_model, opt)
 
-        featureMerge(featurePaths, opt.save_path_all)
+        #featureMerge(featurePaths, opt.save_path_all)
 
     else:
         """
