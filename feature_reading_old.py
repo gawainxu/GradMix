@@ -256,7 +256,7 @@ if __name__ == "__main__":
     featurePaths= []
 
     if opt.if_train == "train" or opt.if_train == "test_known" or opt.if_train == "full":
-        for r in range(0, opt.n_cls):
+        for r in range(0, 1):
             opt.save_path = opt.feature_save + "temp" + str(r)
             featurePaths.append(opt.save_path)
             if r < opt.start_class:
