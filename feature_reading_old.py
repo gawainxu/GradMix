@@ -45,7 +45,7 @@ breaks = {"cifar-10-100-10": {"train": 5000, "test_known":500, "test_unknown": 5
            "cub":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
            "cars":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
            "aircraft":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
-           "imagenet100":{"train": 40000, "test_known": 1000, "test_unknown": 1000, "full": 100000},
+           "imagenet100":{"train": 1000, "test_known": 1000, "test_unknown": 1000, "full": 100000},
            "FUB": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},}
 
 def parse_option():
@@ -256,23 +256,24 @@ if __name__ == "__main__":
     featurePaths= []
 
     if opt.if_train == "train" or opt.if_train == "test_known" or opt.if_train == "full":
-        for r in range(0, 1):
+        for r in range(0, opt.n_cls):
             opt.save_path = opt.feature_save + "temp" + str(r)
             featurePaths.append(opt.save_path)
             if r < opt.start_class:
                 continue
             datasets = set_data(opt, class_idx=r)
-            fraction = 0.3  # Keep 10% of the dataset
-            num_samples = int(len(datasets) * fraction)
+
+            #fraction = 0.3  # Keep 10% of the dataset
+            #num_samples = int(len(datasets) * fraction)
             # Randomly select indices
-            indices = torch.randperm(len(datasets))[:num_samples]
-            downsampled_dataset = Subset(datasets, indices)
+            #indices = torch.randperm(len(datasets))[:num_samples]
+            #downsampled_dataset = Subset(datasets, indices)
 
             dataloader = DataLoader(datasets, batch_size=1, shuffle=False, sampler=None,
                                     num_workers=1)
             normalFeatureReading(dataloader, model, linear_model, opt)
 
-        #featureMerge(featurePaths, opt.save_path_all)
+        featureMerge(featurePaths, opt.save_path_all)
 
     else:
         """
