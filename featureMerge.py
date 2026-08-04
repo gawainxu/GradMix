@@ -20,7 +20,8 @@ def featureMerge(featureList, save_path_all):
     print(save_path_all)
 
     for featurePath in featureList:
-        
+
+        print(featurePath)
         with open(featurePath, "rb") as f:
             features, feature_backbone, feature_linear, labels_part = pickle.load(f)
   
