@@ -49,7 +49,7 @@ if __name__ == '__main__':
     import os
 
     features_folder = "./features/imagenet100_vgg16_original_data__vanilia__Joint_0.4_0.6_trail_0_128_256_split_128_train"
-    save_path_all = "./features/imagenet100_vgg16_original_data__vanilia__Joint_0.4_0.6_trail_0_128_256_split_128_train"
+    save_path_all = "./features/imagenet100_vgg16_original_data__vanilia__Joint_0.4_0.6_trail_0_128_256_split_128_train_all"
     features_list = ["temp" + str(i) for i in range(100)]
     feature_list = [os.path.join(features_folder, fl) for fl in features_list]
 
