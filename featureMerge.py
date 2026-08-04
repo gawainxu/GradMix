@@ -40,9 +40,9 @@ def featureMerge(featureList, save_path_all):
         if len(feature_linear) > 0:
             featureMaps_linear = featureMaps_linear + feature_linear
 
-        featureMaps_backbone = featureMaps_backbone + feature_backbone
-        featureMaps = featureMaps + features
-        labels = labels + labels_part
+        featureMaps_backbone = featureMaps_backbone + feature_backbone[:3000]
+        featureMaps = featureMaps + features[:3000]
+        labels = labels + labels_part[:3000]
         
     featureMaps_backbone = np.array(featureMaps_backbone, dtype=object)
     featureMaps = np.array(featureMaps, dtype=object)
