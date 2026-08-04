@@ -351,7 +351,7 @@ def KNN_classifier(testing_features, testing_labels, sorted_training_features):
 
     print("Begin KNN Classifier!")
     print("testing_features", testing_features.shape)
-    print("sorted_training_features", sorted_training_features[0].shape)
+    print("sorted_training_features", sorted_training_features[0][0].shape)
     testing_similarity_logits = KNN_logits(testing_features, sorted_training_features)
     prediction_logits, predictions = np.amax(testing_similarity_logits, axis=1), np.argmax(testing_similarity_logits, axis=1)
     #prediction_logits, predictions = -np.amin(testing_similarity_logits, axis=1), np.argmin(testing_similarity_logits, axis=1)       # minus here, larger score for inliers
