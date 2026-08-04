@@ -52,15 +52,15 @@ def parse_option():
     parser.add_argument("--end", type=bool, default=False, help="if it is end to end training")
     parser.add_argument("--ensembles", type=int, default=1)
     parser.add_argument("--linear_model_path", type=str, default="/save/SupCon/cifar10_models/cifar10_resnet18_original_data__vanilia__SimCLR_0.01_trail_0/last_linear.pth")
-    parser.add_argument("--num_classes", type=int, default=3)
+    parser.add_argument("--num_classes", type=int, default=100)
     parser.add_argument("--feat_dim", type=int, default=128)
 
     parser.add_argument("--exemplar_features_path", type=str,
-                        default="/features/FUB_simCNN_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_3_SimCLR_1.0_1.0_0.05_trail_0_128_256_old_augmented_600_train")
+                        default="/features/imagenet100_vgg16_original_data__vanilia__Joint_0.4_0.6_trail_0_128_256_split_128_600_outliers_0_train")
     parser.add_argument("--testing_known_features_path", type=str,
-                        default="/features/FUB_simCNN_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_3_SimCLR_1.0_1.0_0.05_trail_0_128_256_old_augmented_600_test_known")
+                        default="/features/imagenet100_vgg16_original_data__vanilia__Joint_0.4_0.6_trail_0_128_256_split_128_600_outliers_0_test_known")
     parser.add_argument("--testing_unknown_features_path", type=str,
-                        default="/features/FUB_simCNN_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_3_SimCLR_1.0_1.0_0.05_trail_0_128_256_old_augmented_600_test_unknown")
+                        default="/features/imagenet100_vgg16_original_data__vanilia__Joint_0.4_0.6_trail_0_128_256_split_128_600_outliers_0_test_unknown")
 
     parser.add_argument("--exemplar_features_path1", type=str,
                         default=None)
@@ -374,7 +374,8 @@ def distance_classifier(testing_features, testing_labels, sorted_training_featur
 def feature_classifier(opt):
 
     with open(opt.exemplar_features_path, "rb") as f:
-        features_exemplar_head, features_exemplar_backbone, _, labels_examplar = pickle.load(f) 
+        features_exemplar_head, features_exemplar_backbone, _, labels_examplar = pickle.load(f)
+        print("features_exemplar_head", features_exemplar_head.shape)
         features_exemplar_head = np.squeeze(np.array(features_exemplar_head))    
         features_exemplar_backbone = np.squeeze(np.array(features_exemplar_backbone))
 
@@ -402,7 +403,8 @@ def feature_classifier(opt):
 
     if opt.testing_known_features_path is not None:
         with open(opt.testing_known_features_path, "rb") as f:
-            features_testing_known_head, features_testing_known_backbone, _, labels_testing_known = pickle.load(f) 
+            features_testing_known_head, features_testing_known_backbone, _, labels_testing_known = pickle.load(f)
+            print("features_testing_known_head", features_testing_known_head.shape)
             features_testing_known_head = np.squeeze(np.array(features_testing_known_head))       
             features_testing_known_backbone = np.squeeze(np.array(features_testing_known_backbone))
             labels_testing_known = np.squeeze(np.array(labels_testing_known))
