@@ -1242,7 +1242,7 @@ if __name__ == "__main__":
                                           transforms.ToTensor(),])
 
     imagenet100 = ImageNet100(root=root_path, classes=[0,1,2,3,4], train=False, transform=transform)
-    for i, (l, _) in enumerate(imagenet100):
+    for i, (_, l) in enumerate(imagenet100):
         print(i, l)
 
     """
