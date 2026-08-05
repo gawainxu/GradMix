@@ -45,7 +45,7 @@ breaks = {"cifar-10-100-10": {"train": 5000, "test_known":500, "test_unknown": 5
            "cub":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
            "cars":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
            "aircraft":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
-           "imagenet100":{"train": 1000, "test_known": 1000, "test_unknown": 1000, "full": 100000},
+           "imagenet100":{"train": 2000, "test_known": 1000, "test_unknown": 1000, "full": 100000},
            "FUB": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},}
 
 def parse_option():
@@ -257,6 +257,7 @@ if __name__ == "__main__":
 
     if opt.if_train == "train" or opt.if_train == "test_known" or opt.if_train == "full":
         for r in range(0, opt.n_cls):
+            print(r)
             opt.save_path = opt.feature_save + "temp" + str(r)
             featurePaths.append(opt.save_path)
             if r < opt.start_class:
