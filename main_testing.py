@@ -350,8 +350,6 @@ def distances(stats, test_features, mode="others"):
 def KNN_classifier(testing_features, testing_labels, sorted_training_features):
 
     print("Begin KNN Classifier!")
-    print("testing_features", testing_features.shape)
-    print("sorted_training_features", sorted_training_features[0][0].shape)
     testing_similarity_logits = KNN_logits(testing_features, sorted_training_features)
     prediction_logits, predictions = np.amax(testing_similarity_logits, axis=1), np.argmax(testing_similarity_logits, axis=1)
     #prediction_logits, predictions = -np.amin(testing_similarity_logits, axis=1), np.argmin(testing_similarity_logits, axis=1)       # minus here, larger score for inliers
@@ -406,7 +404,6 @@ def feature_classifier(opt):
     if opt.testing_known_features_path is not None:
         with open(opt.testing_known_features_path, "rb") as f:
             features_testing_known_head, features_testing_known_backbone, _, labels_testing_known = pickle.load(f)
-            print("features_testing_known_head", features_testing_known_head.shape)
             features_testing_known_head = np.squeeze(np.array(features_testing_known_head))       
             features_testing_known_backbone = np.squeeze(np.array(features_testing_known_backbone))
             labels_testing_known = np.squeeze(np.array(labels_testing_known))
@@ -436,7 +433,7 @@ def feature_classifier(opt):
     #prediction_logits_known, predictions_known, acc_known = KNN_classifier(features_testing_known_backbone, labels_testing_known, sorted_features_examplar_backbone)
     prediction_logits_known, predictions_known, acc_known = KNN_classifier(features_testing_known_head, labels_testing_known, sorted_features_examplar_head)
 
-    prediction_logits_known_dis_in, prediction_logits_known_dis_out, predictions_known_dis, acc_known_dis = distance_classifier(features_testing_known_backbone, labels_testing_known, sorted_features_examplar_head)
+    prediction_logits_known_dis_in, prediction_logits_known_dis_out, predictions_known_dis, acc_known_dis = distance_classifier(features_testing_known_head, labels_testing_known, sorted_features_examplar_head)
 
     with open(opt.testing_unknown_features_path, "rb") as f:
         features_testing_unknown_head, features_testing_unknown_backbone, _, labels_testing_unknown = pickle.load(f)          
