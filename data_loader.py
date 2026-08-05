@@ -1241,7 +1241,7 @@ if __name__ == "__main__":
                                           transforms.RandomGrayscale(p=0.2),
                                           transforms.ToTensor(),])
 
-    imagenet100 = ImageNet100(root=root_path, classes=[0], train=False, transform=transform)
+    imagenet100 = ImageNet100(root=root_path, classes=[0], train=True, transform=transform)
     print(len(imagenet100))
 
     """
