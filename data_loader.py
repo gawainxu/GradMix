@@ -1235,6 +1235,7 @@ if __name__ == "__main__":
     print(len(fub2))
     """
 
+    """
     transform = transforms.Compose([transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
                                           transforms.RandomResizedCrop(size=224, scale=(0.2, 1.)),
                                           transforms.RandomHorizontalFlip(),
@@ -1244,6 +1245,7 @@ if __name__ == "__main__":
     imagenet100 = ImageNet100(root=root_path, classes=[0,1,2,3,4], train=False, transform=transform)
     for i, (_, l) in enumerate(imagenet100):
         print(i, l)
+    """
 
     """
     cub = CUB(root_path)
