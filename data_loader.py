@@ -1241,12 +1241,10 @@ if __name__ == "__main__":
                                           transforms.RandomGrayscale(p=0.2),
                                           transforms.ToTensor(),])
 
-    """
-    imagenet100 = ImageNet100(root=root_path, train=False, transform=transform)
-    for idx in range(100):
-        print(imagenet100[idx][0].shape, imagenet100[idx][1])
-    """
+    imagenet100 = ImageNet100(root=root_path, classes=[0], train=False, transform=transform)
+    print(len(imagenet100))
 
+    """
     cub = CUB(root_path)
     print("CUB", len(cub))
 
@@ -1255,6 +1253,7 @@ if __name__ == "__main__":
 
     aircraft = Aircraft(root_path)
     print("Aircraft", len(aircraft))
+    """
 
 
    
