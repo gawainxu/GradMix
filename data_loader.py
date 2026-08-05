@@ -594,14 +594,12 @@ class ImageNet100(Dataset):
         else:
             data_path = root + "/imagenet100_test"
 
-        dataset = ImageFolder(data_path)
+        dataset = SelectImageFolder(data_path, classes)
         self.images = []
         self.labels = []
         self.transform = transform
 
         for img, l in dataset:
-            if l not in classes:
-                continue
             self.images.append(img)
             self.labels.append(l)
 
@@ -614,6 +612,24 @@ class ImageNet100(Dataset):
     def __len__(self):
 
         return len(self.images)
+
+
+class SelectImageFolder(ImageFolder):
+    def __init__(self, root, classes=range(100), **kwargs):
+
+        self.target_class_indices = classes
+        super().__init__(root, **kwargs)
+
+    def find_classes(self, directory):
+
+        classes_all = [d.name for i, d in enumerate(os.scandir(directory)) if d.is_dir()]
+        classes_all.sort()
+
+        classes = [n for i, n in enumerate(classes_all)
+                            if i in self.target_class_indices]
+        classes_to_idx = {cls_name: i for cls_name, i in zip(classes, self.target_class_indices)}
+
+        return classes, classes_to_idx
 
 
 class ImageNet900_outliers(Dataset):
