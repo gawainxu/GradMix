@@ -1241,8 +1241,9 @@ if __name__ == "__main__":
                                           transforms.RandomGrayscale(p=0.2),
                                           transforms.ToTensor(),])
 
-    imagenet100 = ImageNet100(root=root_path, classes=[0,1,2,3,4], train=True, transform=transform)
-    print(len(imagenet100))
+    imagenet100 = ImageNet100(root=root_path, classes=[0,1,2,3,4], train=False, transform=transform)
+    for i, (l, _) in enumerate(imagenet100):
+        print(i, l)
 
     """
     cub = CUB(root_path)
