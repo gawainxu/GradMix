@@ -119,6 +119,7 @@ def parse_option():
     opt.n_outs = len(osr_splits_outliers[opt.datasets][opt.trail_outliers])
 
     opt.break_idx = breaks[opt.datasets][opt.if_train]
+    print(opt.break_idx)
     if platform.system() == 'Windows':
         opt.model_name = opt.model_path.split("\\")[-2]
     elif platform.system() == 'Linux':
@@ -127,9 +128,6 @@ def parse_option():
                          + "_outliers_" + str(opt.trail_outliers) + "_" + opt.if_train)
 
     opt.num_classes = num_inlier_classes_mapping[opt.datasets]
-
-    for name, value in inspect.getmembers(opt):
-        print(name, value)
 
     return opt
 
