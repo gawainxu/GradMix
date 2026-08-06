@@ -119,7 +119,7 @@ def parse_option():
     opt.n_outs = len(osr_splits_outliers[opt.datasets][opt.trail_outliers])
 
     opt.break_idx = breaks[opt.datasets][opt.if_train]
-    print(opt.break_idx)
+    print("opt.break_idx", opt.break_idx)
     if platform.system() == 'Windows':
         opt.model_name = opt.model_path.split("\\")[-2]
     elif platform.system() == 'Linux':
@@ -284,4 +284,5 @@ if __name__ == "__main__":
         dataloader = DataLoader(datasets, batch_size=1, shuffle=False, sampler=None,
                                 num_workers=1)
         opt.save_path = opt.save_path_all
+        print("opt.break_idx", opt.break_idx)
         normalFeatureReading(dataloader, model, linear_model, opt.save_path_all)
