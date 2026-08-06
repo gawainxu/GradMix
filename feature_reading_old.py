@@ -13,13 +13,10 @@ BASE_PATH = "/home/sysgen/Jiawen/causal_OSR"
 sys.path.append(BASE_PATH) 
 
 import argparse
+import inspect
 
 import torch
-import torch.backends.cudnn as cudnn
-import torchvision.transforms as transforms
-import numpy as np
 import pickle
-from itertools import chain
 
 from networks.resnet_big import SupConResNet, LinearClassifier
 from networks.vgg import SupConVGG
@@ -38,14 +35,14 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 breaks = {"cifar-10-100-10": {"train": 5000, "test_known":500, "test_unknown": 50, "full": 100000}, 
           "cifar-10-100-50": {"train": 5000, "test_known": 500, "test_unknown": 50, "full": 100000},
           "cifar100": {"train": 5000, "test_known": 500, "test_unknown": 50, "full": 100000},
-           'cifar10':{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000}, 
-           "tinyimgnet":{"train": 5000, "test_known": 100, "test_unknown": 20, "full": 100000}, 
-           'mnist':{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000}, 
-           "svhn":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
-           "cub":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
-           "cars":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
-           "aircraft":{"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
-           "imagenet100":{"train": 2000, "test_known": 1000, "test_unknown": 1000, "full": 100000},
+           'cifar10': {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
+           "tinyimgnet": {"train": 5000, "test_known": 100, "test_unknown": 20, "full": 100000},
+           'mnist': {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
+           "svhn": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
+           "cub": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
+           "cars": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
+           "aircraft": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
+           "imagenet100": {"train": 2000, "test_known": 1000, "test_unknown": 1000, "full": 100000},
            "FUB": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},}
 
 def parse_option():
@@ -130,6 +127,9 @@ def parse_option():
                          + "_outliers_" + str(opt.trail_outliers) + "_" + opt.if_train)
 
     opt.num_classes = num_inlier_classes_mapping[opt.datasets]
+
+    for name, value in inspect.getmembers(opt):
+        print(name, value)
 
     return opt
 
@@ -263,12 +263,6 @@ if __name__ == "__main__":
             if r < opt.start_class:
                 continue
             datasets = set_data(opt, class_idx=r)
-
-            #fraction = 0.3  # Keep 10% of the dataset
-            #num_samples = int(len(datasets) * fraction)
-            # Randomly select indices
-            #indices = torch.randperm(len(datasets))[:num_samples]
-            #downsampled_dataset = Subset(datasets, indices)
 
             dataloader = DataLoader(datasets, batch_size=1, shuffle=False, sampler=None,
                                     num_workers=1)

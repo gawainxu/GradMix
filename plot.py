@@ -4,36 +4,48 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-values = {"ACCURACY": np.array([90.1, 92.2, 93.1]),
-          "AUROC": np.array([69.1, 78.1, 87.3])} 
-settings = (r"$\tau$=0.05", r"$\tau$=0.01", r"$\tau$=0.005")
-
-x = np.arange(len(settings))  # the label locations
-width = 0.25  
-fig, ax1 = plt.subplots()
-bottom = np.zeros(3)
-
-metric, v = values.popitem()
-p1 = ax1.bar(x, v, width, label=metric, color="blue")
-bottom += v
-ax1.bar_label(p1, padding=3)
-ax1.set_ylabel('AUROC (%)')
-ax1.set_ylim(60, 100)
-
-ax2 = ax1.twinx()
-metric, v = values.popitem()
-p2 = ax2.bar(x+width, v, width, label=metric, color="red")
-ax2.bar_label(p2, padding=3)
-ax2.set_ylabel('Accuracy (%)')
-ax2.set_ylim(70, 100)
+values_wo = {"accuracy": np.array([ 95.73,	96.2, 96.23, 96.78]),
+          "auroc": np.array([86.62,	87.48, 87.8, 88.41,])} 
 
 
-#fig.legend(bbox_to_anchor=(1.2, 1))
-fig.legend(loc=7)
-fig.tight_layout()
-fig.subplots_adjust(right=0.75)
+values_w = {"accuracy": np.array([ 96.62,	96.75,	97.1,	97.32]),
+          "auroc": np.array([89.15,	89.41,	90.83,	91.57])} 
 
-ax1.set_title('Values of Inlier Accuracy and Outlier AUROC', fontsize=16)
-ax1.set_xticks(x+width/2, settings)
-plt.savefig("./test.pdf")
-plt.show()
+beta = ["0.2", "0.4", "0.6", "0.8"]
+
+
+# Plotting both curves
+plt.plot(values_w["auroc"], values_w["accuracy"], label='w GradMix', color='blue', marker='o')
+plt.plot(values_wo["auroc"],  values_wo["accuracy"], label='wo GradMix', color='red', marker='o')
+
+
+for i, (x, y) in enumerate(zip(values_w["auroc"], values_w["accuracy"])):
+    plt.annotate(
+        beta[i],           # The label text
+        xy=(x, y),               # The point to annotate
+        textcoords="offset points", # How to position the text
+        xytext=(0, 10),          # Distance from text to point (x,y)
+        ha='center',             # Horizontal alignment
+        fontsize=8,
+        color='k'
+    )
+
+
+for i, (x, y) in enumerate(zip(values_wo["auroc"], values_wo["accuracy"])):
+    plt.annotate(
+        beta[i],           # The label text
+        xy=(x, y),               # The point to annotate
+        textcoords="offset points", # How to position the text
+        xytext=(0, 10),          # Distance from text to point (x,y)
+        ha='center',             # Horizontal alignment
+        fontsize=8,
+        color='k'
+    )
+
+
+plt.xlabel('AUROC (%)')
+plt.ylabel('Accuracy (%)')
+plt.title(r'AUROC vs. Accuracy with varying $\beta$')
+plt.legend()
+
+plt.savefig("./plots/preto_cifar.pdf")

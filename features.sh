@@ -2,10 +2,6 @@
 
 
 
-#python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model_path "/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_original_data__vanilia__SimCLR_1.0_1.0_0.05_trail_1_128_256/ckpt_epoch_600.pth" --epoch 600 --trail 1 --augmentation_method "mixup" --temp 0.05 --lr 0.01 --training_bz 256 --if_train "train"
-#python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model_path "/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_original_data__vanilia__SimCLR_1.0_1.0_0.05_trail_1_128_256/ckpt_epoch_600.pth" --epoch 600 --trail 1 --augmentation_method "mixup" --temp 0.05 --lr 0.01 --training_bz 256 --if_train "test_known"
-#python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model_path "/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_original_data__vanilia__SimCLR_1.0_1.0_0.05_trail_1_128_256/ckpt_epoch_600.pth" --epoch 600 --trail 1 --augmentation_method "mixup" --temp 0.05 --lr 0.01 --training_bz 256 --if_train "test_unknown"
-
 #python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model_path "/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_original_data__vanilia__SimCLR_1.0_1.0_0.05_trail_2_128_256/ckpt_epoch_600.pth" --epoch 600 --trail 2 --augmentation_method "mixup" --temp 0.05 --lr 0.01 --training_bz 256 --if_train "train"
 
 
@@ -22,8 +18,8 @@
 
 
 
-python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model_path "/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_5_128_256/last.pth" --epoch 600 --trail 5 --lr 0.01 --training_bz 256 --if_train "train"
-python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model_path "/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_5_128_256/last.pth" --epoch 600 --trail 5 --lr 0.01 --training_bz 256 --if_train "test_known"
+#python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model_path "/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_5_128_256/last.pth" --epoch 600 --trail 5 --lr 0.01 --training_bz 256 --if_train "train"
+#python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model_path "/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_5_128_256/last.pth" --epoch 600 --trail 5 --lr 0.01 --training_bz 256 --if_train "test_known"
 
 
 
@@ -31,12 +27,6 @@ python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model
 #python3 feature_reading_old.py --dataset "cifar10" --model "resnet18" --model_path "/save/SupCon/cifar10_models/cifar10_resnet18_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_2,3,4_SimCLR_1.0_1.2_0.05_trail_2_128_256_twostage_old_augmented/last.pth" --epoch 600 --trail 2 --lr 0.01 --training_bz 256 --if_train "train"
 #python3 feature_reading_old.py --dataset "cifar10" --model "resnet18" --model_path "/save/SupCon/cifar10_models/cifar10_resnet18_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_2,3,4_SimCLR_1.0_1.2_0.05_trail_2_128_256_twostage_old_augmented/last.pth" --epoch 600 --trail 2 --lr 0.01 --training_bz 256 --if_train "test_known"
 #python3 feature_reading_old.py --dataset "cifar10" --model "resnet18" --model_path "/save/SupCon/cifar10_models/cifar10_resnet18_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_2,3,4_SimCLR_1.0_1.2_0.05_trail_2_128_256_twostage_old_augmented/last.pth" --epoch 600 --trail 2 --lr 0.01 --training_bz 256 --if_train "test_unknown"
-
-
-
-#python3 feature_reading_old.py --dataset "cifar10" --model "resnet18" --model_path "/save/SupCon/cifar10_models/cifar10_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_0_128_256/last.pth" --epoch 600 --trail 0 --temp 0.05 --lr 0.01 --training_bz 256 --if_train "train"
-#python3 feature_reading_old.py --dataset "cifar10" --model "resnet18" --model_path "/save/SupCon/cifar10_models/cifar10_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_0_128_256/last.pth" --epoch 600 --trail 0 --temp 0.05 --lr 0.01 --training_bz 256 --if_train "test_known"
-#python3 feature_reading_old.py --dataset "cifar10" --model "resnet18" --model_path "/save/SupCon/cifar10_models/cifar10_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_0_128_256/last.pth" --epoch 600 --trail 0 --temp 0.05 --lr 0.01 --training_bz 256 --if_train "test_unknown"
 
 
 
@@ -53,10 +43,11 @@ python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model
 
 
 
-#python3 feature_reading_old.py --dataset "cifar10" --model "resnet18" --model_path "/save/SupCon/cifar10_models/cifar10_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256/last.pth" --epoch 600 --trail 0 --lr 0.01 --training_bz 256 --if_train "train"
-#python3 feature_reading_old.py --dataset "cifar10" --model "resnet18" --model_path "/save/SupCon/cifar10_models/cifar10_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256/last.pth" --epoch 600 --trail 0 --temp 0.05 --lr 0.01 --training_bz 256 --if_train "test_known"
-#python3 feature_reading_old.py --dataset "cifar10" --model "resnet18" --model_path "/save/SupCon/cifar10_models/cifar10_resnet18_vanilia__SimCLR_1.0_0.0_0.05_trail_0_128_256/last.pth" --epoch 600 --trail 0 --lr 0.01 --training_bz 256 --if_train "test_unknown"
+
+#python3 feature_reading_old.py --dataset "cifar10" --model "resnet18" --model_path "/save/SupCon/cifar10_models/cifar10_resnet18_vanilia__SimCLR_1.0_0.0_0.1_trail_5_128_256/last.pth" --epoch 600 --trail 5 --if_train "train" --feature_save "/features1/"
+#python3 feature_reading_old.py --dataset "cifar10" --model "resnet18" --model_path "/save/SupCon/cifar10_models/cifar10_resnet18_vanilia__SimCLR_1.0_0.0_0.1_trail_5_128_256/last.pth" --epoch 600 --trail 5 --if_train "test_known" --feature_save "/features1/"
 
 
-
+python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model_path "/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_5_128_256/ckpt_epoch_250.pth" --epoch 250 --trail 5 --if_train "train" --feature_save "/features1/"
+python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model_path "/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_5_128_256/ckpt_epoch_250.pth" --epoch 250 --trail 5 --if_train "test_known" --feature_save "/features1/"
 
