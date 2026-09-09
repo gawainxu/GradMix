@@ -17,7 +17,7 @@ from util import set_optimizer, save_model
 from datautil import vanilla_mixup, salient_cutmix, vanilla_cutmix
 from datautil import num_inlier_classes_mapping
 from networks.resnet_big import SupConResNet, LinearClassifier
-from networks.resnet_big import pretrained_resnet50
+from networks.resnet_big import ResNet50
 from networks.resnet_big import MoCoResNet
 from networks.maskcon import MaskCon
 from networks.simCNN import simCNN_contrastive
@@ -69,7 +69,7 @@ def parse_option():
     parser.add_argument('--model', type=str, default='resnet50_pretrain',
                         choices=["resnet18", "resnet34", "resnet50_pretrain", "vgg16", "vgg11", "vgg_s_bn", "simCNN", "MLP"])
     parser.add_argument('--datasets', type=str, default='cars',
-                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet", "imagenet100_small",
+                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet", "imagenet100_small", "imagenet1k"
                                  "imagenet100", "imagenet100_m", "ImageNet100_Folder", 'mnist', "svhn", "cub", "aircraft", "cars", "FUB"], help='dataset')
     parser.add_argument('--mean', type=str, help='mean of dataset in path in form of str tuple')
     parser.add_argument('--std', type=str, help='std of dataset in path in form of str tuple')
@@ -291,7 +291,7 @@ def set_model(opt):
         elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
             model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "resnet50_pretrain":
-            model = pretrained_resnet50(feat_dim=opt.feat_dim)
+            model = ResNet50(feat_dim=opt.feat_dim)
         else:
             model = simCNN_contrastive(opt, feature_dim=opt.feat_dim, in_channels=in_channels)
             

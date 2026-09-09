@@ -1208,6 +1208,17 @@ class FUB(Dataset):
 
         return len(self.data)
 
+def ImageNet1K(root, classes=range(100), train=True, opt=None, transform=None,
+               target_transform=None, download=False, label_dict = None, last_features_list=None,
+               last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
+    if train:
+        data_dir = os.path.join(root, "imagenet1k")
+    else:
+        data_dir = os.path.join(root, "imagenet1k_test")
+
+    imagenet1k = ImageFolder(data_dir, transform=transform)
+    return imagenet1k
+
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ from networks.resnet_big import SupConResNet, LinearClassifier
 from networks.vgg import SupConVGG
 from networks.simCNN import simCNN_contrastive
 from networks.mlp import SupConMLP
-from networks.resnet_big import pretrained_resnet50
+from networks.resnet_big import ResNet50
 from featureMerge import featureMerge
 from datautil import num_inlier_classes_mapping
 
@@ -43,6 +43,7 @@ breaks = {"cifar-10-100-10": {"train": 5000, "test_known":500, "test_unknown": 5
            "cars": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
            "aircraft": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},
            "imagenet100": {"train": 2000, "test_known": 1000, "test_unknown": 10000, "full": 100000},
+           "imagenet1k": {"train": 2000, "test_known": 1000, "test_unknown": 10000, "full": 100000},
            "FUB": {"train": 5000, "test_known": 500, "test_unknown": 500, "full": 100000},}
 
 def parse_option():
@@ -51,7 +52,7 @@ def parse_option():
 
     parser.add_argument('--datasets', type=str, default='cars',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', "tinyimgnet",
-                                 'mnist', "svhn", "cub", "aircraft", "cars", "FUB", "imagenet100"], help='dataset')
+                                 'mnist', "svhn", "cub", "aircraft", "cars", "FUB", "imagenet100", "imagenet1k"], help='dataset')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
     parser.add_argument('--model', type=str, default="resnet50_pretrain", choices=["resnet18", "vgg16", "resnet50_pretrain", "simCNN", "MLP"])
     parser.add_argument("--model_path", type=str,
@@ -145,7 +146,7 @@ def load_model(opt):
     elif opt.model == "MLP":
         model = SupConMLP(feat_dim=opt.feat_dim)
     elif opt.model == "resnet50_pretrain":
-        model = pretrained_resnet50(feat_dim=opt.feat_dim)
+        model = ResNet50(feat_dim=opt.feat_dim)
     elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
         model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
     else:

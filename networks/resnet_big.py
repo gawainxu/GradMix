@@ -188,6 +188,43 @@ class pretrained_resnet50(nn.Module):
         return feat
 
 
+class ResNet50(nn.Module):
+    def __init__(self, name='resnet50', head='mlp', feat_dim=128, in_channels=3):
+        super(ResNet50, self).__init__()
+        # with layer names in backbone layer4, layer3, layer2, layer1
+        # https://pytorch.org/hub/facebookresearch_semi-supervised-imagenet1k-models_resnext/
+        self.encoder = torch.hub.load('facebookresearch/semi-supervised-ImageNet1K-models', 'resnet50_swsl')
+        self.encoder.fc = nn.Identity()
+
+        model_fun, dim_in = model_dict[name]
+        if head == 'linear':
+            self.head = nn.Linear(dim_in, feat_dim)
+        elif head == 'mlp':
+            self.head = nn.Sequential(
+                nn.Linear(dim_in, int(dim_in / 2)),
+                nn.ReLU(inplace=True),
+                nn.Linear(int(dim_in / 2), feat_dim)
+            )
+        else:
+            raise NotImplementedError(
+                'head not supported: {}'.format(head))
+
+    def forward(self, x):
+
+        feat = self.encoder(x)
+        feat = F.normalize(self.head(feat), dim=1)
+        return feat
+
+
+class Identity(nn.Module):
+
+    def __init__(self):
+        super(Identity, self).__init__()
+
+    def forward(self, x):
+        return x
+
+
 class remove_fc(nn.Module):
     def __init__(self, model):
         super(remove_fc, self).__init__()
