@@ -108,6 +108,7 @@ def parse_option():
     parser.add_argument("--grad_layers", type=str, default="0")
     parser.add_argument("--old_augmented", type=bool, default=True)
     parser.add_argument("--supcon_aug", type=int, default=0)
+    parser.add_argument("--frozen_layers", type=int, default=-1)
     
     # moco parameters
     parser.add_argument("--K", type=int, default=4096, help="buffer size in moco")
@@ -291,7 +292,7 @@ def set_model(opt):
         elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
             model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "resnet50_pretrain":
-            model = ResNet50(feat_dim=opt.feat_dim)
+            model = ResNet50(feat_dim=opt.feat_dim, freeze_layers=opt.frozen_layers)
         else:
             model = simCNN_contrastive(opt, feature_dim=opt.feat_dim, in_channels=in_channels)
             

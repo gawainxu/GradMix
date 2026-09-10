@@ -189,7 +189,7 @@ class pretrained_resnet50(nn.Module):
 
 
 class ResNet50(nn.Module):
-    def __init__(self, name='resnet50', head='mlp', feat_dim=128, in_channels=3):
+    def __init__(self, name='resnet50', head='mlp', feat_dim=128, in_channels=3, freeze_layers=-1):
         super(ResNet50, self).__init__()
         # with layer names in backbone layer4, layer3, layer2, layer1
         # https://pytorch.org/hub/facebookresearch_semi-supervised-imagenet1k-models_resnext/
@@ -208,6 +208,17 @@ class ResNet50(nn.Module):
         else:
             raise NotImplementedError(
                 'head not supported: {}'.format(head))
+
+        freeze_layer_names = []
+        if freeze_layers < 0:
+            pass
+        else:
+            for i in range(freeze_layers):
+                freeze_layer_names.append('layer{}'.format(i))
+
+        for name, param in self.encoder.named_parameters():
+            if name in freeze_layer_names:
+                param.requires_grad = False
 
     def forward(self, x):
 

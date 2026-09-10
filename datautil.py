@@ -251,7 +251,7 @@ from config import data_root
 from augmentations.randaugment import RandAugment
 from augmentations.cut_out import *
 from scipy.spatial.distance import mahalanobis
-from util import  feature_stats
+from util import feature_stats
 from PIL import Image
 from util import accuracy_plain
 from losses import SupConLoss
