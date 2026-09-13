@@ -14,7 +14,7 @@ from util import AverageMeter
 from main_supcon_old import set_loader
 from util import adjust_learning_rate, warmup_learning_rate, accuracy
 from util import set_optimizer, save_model
-from networks.resnet_big import SupConResNet, LinearClassifier
+from networks.resnet_big import SupConResNet, LinearClassifier, ResNet50
 from networks.resnet_big import MoCoResNet
 from networks.vgg import SupConVGG
 from networks.simCNN import simCNN_contrastive
@@ -66,12 +66,12 @@ def parse_option():
     parser.add_argument('--temp', type=float, default=0.05, help='temperature for loss')
     parser.add_argument("--clip", type=float, default=None, help="for gradient clipping")
     
-    parser.add_argument('--model', type=str, default='vgg16', choices=["resnet18", "resnet34", "vgg16", "resnet50", "simCNN", "MLP"])
+    parser.add_argument('--model', type=str, default='vgg16', choices=["resnet18", "resnet34", "vgg16", "resnet50_pretrain", "simCNN", "MLP"])
     parser.add_argument("--feat_dim", type=int, default=128)
     parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', 'imagenet100',
                                  "imagenet100_small", 'imagenet100_m', "tinyimgnet", 'mnist', "svhn", "cub", "aircraft"], help='dataset')
-    parser.add_argument("--backbone_model_direct", type=str, default="/save/SupCon/imagenet100_vgg16_original_data__vanilia__Joint_0.6_0.4_trail_0_128_256_split_128/")
+    parser.add_argument("--backbone_model_direct", type=str, default=None)
     parser.add_argument("--backbone_model_name", type=str, default="last.pth")
     parser.add_argument("--trail", type=int, default=0)
     parser.add_argument("--temp_list", type=str, default="")
@@ -104,9 +104,10 @@ def parse_option():
         opt.lr_decay_epochs.append(int(it))
 
     opt.main_dir = os.getcwd()
-    opt.backbone_model_direct = opt.main_dir + opt.backbone_model_direct
-    opt.backbone_model_path = os.path.join(opt.backbone_model_direct, opt.backbone_model_name)  
-    opt.linear_model_path = os.path.join(opt.backbone_model_direct, "last_linear.pth")
+    if opt.backbone_model_direct is not None:
+        opt.backbone_model_direct = opt.main_dir + opt.backbone_model_direct
+        opt.backbone_model_path = os.path.join(opt.backbone_model_direct, opt.backbone_model_name)
+        opt.linear_model_path = os.path.join(opt.backbone_model_direct, "last_linear.pth")
 
     return opt
 
@@ -148,14 +149,17 @@ def set_model(opt):
     else:
         if opt.model == "resnet18" or opt.model == "resnet34" or opt.model == "resnet50":
             model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
+        elif opt.model == "resnet50_pretrain":
+            model = ResNet50(feat_dim=opt.feat_dim, freeze_layers=opt.frozen_layers)
         elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
             model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "MLP":
             model = SupConMLP(feat_dim=opt.feat_dim)
         else:
             model = simCNN_contrastive(opt, feature_dim=opt.feat_dim, in_channels=in_channels)
-            
-    model = load_model(model, opt.backbone_model_path)
+
+    if opt.backbone_model_path is not None:
+        model = load_model(model, opt.backbone_model_path)
 
     return model, classifier, criterion
 
