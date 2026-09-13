@@ -189,7 +189,7 @@ class pretrained_resnet50(nn.Module):
 
 
 class ResNet50(nn.Module):
-    def __init__(self, name='resnet50', head='mlp', feat_dim=128, in_channels=3, freeze_layers=-1):
+    def __init__(self, name='resnet50', head='mlp', feat_dim=128, in_channels=3, freeze_layers=4):
         super(ResNet50, self).__init__()
         # with layer names in backbone layer4, layer3, layer2, layer1
         # https://pytorch.org/hub/facebookresearch_semi-supervised-imagenet1k-models_resnext/
@@ -213,12 +213,15 @@ class ResNet50(nn.Module):
         if freeze_layers < 0:
             pass
         else:
-            for i in range(freeze_layers):
+            for i in range(freeze_layers + 1):
                 freeze_layer_names.append('layer{}'.format(i))
 
+        print(freeze_layer_names)
+
         for name, param in self.encoder.named_parameters():
-            if name in freeze_layer_names:
-                param.requires_grad = False
+            for fln in freeze_layer_names:
+                if fln in name:
+                    param.requires_grad = False
 
     def forward(self, x):
 
@@ -459,9 +462,9 @@ if __name__ == "__main__":
     parser.add_argument('--num_classes', type=int, default=10)
     opt = parser.parse_args()
 
-    model = pretrained_resnet50()
+    model = ResNet50()
     #for idx, layer in enumerate(model.modules()):
     #    print(f"Index: {idx} | Module: {type(layer).__name__}")
 
-    for name, layer in model.named_modules():
-        print(f"Name: {name} | Layer: {layer}")
+    for name, param in model.named_parameters():
+        print(f"{name} | requires_grad={param.requires_grad}")

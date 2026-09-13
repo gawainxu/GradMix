@@ -788,13 +788,6 @@ def main():
     # build model and criterion
     model, linear, criterion1, criterion2 = set_model(opt)
 
-    for param in model.parameters():
-        param.requires_grad = False
-
-    # Step 2: Unfreeze the final fully connected layer
-    for param in model.fc.parameters():
-        param.requires_grad = True
-
     # build optimizer
     optimizer = set_optimizer(opt, model)
 
