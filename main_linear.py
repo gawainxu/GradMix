@@ -108,6 +108,8 @@ def parse_option():
         opt.backbone_model_direct = opt.main_dir + opt.backbone_model_direct
         opt.backbone_model_path = os.path.join(opt.backbone_model_direct, opt.backbone_model_name)
         opt.linear_model_path = os.path.join(opt.backbone_model_direct, "last_linear.pth")
+    else:
+        opt.backbone_model_path = None
 
     return opt
 
