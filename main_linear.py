@@ -152,7 +152,7 @@ def set_model(opt):
         if opt.model == "resnet18" or opt.model == "resnet34" or opt.model == "resnet50":
             model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "resnet50_pretrain":
-            model = ResNet50(feat_dim=opt.feat_dim, freeze_layers=opt.frozen_layers)
+            model = ResNet50(feat_dim=opt.feat_dim, freeze_layers=4)
         elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
             model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "MLP":
