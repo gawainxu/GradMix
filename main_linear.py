@@ -162,6 +162,7 @@ def set_model(opt):
 
     if opt.backbone_model_path is not None:
         model = load_model(model, opt.backbone_model_path)
+        model = model.cuda()
 
     return model, classifier, criterion
 
