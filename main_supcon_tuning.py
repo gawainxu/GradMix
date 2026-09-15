@@ -573,9 +573,9 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
         losses2.update(loss_ssl.detach().cpu().item(), bsz)
 
         # SGD
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        #optimizer.zero_grad()
+        #loss.backward()
+        #optimizer.step()
 
         # measure elapsed time
         batch_time.update(time.time() - end)
