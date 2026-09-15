@@ -216,8 +216,6 @@ class ResNet50(nn.Module):
             for i in range(freeze_layers + 1):
                 freeze_layer_names.append('layer{}'.format(i))
 
-        print(freeze_layer_names)
-
         for name, param in self.encoder.named_parameters():
             for fln in freeze_layer_names:
                 if fln in name:

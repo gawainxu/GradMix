@@ -371,6 +371,7 @@ def set_optimizer(opt, model):
 def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt):
     """one epoch training"""
     #model.train()
+    model.encoder.eval()
 
     batch_time = AverageMeter()
     data_time = AverageMeter()
