@@ -803,8 +803,8 @@ def main():
 
         # train for one epoch
         time1 = time.time()
-        loss, ious_epoch, grads = train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
-        #loss_vali, ious_epoch_vali = validate(test_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
+        #loss, ious_epoch, grads = train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
+        loss_vali, ious_epoch_vali = validate(test_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
         time2 = time.time()
         print('epoch {}, total time {:.2f}'.format(epoch, time2 - time1))
 
