@@ -106,8 +106,9 @@ def parse_option():
     parser.add_argument("--ensemble_num", type=int, default=1)
     parser.add_argument("--feat_dim", type=int, default=128)
     parser.add_argument("--grad_layers", type=str, default="0")
-    parser.add_argument("--old_augmented", type=bool, default=True)
+    parser.add_argument("--old_augmented", type=int, default=1)
     parser.add_argument("--supcon_aug", type=int, default=0)
+    parser.add_argument("--ssl_aug_abl", type=int, default=0)
     parser.add_argument("--frozen_layers", type=int, default=-1)
     
     # moco parameters
@@ -198,6 +199,9 @@ def parse_option():
 
     if opt.supcon_aug:
         opt.model_name += "_supcon_aug"
+
+    if opt.ssl_aug_abl:
+        opt.model_name += "_ssl_aug_abl"
 
     # warm-up for large-batch training,
     if opt.batch_size > 256:
@@ -482,6 +486,8 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
 
                 if opt.old_augmented:
                     loss_ssl = loss_ssl + lam * loss_ssl_mix
+                elif opt.ssl_aug_abl:
+                    loss_ssl = loss_ssl
                 else:
                     loss_ssl = loss2 = loss_ssl_mix
                 losses_ssl_mix.update(loss_ssl_mix.detach().cpu().item())
