@@ -573,9 +573,9 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
         losses2.update(loss_ssl.detach().cpu().item(), bsz)
 
         # SGD
-        #optimizer.zero_grad()
-        #loss.backward()
-        #optimizer.step()
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
         # measure elapsed time
         batch_time.update(time.time() - end)
@@ -803,12 +803,12 @@ def main():
 
         # train for one epoch
         time1 = time.time()
-        #loss, ious_epoch, grads = train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
-        loss_vali, ious_epoch_vali = validate(test_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
+        loss, ious_epoch, grads = train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
+        #loss_vali, ious_epoch_vali = validate(test_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
         time2 = time.time()
         print('epoch {}, total time {:.2f}'.format(epoch, time2 - time1))
 
-        """
+
         losses.append(loss)
         all_ious.append(ious_epoch)
         # losses_vali.append(loss_vali)
@@ -842,7 +842,6 @@ def main():
         pickle.dump(all_ious, f)
     with open(os.path.join(opt.save_folder, "iou_all_vali"), "wb") as f:
         pickle.dump(all_ious_vali, f)
-    """
 
 
 if __name__ == '__main__':
