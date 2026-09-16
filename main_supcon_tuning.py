@@ -573,9 +573,9 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
         losses2.update(loss_ssl.detach().cpu().item(), bsz)
 
         # SGD
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        #optimizer.zero_grad()
+        #loss.backward()
+        #optimizer.step()
 
         # measure elapsed time
         batch_time.update(time.time() - end)
@@ -670,7 +670,7 @@ def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoc
                     mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2, model,
                                                                                            opt)
                 elif opt.positive_method == "layersaliencymix":
-                    mixed_positive_samples1, mixed_positive_samples2, lam, ious = salient_cutmix(images1, images2,
+                    mixed_positive_samples1, mixed_positive_samples2, lam = salient_cutmix(images1, images2,
                                                                                                  model, opt)
                 elif opt.positive_method == "attentive_mix":
                     mixed_positive_samples1, mixed_positive_samples2, lam = attentive_cutmix(images1, images2, opt)
@@ -704,7 +704,7 @@ def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoc
             loss = opt.method_gama * loss_sup + opt.method_lam * loss_ssl
             losses_ssl.update(loss_ssl.detach().cpu().item())
             losses_sup.update(loss_sup.detach().cpu().item())
-            ious_epoch.append(ious)
+            #ious_epoch.append(ious)
 
         elif opt.method == 'SimCLR_CE':
             features = model(images)
@@ -803,8 +803,8 @@ def main():
 
         # train for one epoch
         time1 = time.time()
-        #loss, ious_epoch, grads = train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
-        loss_vali, ious_epoch_vali = validate(test_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
+        loss, ious_epoch, grads = train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
+        #loss_vali, ious_epoch_vali = validate(test_loader, model, linear, criterion1, criterion2, optimizer, epoch, opt)
         time2 = time.time()
         print('epoch {}, total time {:.2f}'.format(epoch, time2 - time1))
 
