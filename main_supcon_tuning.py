@@ -70,7 +70,7 @@ def parse_option():
     parser.add_argument('--model', type=str, default='resnet50_pretrain',
                         choices=["resnet18", "resnet34", "resnet50_pretrain", "vgg16", "vgg11", "vgg_s_bn", "simCNN",
                                  "MLP"])
-    parser.add_argument('--datasets', type=str, default='cars',
+    parser.add_argument('--datasets', type=str, default='cifar10',
                         choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', "cifar100", "tinyimgnet",
                                  "imagenet100_small", "imagenet1k",
                                  "imagenet100", "imagenet100_m", "ImageNet100_Folder", 'mnist', "svhn", "cub",
@@ -85,7 +85,7 @@ def parse_option():
     parser.add_argument("--augmix", type=bool, default=False)
 
     # method
-    parser.add_argument('--method', type=str, default='SupCon',
+    parser.add_argument('--method', type=str, default='SimCLR',
                         choices=['SupCon', 'SimCLR', "SimCLR_CE", "MoCo"], help='choose method')
     parser.add_argument("--method_gama", type=float, default=1.0)
     parser.add_argument("--method_lam", type=float, default=1.0)
@@ -573,9 +573,9 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
         losses2.update(loss_ssl.detach().cpu().item(), bsz)
 
         # SGD
-        #optimizer.zero_grad()
-        #loss.backward()
-        #optimizer.step()
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
         # measure elapsed time
         batch_time.update(time.time() - end)
