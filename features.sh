@@ -48,6 +48,5 @@
 #python3 feature_reading_old.py --dataset "cifar10" --model "resnet18" --model_path "/save/SupCon/cifar10_models/cifar10_resnet18_vanilia__SimCLR_1.0_0.0_0.1_trail_5_128_256/last.pth" --epoch 600 --trail 5 --if_train "test_known" --feature_save "/features1/"
 
 
-python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model_path "/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_5_128_256/ckpt_epoch_250.pth" --epoch 250 --trail 5 --if_train "train" --feature_save "/features1/"
-python3 feature_reading_old.py --dataset "tinyimgnet" --model "resnet18" --model_path "/save/SupCon/tinyimgnet_models/tinyimgnet_resnet18_vanilia__SimCLR_1.0_0.0_0.5_trail_5_128_256/ckpt_epoch_250.pth" --epoch 250 --trail 5 --if_train "test_known" --feature_save "/features1/"
+python3 feature_reading_old.py --dataset "imagenet100" --model "resnet18" --model_path "/save/SupCon/imagenet100_models/imagenet100_resnet18_vanilia__SimCLR_0.2_0.8_0.05_trail_0_128_256_old_augmented/ckpt_epoch_80.pth" --epoch 80 --trail 0 --if_train "train" --feature_save "/features1/"
 

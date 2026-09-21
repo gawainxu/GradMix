@@ -1,0 +1,1 @@
+python3 feature_reading_old.py --dataset "imagenet100" --model "resnet18" --model_path "/save/SupCon/imagenet100_models/imagenet100_resnet18_mixup_positive_alpha_1.0_beta_1.0_layersaliencymix_2,3_SimCLR_0.6_0.4_0.05_trail_0_128_256_twostage2_old_augmented/ckpt_epoch_30.pth" --epoch 80 --trail 0 --if_train "train" --feature_save "/features4/"
