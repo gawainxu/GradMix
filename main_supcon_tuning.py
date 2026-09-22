@@ -26,6 +26,7 @@ from networks.mlp import SupConMLP
 from networks.vgg import SupConVGG
 from losses import SupConLoss
 from datautil import get_train_datasets, get_test_datasets
+from  data_loader import safe_collate
 
 import matplotlib
 
@@ -262,10 +263,10 @@ def set_loader(opt):
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True,
                                                num_workers=opt.num_workers, pin_memory=True, sampler=train_sampler,
                                                drop_last=True,
-                                               persistent_workers=True)
+                                               persistent_workers=True, collate_fn=safe_collate)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1,
                                               shuffle=False, num_workers=opt.num_workers, pin_memory=True,
-                                              sampler=train_sampler, drop_last=True, persistent_workers=True)
+                                              sampler=train_sampler, drop_last=True, persistent_workers=True, collate_fn=safe_collate)
 
     return train_loader, test_loader
 
@@ -391,6 +392,9 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
     loss_ssl_hessian = []
 
     for idx, (images, labels) in enumerate(train_loader):
+
+        if images is None:
+            continue
 
         data_time.update(time.time() - end)
         images1 = images[0]
@@ -622,6 +626,9 @@ def validate(vali_loader, model, linear, criterion1, criterion2, optimizer, epoc
     ious_epoch = []
 
     for idx, (images, labels) in enumerate(vali_loader):
+
+        if images is None:
+            continue
 
         images1 = images[0]
         images2 = images[1]

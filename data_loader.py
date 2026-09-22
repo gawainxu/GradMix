@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST, SVHN
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.folder import default_loader
+from torch.utils.data.dataloader import default_collate
 
 import datautil
 import numpy as np
@@ -10,7 +11,7 @@ import gzip
 import torch
 import struct
 import pickle
-from PIL import Image, ImageDraw
+import PIL
 import csv
 
 import torchvision.transforms as transforms
@@ -93,7 +94,7 @@ class iCIFAR10(CIFAR10):
             img, target = self.test_data[index], self.test_labels[index]
 
         if self.transform is not None:
-            img = Image.fromarray(img)
+            img = PIL.Image.fromarray(img)
             img = self.transform(img)
 
         if self.target_transform is not None:
@@ -185,7 +186,7 @@ class iCIFAR100(CIFAR100):
             img, target = self.test_data[index], self.test_labels[index]
 
         if self.transform is not None:
-            img = Image.fromarray(img)
+            img = PIL.Image.fromarray(img)
             img = self.transform(img)
 
         if self.target_transform is not None:
@@ -275,7 +276,7 @@ class mnist(MNIST):
         else:
             img, target = self.testdata[index], self.testlabels[index]
 
-        img = Image.fromarray(img, mode='L')
+        img = PIL.Image.fromarray(img, mode='L')
         if self.transform is not None:
             img = self.transform(img)
 
@@ -363,7 +364,7 @@ class mnist1(data.Dataset):
              img, target = self.test_data[index], self.test_labels[index]
 
           if self.transform is not None:
-             img = Image.fromarray(np.squeeze(img), mode='L')
+             img = PIL.Image.fromarray(np.squeeze(img), mode='L')
              img = self.transform(img)
 
           if self.target_transform is not None:
@@ -485,7 +486,7 @@ class TinyImagenet(Dataset):
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
-        img = Image.fromarray(np.uint8(255 * img))                     ## put it in non transform ????????????
+        img = PIL.Image.fromarray(np.uint8(255 * img))                     ## put it in non transform ????????????
         original_img = img.copy()
 
         if self.transform is not None:
@@ -538,7 +539,7 @@ class cifar10_c(Dataset):
         img = self.data[index] 
         label = self.label[index]
         if self.transform is not None:
-            img = Image.fromarray(img)
+            img = PIL.Image.fromarray(img)
             img = self.transform(img)
             
         return img, label
@@ -560,7 +561,7 @@ class cifar100_c(Dataset):
         img = self.data[index]
         label = self.label[index]
         if self.transform is not None:
-            img = Image.fromarray(img)
+            img = PIL.Image.fromarray(img)
             img = self.transform(img)
 
         return img, label
@@ -577,7 +578,7 @@ def ImageNet100_Folder(root, classes=range(100), train=True, opt=None, transform
     else:
         data_path = root + "/imagenet100_test"
         
-    dataset = ImageFolder(data_path, transform=transform)
+    dataset = SafeImageFolder(data_path, transform=transform)
 
     return dataset
 
@@ -669,7 +670,7 @@ def ImageNet100_small(root, classes=range(10), train=True, opt=None, transform=N
     else:
         data_path = root + "/imagenet100_small_test"
 
-    dataset = ImageFolder(data_path, transform=transform)
+    dataset = SafeImageFolder(data_path, transform=transform)
 
     return dataset
 
@@ -714,7 +715,7 @@ class ImageNet100_M(Dataset):
            class_dir = self.data_path + "/" + cd
            class_file_list = os.listdir(class_dir)
            for class_file_name in class_file_list:
-               im = Image.open(class_dir + "/" + class_file_name)
+               im = PIL.Image.open(class_dir + "/" + class_file_name)
                im = im.convert("RGB")
 
                self.width, self.height = im.size
@@ -857,7 +858,7 @@ class customSVHN(SVHN):
             img, target = self.test_data[index], self.test_labels[index]
 
         if self.transform is not None:
-            img = Image.fromarray(np.transpose(img, (1, 2, 0)))
+            img = PIL.Image.fromarray(np.transpose(img, (1, 2, 0)))
             img = self.transform(img)
 
         if self.target_transform is not None:
@@ -1182,7 +1183,7 @@ class FUB(Dataset):
             label_name = self.names_labels_dict[data_name]
             label = self.labels_dict[label_name]
             if label in classes:
-                image = Image.open(os.path.join(images_folder, fn)).convert('L')
+                image = PIL.Image.open(os.path.join(images_folder, fn)).convert('L')
                 self.labels.append(label)
                 self.data.append(image)
                 # upsampling
@@ -1216,9 +1217,28 @@ def ImageNet1K(root, classes=range(100), train=True, opt=None, transform=None,
     else:
         data_dir = os.path.join(root, "imagenet1k_test")
 
-    imagenet1k = ImageFolder(data_dir, transform=transform)
+    imagenet1k = SafeImageFolder(data_dir, transform=transform)
     return imagenet1k
 
+
+class SafeImageFolder(ImageFolder):
+
+  def __getitem__(self, index):
+    try:
+      return super().__getitem__(index)
+    except (PIL.UnidentifiedImageError, OSError, IOError) as e:
+      # Log warning (optional)
+      path, _ = self.samples[index]
+      print(f"[Warning] Failed to read {path}: {e}")
+      return None
+
+
+# 2. Custom collate function to drop None items from the batch
+def safe_collate(batch):
+  batch = [item for item in batch if item is not None]
+  if len(batch) == 0:
+    return None  # Handle empty batch in your training loop
+  return default_collate(batch)
 
 
 if __name__ == "__main__":
