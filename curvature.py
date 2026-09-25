@@ -76,18 +76,11 @@ def set_loader(opt):
         test_dataset = get_test_datasets(opt)
 
     train_sampler = None
-    labels = [label for _, label in train_dataset]
-    subset_indices, _ = train_test_split(
-        range(len(train_dataset)),
-        train_size=opt.downsample_ratio,  # Keep 10% of dataset
-        stratify=labels,  # Maintain class ratios
-        shuffle=False)
-    train_dataset = Subset(train_dataset, subset_indices)
+    train_dataset = Subset(train_dataset, range(0, int(opt.downsample_ratio*len(train_dataset))))
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=False,
                                                num_workers=opt.num_workers, pin_memory=True, sampler=train_sampler,
-                                               drop_last=True,
-                                               persistent_workers=True)
+                                               drop_last=True, persistent_workers=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1,
                                               shuffle=False, num_workers=opt.num_workers, pin_memory=True,
                                               sampler=train_sampler, drop_last=True, persistent_workers=True)
