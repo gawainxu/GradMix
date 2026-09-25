@@ -40,7 +40,7 @@ def parse_opts():
     parser.add_argument('--batch_size', type=int, default=256,
                         help='batch_size')
 
-    parser.add_argument("--use_cuda", type=bool, default=False)
+    parser.add_argument("--use_cuda", type=bool, default=True)
     parser.add_argument('--syncBN', action='store_true',
                         help='using synchronized batch normalization')
     parser.add_argument("--upsample", type=bool, default=False)
