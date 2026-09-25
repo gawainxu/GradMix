@@ -274,7 +274,7 @@ def directional_ssl_curvature(model, direction, dataloader,
 
     # Restore the original parameters.
     add_direction(params, direction, epsilon)
-    curvature = (loss_plus + loss_minus - 2 * loss_zero) / (relative_radius ** 2 * denominator_loss)
+    curvature = (loss_plus + loss_minus - 2 * loss_zero) / (denominator_loss)    # relative_radius ** 2 *
 
     return {
         "relative_radius": relative_radius,
