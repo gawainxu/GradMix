@@ -40,7 +40,7 @@ def parse_opts():
                                  "feature_reading"])
     parser.add_argument('--batch_size', type=int, default=256,
                         help='batch_size')
-    parser.add_argument("--downsample_ratio", type=float, default=1.,)
+    parser.add_argument("--downsample_rate", type=int, default=1,)
 
     parser.add_argument("--use_cuda", type=bool, default=True)
     parser.add_argument('--syncBN', action='store_true',
@@ -76,7 +76,7 @@ def set_loader(opt):
         test_dataset = get_test_datasets(opt)
 
     train_sampler = None
-    train_dataset = Subset(train_dataset, range(0, int(opt.downsample_ratio*len(train_dataset))))
+    train_dataset = Subset(train_dataset, range(0, len(train_dataset), opt.downsample_rate))
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=False,
                                                num_workers=opt.num_workers, pin_memory=True, sampler=train_sampler,
