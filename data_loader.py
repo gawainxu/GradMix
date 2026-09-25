@@ -1209,6 +1209,7 @@ class FUB(Dataset):
 
         return len(self.data)
 
+"""
 def ImageNet1K(root, classes=range(100), train=True, opt=None, transform=None,
                target_transform=None, download=False, label_dict = None, last_features_list=None,
                last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
@@ -1219,6 +1220,38 @@ def ImageNet1K(root, classes=range(100), train=True, opt=None, transform=None,
 
     imagenet1k = SafeImageFolder(data_dir, transform=transform)
     return imagenet1k
+"""
+
+
+class ImageNet1K(Dataset):
+
+    def __init__(self, root, classes=range(1000), train=True, opt=None, transform=None,
+                target_transform=None, download=False, label_dict = None, last_features_list=None,
+                last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
+
+        if train:
+            data_path = root + "/imagenet1k"
+        else:
+            data_path = root + "/imagenet1k_test"
+
+        dataset = SelectImageFolder(data_path, classes)
+        self.images = []
+        self.labels = []
+        self.transform = transform
+
+        for img, l in dataset:
+            self.images.append(img)
+            self.labels.append(l)
+
+    def __getitem__(self, idx):
+        if self.transform is not None:
+            return self.transform(self.images[idx]), self.labels[idx]
+        else:
+            return self.images[idx], self.labels[idx]
+
+    def __len__(self):
+
+        return len(self.images)
 
 
 class SafeImageFolder(ImageFolder):
