@@ -314,3 +314,7 @@ if __name__ == "__main__":
         for radius in radii
     ]
 
+    for result in results:
+        for key, value in result.items():
+            print(f"{key}: {value}")
+
