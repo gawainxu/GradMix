@@ -4,7 +4,8 @@ import argparse
 
 import torch
 import torch.backends.cudnn as cudnn
-import numpy as np
+from sklearn.model_selection import train_test_split
+from torch.utils.data import Subset
 
 from datautil import get_train_datasets, get_test_datasets
 from networks.resnet_big import SupConResNet, LinearClassifier, ResNet50, MoCoResNet
@@ -74,7 +75,15 @@ def set_loader(opt):
         test_dataset = get_test_datasets(opt)
 
     train_sampler = None
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True,
+    labels = [label for _, label in train_dataset]
+    subset_indices, _ = train_test_split(
+        range(len(train_dataset)),
+        train_size=0.10,  # Keep 10% of dataset
+        stratify=labels,  # Maintain class ratios
+        shuffle=False)
+    train_dataset = Subset(train_dataset, subset_indices)
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=False,
                                                num_workers=opt.num_workers, pin_memory=True, sampler=train_sampler,
                                                drop_last=True,
                                                persistent_workers=True)
