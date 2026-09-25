@@ -403,14 +403,13 @@ def train(train_loader, model, linear, criterion1, criterion2, optimizer, epoch,
         if opt.method == "SimCLR_CE":
             image3 = images[2]
 
-        images = torch.cat([images1, images2], dim=0)
-
         if torch.cuda.is_available() and opt.use_cuda is True:
             images = images.cuda(non_blocking=True)
             images1 = images1.cuda(non_blocking=True)
             images2 = images2.cuda(non_blocking=True)
             labels = labels.cuda(non_blocking=True)
 
+        images = torch.cat([images1, images2], dim=0)
         bsz = labels.shape[0]
 
         # warm-up learning rate

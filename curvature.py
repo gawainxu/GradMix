@@ -24,8 +24,30 @@ def parse_opts():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', type=str, default='resnet18')
-    parser.add_argument('--dataset', type=str, default='cifar10')
-    parser.add_argument('--model_path', type=str, default="")
+    parser.add_argument('--datasets', type=str, default='cifar10')
+    parser.add_argument('--model_path', type=str,
+                        default="./save/SupCon/cifar10_models/cifar10_resnet18_vanilia__SimCLR_1.0_1.0_0.05_trail_0_128_256_old_augmented/last.pth")
+    parser.add_argument("--feat_dim", type=int, default=128)
+    parser.add_argument('--temp', type=float, default=0.05, help='temperature for loss')
+
+    parser.add_argument('--method', type=str, default='SimCLR',
+                        choices=['SupCon', 'SimCLR', "SimCLR_CE", "MoCo"], help='choose method')
+    parser.add_argument("--trail", type=int, default=0, choices=[0, 1, 2, 3, 4, 5, 6],
+                        help="index of repeating training")
+    parser.add_argument("--action", type=str, default="training_supcon",
+                        choices=["training_supcon", "trainging_linear", "testing_known", "testing_unknown",
+                                 "feature_reading"])
+    parser.add_argument('--batch_size', type=int, default=256,
+                        help='batch_size')
+
+    parser.add_argument("--use_cuda", type=bool, default=False)
+    parser.add_argument('--syncBN', action='store_true',
+                        help='using synchronized batch normalization')
+    parser.add_argument("--upsample", type=bool, default=False)
+    parser.add_argument("--randaug", type=int, default=0)
+    parser.add_argument("--augmix", type=bool, default=False)
+    parser.add_argument('--num_workers', type=int, default=4,
+                        help='num of workers to use')
 
     opt = parser.parse_args()
     return opt
@@ -146,26 +168,140 @@ def load_model(opt, model=None):
     return model
 
 
-def curvature(opt, model, criterion1, criterion2):
+def encoder_parameters(encoder):
 
-    epss = [1e-5, 3e-5, 1e-4, 3e-4, 1e-3]
-
-
-def model_gradient(opt, model, criterion1, criterion2):
-
-    pass
+    return [p for p in encoder.parameters() if p.requires_grad]
 
 
-def permutate_models(opt, model, criterion1, criterion2):
+def parameters_l2_norm(params):
 
-    pass
+    return torch.sqrt(sum(torch.sum(p.detach()**2) for p in params))
+
+
+def average_supervised_direction(model, dataloader, supcon_criterion):
+
+    model.eval()
+    params = encoder_parameters(model.encoder)
+    num_batches = 0
+
+    gradient_sum = [torch.zeros_like(p) for p in params]
+
+    for idx, (images, labels) in enumerate(dataloader):
+
+        images1 = images[0]
+        images2 = images[1]
+        images = torch.cat([images1, images2], dim=0)
+        bsz = labels.shape[0]
+        if torch.cuda.is_available() and opt.use_cuda is True:
+            images = images.cuda(non_blocking=True)
+            labels = labels.cuda(non_blocking=True)
+
+        features = model(images)
+        features1, features2 = torch.split(features, [bsz, bsz], dim=0)
+        features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
+        loss_supcon = supcon_criterion(features, labels)
+
+        gradients = torch.autograd.grad(loss_supcon, params,
+                                        retain_graph=False,
+                                        create_graph=False,
+                                        allow_unused=False)
+
+        for accumulated, gradient in zip(gradient_sum, gradients):
+            accumulated.add_(gradient.detach())
+
+        num_batches = idx + 1
+
+    gradient_mean = [gradient / num_batches for gradient in gradient_sum]
+    gradient_norm = torch.sqrt(sum(torch.sum(gradient ** 2) for gradient in gradient_mean))
+    direction = [gradient / (gradient_norm + 1e-12) for gradient in gradient_mean]
+
+    return direction
+
+
+@torch.no_grad()
+def evaluate_ssl_loss(model, dataloader, ssl_criterion):
+
+    model.eval()
+
+    total_loss = 0
+    total_weight = 0
+
+    for idx, (images, labels) in enumerate(dataloader):
+        images1 = images[0]
+        images2 = images[1]
+        images = torch.cat([images1, images2], dim=0)
+        bsz = labels.shape[0]
+        if torch.cuda.is_available() and opt.use_cuda is True:
+            images = images.cuda(non_blocking=True)
+            labels = labels.cuda(non_blocking=True)
+
+        features = model(images)
+        features1, features2 = torch.split(features, [bsz, bsz], dim=0)
+        features = torch.cat([features1.unsqueeze(1), features2.unsqueeze(1)], dim=1)
+        loss_ssl = ssl_criterion(features)
+        total_loss += loss_ssl.cpu().item() * bsz
+        total_weight += bsz
+
+    return total_loss / total_weight
+
+
+@torch.no_grad()
+def add_direction(params, direction, step):
+    for param, vector in zip(params, direction):
+        param.add_(vector, alpha=step)
+
+
+def directional_ssl_curvature(model, direction, dataloader,
+                              ssl_criterion, relative_radius):
+
+    model.eval()
+    params = encoder_parameters(model.encoder)
+
+    theta_norm = parameters_l2_norm(params).item()
+    epsilon = relative_radius * theta_norm
+
+    loss_zero = evaluate_ssl_loss(model, dataloader, ssl_criterion)
+
+    add_direction(params, direction, epsilon)
+    loss_plus = evaluate_ssl_loss(model, dataloader, ssl_criterion)
+
+    add_direction(params, direction, -2.0*epsilon)
+    loss_minus = evaluate_ssl_loss(model, dataloader, ssl_criterion)
+
+    # Restore the original parameters.
+    add_direction(params, direction, epsilon)
+    curvature = (loss_zero + loss_plus + loss_minus) / (epsilon ** 2)
+
+    return {
+        "relative_radius": relative_radius,
+        "epsilon": epsilon,
+        "loss_zero": loss_zero,
+        "loss_plus": loss_plus,
+        "loss_minus": loss_minus,
+        "curvature": curvature,
+    }
 
 
 if __name__ == "__main__":
 
     opt = parse_opts()
 
-    model, linear, criterion1, criterion2 = set_model(opt)
+    model, linear, criterion_supcon, criterion_ssl = set_model(opt)
     train_loader, test_loader = set_loader(opt)
 
+    direction = average_supervised_direction(
+        model=model, dataloader=train_loader,
+        supcon_criterion = criterion_supcon)
+
+    radii = [1e-5, 3e-5, 1e-4, 3e-4, 1e-3]
+
+    results = [
+        directional_ssl_curvature(
+            model=model,
+            direction=direction,
+            dataloader=train_loader,
+            ssl_criterion=criterion_ssl,
+            relative_radius=radius)
+        for radius in radii
+    ]
 
