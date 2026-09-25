@@ -308,7 +308,11 @@ if __name__ == "__main__":
         for radius in radii
     ]
 
+    curvature = 0
     for result in results:
         for key, value in result.items():
             print(f"{key}: {value}")
+        curvature += result["curvature"]
+
+    print("curvature", curvature/len(radii))
 
