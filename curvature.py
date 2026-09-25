@@ -40,6 +40,7 @@ def parse_opts():
                                  "feature_reading"])
     parser.add_argument('--batch_size', type=int, default=256,
                         help='batch_size')
+    parser.add_argument("--downsample_ratio", type=float, default=1.,)
 
     parser.add_argument("--use_cuda", type=bool, default=True)
     parser.add_argument('--syncBN', action='store_true',
@@ -78,7 +79,7 @@ def set_loader(opt):
     labels = [label for _, label in train_dataset]
     subset_indices, _ = train_test_split(
         range(len(train_dataset)),
-        train_size=0.10,  # Keep 10% of dataset
+        train_size=opt.downsample_ratio,  # Keep 10% of dataset
         stratify=labels,  # Maintain class ratios
         shuffle=False)
     train_dataset = Subset(train_dataset, subset_indices)
