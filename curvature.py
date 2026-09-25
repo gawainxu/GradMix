@@ -264,6 +264,7 @@ def directional_ssl_curvature(model, direction, dataloader,
     epsilon = relative_radius * theta_norm
 
     loss_zero = evaluate_ssl_loss(model, dataloader, ssl_criterion)
+    denominator_loss = loss_zero.abs() + 1e-12
 
     add_direction(params, direction, epsilon)
     loss_plus = evaluate_ssl_loss(model, dataloader, ssl_criterion)
@@ -273,7 +274,7 @@ def directional_ssl_curvature(model, direction, dataloader,
 
     # Restore the original parameters.
     add_direction(params, direction, epsilon)
-    curvature = (loss_zero + loss_plus + loss_minus) / (epsilon ** 2)
+    curvature = (loss_plus + loss_minus - 2 * loss_zero) / (relative_radius ** 2 * denominator_loss)
 
     return {
         "relative_radius": relative_radius,
