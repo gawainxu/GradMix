@@ -3,6 +3,8 @@ from torchvision.datasets import CIFAR10, CIFAR100, MNIST, SVHN
 from torchvision.datasets import VisionDataset
 from torchvision.datasets.folder import default_loader
 from torch.utils.data.dataloader import default_collate
+from datasets import load_dataset
+from torchvision import transforms
 
 import datautil
 import numpy as np
@@ -1272,6 +1274,23 @@ def safe_collate(batch):
   if len(batch) == 0:
     return None  # Handle empty batch in your training loop
   return default_collate(batch)
+
+
+def imagenet_o(transform=None, target_transform=None, download=False, label_dict = None, last_features_list=None,):
+    def collate_fn(batch):
+        pixel_values = torch.stack([x["pixel_values"] for x in batch])
+        return pixel_values
+
+    def transform_fn(examples):
+        # Convert PIL Images to PyTorch Tensors and apply transforms
+        examples["pixel_values"] = [transform(img.convert("RGB")) for img in examples["image"]]
+        return examples
+
+    dataset = load_dataset("Voxel51/ImageNet-O", split="train")
+    dataset.set_transform(transform_fn)
+
+    return dataset
+
 
 
 if __name__ == "__main__":
