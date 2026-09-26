@@ -1246,6 +1246,7 @@ class ImageNet1K(Dataset):
             self.labels.append(l)
 
     def __getitem__(self, idx):
+        print("note for getitem")
         try:
             return self.transform(self.images[idx]), self.labels[idx]
         except (PIL.UnidentifiedImageError, OSError, IOError) as e:
