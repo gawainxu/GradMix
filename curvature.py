@@ -276,6 +276,17 @@ def directional_ssl_curvature(model, direction, dataloader,
     add_direction(params, direction, epsilon)
     curvature = (loss_plus + loss_minus - 2 * loss_zero) / (denominator_loss)    # relative_radius ** 2 *
 
+    result = {
+        "relative_radius": relative_radius,
+        "epsilon": epsilon,
+        "loss_zero": loss_zero,
+        "loss_plus": loss_plus,
+        "loss_minus": loss_minus,
+        "curvature": curvature,}
+
+    for key, value in result.items():
+        print(f"{key}: {value}")
+
     return {
         "relative_radius": relative_radius,
         "epsilon": epsilon,
@@ -315,5 +326,5 @@ if __name__ == "__main__":
             print(f"{key}: {value}")
         curvature += result["curvature"]
 
-    print("curvature", curvature/len(radii))
+    print("curvature mean", curvature/len(radii))
 
