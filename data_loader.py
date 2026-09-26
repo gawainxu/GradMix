@@ -1246,10 +1246,19 @@ class ImageNet1K(Dataset):
             self.labels.append(l)
 
     def __getitem__(self, idx):
+        try:
+            return self.transform(self.images[idx]), self.labels[idx]
+        except (PIL.UnidentifiedImageError, OSError, IOError) as e:
+            # Log warning (optional)
+            path, _ = self.images[idx]
+            print(f"[Warning] Failed to read {path}: {e}")
+            return None
+        """
         if self.transform is not None:
             return self.transform(self.images[idx]), self.labels[idx]
         else:
             return self.images[idx], self.labels[idx]
+        """
 
     def __len__(self):
 

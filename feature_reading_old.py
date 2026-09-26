@@ -25,6 +25,7 @@ from networks.mlp import SupConMLP
 from networks.resnet_big import ResNet50
 from featureMerge import featureMerge
 from datautil import num_inlier_classes_mapping
+from  data_loader import safe_collate
 
 from torch.utils.data import DataLoader, Subset
 from datautil import get_train_datasets, get_test_datasets, get_outlier_datasets, osr_splits_inliers, osr_splits_outliers
@@ -201,7 +202,10 @@ def normalFeatureReading(data_loader, model, linear_model, opt):
     labels = []
 
     for i, (img, label) in enumerate(data_loader):
-        
+
+        if img is None:
+            i -= 1
+            continue
         print(i)
         if i > opt.break_idx:
             break
@@ -263,7 +267,7 @@ if __name__ == "__main__":
             datasets = set_data(opt, class_idx=r)
 
             dataloader = DataLoader(datasets, batch_size=1, shuffle=False, sampler=None,
-                                    num_workers=1)
+                                    num_workers=1, collate_fn=safe_collate)
             normalFeatureReading(dataloader, model, linear_model, opt)
 
         featureMerge(featurePaths, opt.save_path_all)
@@ -282,6 +286,6 @@ if __name__ == "__main__":
          """
         datasets = set_data(opt)
         dataloader = DataLoader(datasets, batch_size=1, shuffle=False, sampler=None,
-                                num_workers=1)
+                                num_workers=1, collate_fn=safe_collate)
         opt.save_path = opt.save_path_all
         normalFeatureReading(dataloader, model, linear_model, opt)
