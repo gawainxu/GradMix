@@ -1245,6 +1245,8 @@ class ImageNet1K(Dataset):
             self.images.append(img)
             self.labels.append(l)
 
+        print("note for dataset")
+
     def __getitem__(self, idx):
         print("note for getitem")
         try:
