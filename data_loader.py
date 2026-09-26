@@ -1240,18 +1240,17 @@ class ImageNet1K(Dataset):
         self.images = []
         self.labels = []
         self.transform = transform
+        print("note for dataset", len(dataset))
 
-        for img, l in dataset:
+        for i in range(len(dataset)):
             try:
+                img, l = dataset[i]
                 self.images.append(img)
                 self.labels.append(l)
             except (PIL.UnidentifiedImageError, OSError, IOError) as e:
                 continue
 
-        print("note for dataset")
-
     def __getitem__(self, idx):
-        print("note for getitem")
         """
         try:
             return self.transform(self.images[idx]), self.labels[idx]
