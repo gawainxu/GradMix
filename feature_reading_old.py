@@ -245,6 +245,7 @@ def set_data(opt, class_idx=None):
     elif opt.if_train == "test_unknown":
         datasets = get_outlier_datasets(opt)
 
+    print("data length", len(datasets))
     return datasets
         
 
