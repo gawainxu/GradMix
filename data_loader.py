@@ -1240,7 +1240,6 @@ class ImageNet1K(Dataset):
         self.images = []
         self.labels = []
         self.transform = transform
-        print("note for dataset", len(dataset))
 
         for i in range(len(dataset)):
             try:
