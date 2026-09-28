@@ -1229,9 +1229,9 @@ def MITScene(root, classes=range(100), train=True, opt=None, transform=None,
             target_transform=None, download=False, label_dict = None, last_features_list=None,
             last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
     if train:
-        data_path = root + "/" + "MITSceen" + "/train"
+        data_path = root + "/" + "MIT_train"
     else:
-        data_path = root + "/" + "MITSceen" + "/test"
+        data_path = root + "/" + "MIT_test"
 
     dataset = ImageFolder(data_path, transform=transform)
 
@@ -1242,9 +1242,9 @@ def Flower102(root, classes=range(100), train=True, opt=None, transform=None,
               target_transform=None, download=False, label_dict = None, last_features_list=None,
               last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
     if train:
-        data_path = root + "/" + "flower_data" + "/train"
+        data_path = root + "/" + "flower_train"
     else:
-        data_path = root + "/" + "flower_data" + "/valid"
+        data_path = root + "/" + "flower_test"
 
     dataset = ImageFolder(data_path, transform=transform)
 
