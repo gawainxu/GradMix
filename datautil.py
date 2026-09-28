@@ -132,11 +132,11 @@ osr_splits_inliers = {
                       173, 176, 177, 181, 184, 188, 191, 194, 195, 2, 7, 9, 16, 20, 26, 28, 44, 54, 95,
                       98, 102, 127, 178, 182, 22, 41, 82, 93, 112, 125, 189]],
 
-    "mit": list(range(67)),
+    "mit": [list(range(67))],
 
-    "dtd": list(range(47)),
+    "dtd": [list(range(47))],
 
-    "flower": list(range(102)),
+    "flower": [list(range(102))],
                   
     "cifar100_macro": [[4, 54, 3, 22, 26, 8]],
 
@@ -232,11 +232,11 @@ osr_splits_outliers = {
                       80, 85, 86, 87, 88, 89, 90, 91, 92, 101, 106, 107, 108, 109, 110,
                       111, 114, 115, 116, 118, 119, 120, 121, 124, 130, 131, 132]],
 
-    "mit": list(range(67)),
+    "mit": [list(range(67))],
 
-    "dtd": list(range(47)),
+    "dtd": [list(range(47))],
 
-    "flower": list(range(102)),
+    "flower": [list(range(102))],
 
     "cifar100_marco": [[1, 0, 5, 34, 6, 41]],
 
