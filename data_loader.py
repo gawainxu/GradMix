@@ -1225,10 +1225,9 @@ def ImageNet1K(root, classes=range(100), train=True, opt=None, transform=None,
 """
 
 
-def MITScene(root, classes=range(100), train=True, transform=None,
-             target_transform=None, download=False, label_dict=None, last_features_list=None,
-             last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1,
-             upsample_times=1):
+def MITScene(root, classes=range(100), train=True, opt=None, transform=None,
+            target_transform=None, download=False, label_dict = None, last_features_list=None,
+            last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
     if train:
         data_path = root + "/" + "MITSceen" + "/train"
     else:
@@ -1239,10 +1238,9 @@ def MITScene(root, classes=range(100), train=True, transform=None,
     return dataset
 
 
-def Flower102(root, classes=range(100), train=True, transform=None,
-              target_transform=None, download=False, label_dict=None, last_features_list=None,
-              last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1,
-              upsample_times=1):
+def Flower102(root, classes=range(100), train=True, opt=None, transform=None,
+              target_transform=None, download=False, label_dict = None, last_features_list=None,
+              last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
     if train:
         data_path = root + "/" + "flower_data" + "/train"
     else:
@@ -1253,10 +1251,9 @@ def Flower102(root, classes=range(100), train=True, transform=None,
     return dataset
 
 
-def DTD(root, classes=range(100), train=True, transform=None,
-              target_transform=None, download=False, label_dict=None, last_features_list=None,
-              last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1,
-              upsample_times=1):
+def DTD(root, classes=range(100), train=True, opt=None, transform=None,
+        target_transform=None, download=False, label_dict = None, last_features_list=None,
+        last_feature_labels_list=None, last_model=None, subsample_transform=None, portion_out=0.1, upsample_times=1):
     if train:
         data_path = root + "/" + "DTD_train"
     else:
