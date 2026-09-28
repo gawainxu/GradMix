@@ -131,6 +131,12 @@ osr_splits_inliers = {
                       141, 142, 143, 148, 152, 154, 155, 156, 157, 158, 159, 165, 166, 170, 171, 172,
                       173, 176, 177, 181, 184, 188, 191, 194, 195, 2, 7, 9, 16, 20, 26, 28, 44, 54, 95,
                       98, 102, 127, 178, 182, 22, 41, 82, 93, 112, 125, 189]],
+
+    "mit": list(range(67)),
+
+    "dtd": list(range(47)),
+
+    "flower": list(range(102)),
                   
     "cifar100_macro": [[4, 54, 3, 22, 26, 8]],
 
@@ -226,6 +232,12 @@ osr_splits_outliers = {
                       80, 85, 86, 87, 88, 89, 90, 91, 92, 101, 106, 107, 108, 109, 110,
                       111, 114, 115, 116, 118, 119, 120, 121, 124, 130, 131, 132]],
 
+    "mit": list(range(67)),
+
+    "dtd": list(range(47)),
+
+    "flower": list(range(102)),
+
     "cifar100_marco": [[1, 0, 5, 34, 6, 41]],
 
     "FUB": [[3]]
@@ -246,6 +258,7 @@ import cv2
 import random
 from data_loader import iCIFAR10, iCIFAR100, TinyImagenet, customSVHN, mnist, CUB, Aircraft, Cars, ImageNet100_M, ImageNet900_outliers
 from data_loader import tinyimgnet_c, cifar10_c, cifar100_c, ImageNet100, ImageNet100_small, ImageNet100_Folder, FUB, ImageNet1K
+from data_loader import MITScene, DTD, Flower102
 import torchvision
 import torch
 from util import TwoCropTransform
@@ -274,15 +287,18 @@ num_inlier_classes_mapping = {"cifar10": 6, "cifar-10-100-10": 4, "cifar-10-100-
 
 data_function_mapping = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR10, "cifar-10-100-50": iCIFAR10, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100,
                          "imagenet100_small": ImageNet100_small, "imagenet100_m": ImageNet100_M, "ImageNet100_Folder": ImageNet100_Folder, "cifar100": iCIFAR100,
-                         "tinyimgnet": TinyImagenet,  "imagenet1k": ImageNet1K, "mnist": mnist, "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "cars": Cars, "FUB": FUB}
+                         "tinyimgnet": TinyImagenet,  "imagenet1k": ImageNet1K, "mnist": mnist, "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "cars": Cars,
+                         "FUB": FUB, "mit": MITScene, "flower": Flower102, "dtd": DTD}
 
 data_function_mapping_testing = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR100, "cifar-10-100-50": iCIFAR100, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet100,
                                  "imagenet100_small": ImageNet100_small, "imagenet100_m": ImageNet100_M, "ImageNet100_Folder": ImageNet100_Folder, "cifar100": iCIFAR100,
-                                 "tinyimgnet": TinyImagenet, "imagenet1k": ImageNet1K, "mnist": mnist, "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "cars": Cars, "FUB": FUB}
+                                 "tinyimgnet": TinyImagenet, "imagenet1k": ImageNet1K, "mnist": mnist, "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "cars": Cars,
+                                 "FUB": FUB, "mit": MITScene, "flower": Flower102, "dtd": DTD}
 
 data_function_mapping_outliers = {"cifar10": iCIFAR10, "cifar-10-100-10": iCIFAR100, "cifar-10-100-50": iCIFAR100, "cifar100_marco": iCIFAR100, "imagenet100": ImageNet900_outliers,
                                  "imagenet100_small": ImageNet100_small, "imagenet100_m": ImageNet900_outliers, "ImageNet100_Folder": ImageNet900_outliers, "cifar100": iCIFAR100,
-                                 "tinyimgnet": TinyImagenet,  "imagenet1k": ImageNet1K, "mnist": mnist, "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "cars": Cars, "FUB": FUB}
+                                 "tinyimgnet": TinyImagenet,  "imagenet1k": ImageNet1K, "mnist": mnist, "svhn": customSVHN, "cub": CUB, "aircraft": Aircraft, "cars": Cars, "FUB": FUB,
+                                  "mit": MITScene, "flower": Flower102, "dtd": DTD}
 
 data_function_mapping_curruption = {"cifar10": cifar10_c, "cifar100": cifar100_c, "tinyimgnet": tinyimgnet_c,}
 
@@ -303,7 +319,10 @@ mean_mapping = {"mnist":  (0.1307,),
                 "aircraft": (0.485, 0.456, 0.406), 
                 "cub": (0.485, 0.456, 0.406),
                 "cars": (0.485, 0.456, 0.406),
-                "FUB": (0.485, 0.456, 0.406),}       # 0.408, 0.459, 0.502, 123., 117., 104.
+                "FUB": (0.485, 0.456, 0.406),
+                "mit": (0.485, 0.456, 0.406),
+                "flower": (0.485, 0.456, 0.406),
+                "dtd": (0.485, 0.456, 0.406),}       # 0.408, 0.459, 0.502, 123., 117., 104.
 
 std_mapping = {"mnist": (0.3081,),
                "svhn": (0.19803012, 0.20101562, 0.19703614),
@@ -321,7 +340,10 @@ std_mapping = {"mnist": (0.3081,),
                "aircraft": (0.229, 0.224, 0.225),
                "cub": (0.229, 0.224, 0.225),
                "cars": (0.229, 0.224, 0.225),
-               "FUB": (0.229, 0.224, 0.225)}
+               "FUB": (0.229, 0.224, 0.225),
+               "mit": (0.229, 0.224, 0.225),
+               "flower": (0.229, 0.224, 0.225),
+               "dtd": (0.229, 0.224, 0.225),}
 
 image_size_mapping = {"mnist": 32,
                       "svhn": 32,
@@ -339,7 +361,10 @@ image_size_mapping = {"mnist": 32,
                       "aircraft": 224,
                       "cub": 224,
                       "cars": 224,
-                      "FUB": 128}
+                      "FUB": 128,
+                      "mit": 224,
+                      "flower": 224,
+                      "dtd": 224}
 
 
 def label_to_dict(labels, outliers=False):
@@ -403,7 +428,8 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
         elif opt.datasets == "FUB":
             train_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
                                                   transforms.Resize((size, size))])
-        elif opt.datasets in ["imagenet100", "imagenet100_small", "ImageNet100_Folder", "imagenet100_m", "cub", "cars", "aircraft", "imagenet1k"]:
+        elif opt.datasets in ["imagenet100", "imagenet100_small", "ImageNet100_Folder", "imagenet100_m",
+                              "cub", "cars", "aircraft", "mit", "dtd", "flower", "imagenet1k"]:
             train_transform = transforms.Compose([transforms.ToTensor(),
                                                   transforms.Resize((size, size)), normalize])
         else:
@@ -454,7 +480,8 @@ def get_test_datasets(opt, class_idx = None):
     elif opt.datasets == "FUB":
         test_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
                                               transforms.CenterCrop((size, size)),])
-    elif opt.datasets in ["imagenet100", "imagenet100_small", "ImageNet100_Folder", "imagenet100_m", "cub", "cars", "aircraft", "imagenet1k"]:
+    elif opt.datasets in ["imagenet100", "imagenet100_small", "ImageNet100_Folder", "imagenet100_m",
+                          "cub", "cars", "aircraft", "mit", "dtd", "flower", "imagenet1k"]:
         test_transform = transforms.Compose([transforms.ToTensor(), transforms.Resize((224, 224)), normalize])
     else:
         test_transform = transforms.Compose([transforms.ToTensor(), normalize])
@@ -529,7 +556,8 @@ def get_outlier_datasets(opt, class_idx=None):
         elif opt.datasets == "FUB":
             test_transform = transforms.Compose([transforms.ToTensor(), transforms.CenterCrop((224, 288)),
                                                  transforms.CenterCrop((size, size)), ])
-        elif opt.datasets in ["imagenet100", "imagenet100_small", "ImageNet100_Folder", "imagenet100_m", "cub", "cars", "aircraft", "imagenet1k"]:
+        elif opt.datasets in ["imagenet100", "imagenet100_small", "ImageNet100_Folder", "imagenet100_m",
+                              "cub", "cars", "aircraft", "mit", "dtd", "flower", "imagenet1k"]:
             test_transform = transforms.Compose([transforms.ToTensor(), transforms.Resize((224, 224)),
                                                  normalize])
         else:

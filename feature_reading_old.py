@@ -51,9 +51,7 @@ def parse_option():
 
     parser = argparse.ArgumentParser('argument for feature reading')
 
-    parser.add_argument('--datasets', type=str, default='cars',
-                        choices=["cifar-10-100-10", "cifar-10-100-50", 'cifar10', 'cifar100', "tinyimgnet",
-                                 'mnist', "svhn", "cub", "aircraft", "cars", "FUB", "imagenet100", "imagenet1k"], help='dataset')
+    parser.add_argument('--datasets', type=str, default='cars', help='dataset')
     parser.add_argument('--data_folder', type=str, default=None, help='path to custom dataset')
     parser.add_argument('--model', type=str, default="resnet50_pretrain", choices=["resnet18", "vgg16", "resnet50_pretrain", "simCNN", "MLP"])
     parser.add_argument("--model_path", type=str,
