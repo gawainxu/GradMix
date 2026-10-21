@@ -17,7 +17,7 @@ from util import adjust_learning_rate, save_model
 from datautil import vanilla_mixup, salient_cutmix, vanilla_cutmix
 from datautil import num_inlier_classes_mapping
 from networks.resnet_big import SupConResNet, LinearClassifier
-from networks.resnet_big import ResNet50
+from networks.resnet_big import ResNet_Pretrain
 from networks.resnet_big import MoCoResNet
 from networks.maskcon import MaskCon
 from networks.simCNN import simCNN_contrastive
@@ -69,8 +69,7 @@ def parse_option():
 
     # model dataset
     parser.add_argument('--model', type=str, default='resnet50_pretrain',
-                        choices=["resnet18", "resnet34", "resnet50_pretrain", "vgg16", "vgg11", "vgg_s_bn", "simCNN",
-                                 "MLP"])
+                        choices=["resnet18", "resnet34", "resnet50_pretrain", "resnet18_pretrain"])
     parser.add_argument('--datasets', type=str, default='cifar10', help='dataset')
     parser.add_argument('--mean', type=str, help='mean of dataset in path in form of str tuple')
     parser.add_argument('--std', type=str, help='std of dataset in path in form of str tuple')
@@ -291,16 +290,10 @@ def set_model(opt):
         criterion2 = None
         linear = None
     elif opt.method == "SimCLR" or opt.method == "SupCon":
-        if opt.model in ["preactresnet18", "preactresnet34"]:
-            model = SupConpPreactResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
-        if opt.model in ["resnet18", "resnet34", "resnet50"]:
-            model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
-        elif opt.model == "MLP":
-            model = SupConMLP(feat_dim=opt.feat_dim)
-        elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
-            model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
+        if opt.model == "resnet18_pretrain":
+            model = ResNet_Pretrain(name='resnet18', feat_dim=opt.feat_dim, freeze_layers=opt.frozen_layers)
         elif opt.model == "resnet50_pretrain":
-            model = ResNet50(feat_dim=opt.feat_dim, freeze_layers=opt.frozen_layers)
+            model = ResNet_Pretrain(name='resnet50', feat_dim=opt.feat_dim, freeze_layers=opt.frozen_layers)
         else:
             model = simCNN_contrastive(opt, feature_dim=opt.feat_dim, in_channels=in_channels)
 

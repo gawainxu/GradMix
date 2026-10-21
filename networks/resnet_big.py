@@ -188,12 +188,15 @@ class pretrained_resnet50(nn.Module):
         return feat
 
 
-class ResNet50(nn.Module):
+class ResNet_Pretrain(nn.Module):
     def __init__(self, name='resnet50', head='mlp', feat_dim=128, in_channels=3, freeze_layers=4):
-        super(ResNet50, self).__init__()
+        super(ResNet_Pretrain, self).__init__()
         # with layer names in backbone layer4, layer3, layer2, layer1
         # https://pytorch.org/hub/facebookresearch_semi-supervised-imagenet1k-models_resnext/
-        self.encoder = torch.hub.load('facebookresearch/semi-supervised-ImageNet1K-models', 'resnet50_swsl')
+        if "resnet50" in name:
+            self.encoder = torch.hub.load('facebookresearch/semi-supervised-ImageNet1K-models', 'resnet50_swsl')
+        if "resnet18" in name:
+            self.encoder = torch.hub.load('facebookresearch/semi-supervised-ImageNet1K-models', 'resnet18_swsl')
         self.encoder.fc = nn.Identity()
 
         model_fun, dim_in = model_dict[name]

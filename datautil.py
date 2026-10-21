@@ -397,7 +397,7 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
                                     transforms.RandomHorizontalFlip(), transforms.RandomRotation(15),
                                     transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
                                     transforms.RandomGrayscale(p=0.2),])
-        elif opt.datasets in ["imagenet100", "imagenet100_small", "ImageNet100_Folder", "imagenet100_m", "cub", "cars", "aircraft", "imagenet1k"]:
+        elif opt.datasets in ["imagenet100", "imagenet100_small", "ImageNet100_Folder", "imagenet100_m", "cub", "cars", "aircraft", "imagenet1k", "mit", "flower", "dtd"]:
             train_transform = transforms.Compose(
                 [transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
                  transforms.Resize((size, size)),
