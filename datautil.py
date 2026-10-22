@@ -458,7 +458,7 @@ def get_train_datasets(opt, class_idx=None, last_features_list=None, last_featur
         train = True
 
     train_dataset = data_fun(root=data_root, train=train, opt=opt,
-                             classes=classes, download=True, 
+                             classes=classes, download=False,
                              transform=train_transform, label_dict=label_dict,
                              last_features_list=last_features_list, 
                              last_feature_labels_list=last_feature_labels_list, 
@@ -502,7 +502,7 @@ def get_test_datasets(opt, class_idx = None):
     else:
         train = False
     test_dataset = data_fun(root=data_root, train=train, opt=opt,
-                            classes=classes, download=True, 
+                            classes=classes, download=False,
                             transform=test_transform, label_dict=label_dict)
     print("dataset size", len(test_dataset))
     return test_dataset
