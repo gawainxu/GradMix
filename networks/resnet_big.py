@@ -220,6 +220,7 @@ class ResNet_Pretrain(nn.Module):
                 freeze_layer_names.append('layer{}'.format(i))
 
         for name, param in self.encoder.named_parameters():
+            print("frozen layer", name)
             for fln in freeze_layer_names:
                 if fln in name:
                     param.requires_grad = False
