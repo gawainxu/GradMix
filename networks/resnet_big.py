@@ -464,7 +464,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_classes', type=int, default=10)
     opt = parser.parse_args()
 
-    model = ResNet50()
+    model = ResNet_Pretrain()
     #for idx, layer in enumerate(model.modules()):
     #    print(f"Index: {idx} | Module: {type(layer).__name__}")
 

@@ -17,7 +17,7 @@ from util import set_optimizer, save_model
 from datautil import vanilla_mixup, salient_cutmix, vanilla_cutmix
 from datautil import num_inlier_classes_mapping
 from networks.resnet_big import SupConResNet, LinearClassifier
-from networks.resnet_big import ResNet50
+from networks.resnet_big import ResNet_Pretrain
 from networks.resnet_big import MoCoResNet
 from networks.maskcon import MaskCon
 from networks.simCNN import simCNN_contrastive
@@ -295,7 +295,7 @@ def set_model(opt):
         elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
             model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "resnet50_pretrain":
-            model = ResNet50(feat_dim=opt.feat_dim, freeze_layers=opt.frozen_layers)
+            model = ResNet_Pretrain(name='resnet50', feat_dim=opt.feat_dim)
         else:
             model = simCNN_contrastive(opt, feature_dim=opt.feat_dim, in_channels=in_channels)
             
