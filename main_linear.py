@@ -14,7 +14,7 @@ from util import AverageMeter
 from main_supcon_old import set_loader
 from util import adjust_learning_rate, warmup_learning_rate, accuracy
 from util import set_optimizer, save_model
-from networks.resnet_big import SupConResNet, LinearClassifier, ResNet50
+from networks.resnet_big import SupConResNet, LinearClassifier, ResNet_Pretrain
 from networks.resnet_big import MoCoResNet
 from networks.vgg import SupConVGG
 from networks.simCNN import simCNN_contrastive
@@ -150,7 +150,7 @@ def set_model(opt):
         if opt.model == "resnet18" or opt.model == "resnet34" or opt.model == "resnet50":
             model = SupConResNet(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "resnet50_pretrain":
-            model = ResNet50(feat_dim=opt.feat_dim, freeze_layers=4)
+            model = ResNet_Pretrain(name='resnet50', feat_dim=opt.feat_dim, freeze_layers=4)
         elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
             model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
         elif opt.model == "MLP":
