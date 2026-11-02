@@ -260,8 +260,8 @@ if __name__ == "__main__":
             print(r)
             opt.save_path = opt.feature_save + "temp" + str(r)
             featurePaths.append(opt.save_path)
-            if r < opt.start_class or r > opt.start_class + 1:
-                continue
+            #if r < opt.start_class or r > opt.start_class + 1:
+            #    continue
             datasets = set_data(opt, class_idx=r)
 
             dataloader = DataLoader(datasets, batch_size=1, shuffle=False, sampler=None,
