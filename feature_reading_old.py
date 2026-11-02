@@ -22,7 +22,7 @@ from networks.resnet_big import SupConResNet, LinearClassifier
 from networks.vgg import SupConVGG
 from networks.simCNN import simCNN_contrastive
 from networks.mlp import SupConMLP
-from networks.resnet_big import ResNet50
+from networks.resnet_big import ResNet_Pretrain
 from featureMerge import featureMerge
 from datautil import num_inlier_classes_mapping
 from  data_loader import safe_collate
@@ -145,7 +145,7 @@ def load_model(opt):
     elif opt.model == "MLP":
         model = SupConMLP(feat_dim=opt.feat_dim)
     elif opt.model == "resnet50_pretrain":
-        model = ResNet50(feat_dim=opt.feat_dim)
+        model = ResNet_Pretrain(name='resnet50', feat_dim=opt.feat_dim)
     elif opt.model in ["vgg16", "vgg11", "vgg_s_bn"]:
         model = SupConVGG(name=opt.model, feat_dim=opt.feat_dim, in_channels=in_channels)
     else:
